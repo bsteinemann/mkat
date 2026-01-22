@@ -110,7 +110,23 @@ dotnet ef migrations add <Name> -p src/Mkat.Infrastructure -s src/Mkat.Api
 dotnet ef database update -p src/Mkat.Infrastructure -s src/Mkat.Api
 ```
 
-## Testing Expectations
+## Test-Driven Development (TDD)
+
+**TDD is mandatory for all implementation work.** Follow Red-Green-Refactor:
+
+1. **Red:** Write a failing test that describes the desired behavior
+2. **Green:** Write the minimum code to make the test pass
+3. **Refactor:** Clean up while keeping tests green
+
+### TDD Rules
+
+- NEVER write implementation code without a failing test first
+- Tests define the API contract - write them from the consumer's perspective
+- One test at a time: write one failing test, make it pass, then next test
+- Run `dotnet test` after each green step to confirm no regressions
+- If a bug is found, write a test that reproduces it BEFORE fixing it
+
+### Test Structure
 
 - Unit tests for all domain logic and validators
 - Integration tests for API endpoints (use `WebApplicationFactory`)
@@ -119,14 +135,59 @@ dotnet ef database update -p src/Mkat.Infrastructure -s src/Mkat.Api
 - Test one behavior per test method
 - Cover edge cases: nulls, empty inputs, invalid state transitions
 
+### TDD Workflow Per Feature
+
+```
+1. Write test for first behavior → run → RED
+2. Implement just enough code → run → GREEN
+3. Refactor if needed → run → GREEN
+4. Write test for next behavior → run → RED
+5. Repeat until feature complete
+6. Run full suite → ALL GREEN
+7. Commit
+```
+
+## Git Commit Discipline
+
+**Commit after every completed feature, behavior, or bugfix.** Small, atomic commits.
+
+### Commit Rules
+
+- Commit as soon as a logical unit of work is complete and tests pass
+- Each commit must leave the codebase in a buildable, tests-passing state
+- Never batch multiple unrelated changes into one commit
+- Use conventional commit messages: `feat:`, `fix:`, `refactor:`, `test:`, `docs:`, `chore:`
+
+### Commit Granularity Examples
+
+```
+feat: add ServiceState enum                    (single entity/enum)
+feat: add Service entity                       (single entity)
+feat: add IServiceRepository interface         (single interface)
+feat: add ServiceRepository implementation     (single implementation)
+feat: add health endpoints                     (one feature)
+fix: handle null service in GetById            (one bugfix)
+refactor: extract validation to FluentValidator (one refactor)
+test: add integration tests for health endpoint (test addition)
+chore: add Docker configuration                (infrastructure)
+```
+
+### When to Commit
+
+- After making a new test pass (if it represents a complete behavior)
+- After completing a logical group of related tests + implementation
+- After a refactoring step (tests still green)
+- After adding infrastructure (Docker, config, migrations)
+- After fixing a bug (with its regression test)
+
 ## Implementation Workflow
 
 Follow `docs/workflow.md` for every task. Summary:
 
 1. **Understand** - Read plans, learnings, architecture
-2. **Plan** - List files, identify tests, check if ADR needed
-3. **Implement** - Domain-outward, conventions, DI wiring
-4. **Test** - Unit + integration, full suite passes
+2. **Plan** - List files, identify tests FIRST, check if ADR needed
+3. **Implement (TDD)** - Write failing test → make it pass → refactor → commit
+4. **Verify** - Run full test suite, confirm all green
 5. **Document** - Changelog entry, ADR if needed, fix stale docs
 6. **Retrospective** - Add to learnings.md, update CLAUDE.md if needed
 
@@ -144,6 +205,9 @@ The retrospective step is NOT optional. It makes future tasks more efficient.
 - DO NOT skip the retrospective step after implementation
 - DO NOT ignore `docs/learnings.md` - check it before starting work
 - DO NOT leave stale documentation - update it or delete it
+- DO NOT write implementation code before writing a failing test
+- DO NOT batch multiple features into a single commit
+- DO NOT commit code that leaves tests failing
 
 ## Domain Terminology
 

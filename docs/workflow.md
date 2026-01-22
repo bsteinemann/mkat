@@ -45,17 +45,38 @@ Each phase has a Definition of Done (DoD) that must be satisfied before proceedi
 
 ---
 
-## Phase 3: Implement
+## Phase 3: Implement (TDD)
 
-**Goal:** Write the code following project conventions.
+**Goal:** Build features test-first using Red-Green-Refactor.
 
 ### Steps
 
 1. Start from the Domain layer outward (Domain -> Application -> Infrastructure -> API)
-2. Create interfaces before implementations
-3. Follow naming conventions from CLAUDE.md
-4. Register new services in DI (Program.cs or extension methods)
-5. Add EF migrations if schema changes
+2. For each behavior/unit of work:
+   a. **RED:** Write a failing test that describes the expected behavior
+   b. **GREEN:** Write the minimum implementation to make the test pass
+   c. **REFACTOR:** Clean up code while keeping tests green
+   d. **COMMIT:** Commit when a logical unit is complete and tests pass
+3. Create interfaces before implementations (test against interfaces)
+4. Follow naming conventions from CLAUDE.md
+5. Register new services in DI (Program.cs or extension methods)
+6. Add EF migrations if schema changes
+
+### TDD Rules
+
+- NEVER write implementation without a failing test first
+- One test at a time - don't write multiple failing tests
+- Run `dotnet test` after each green step
+- Commit after each completed feature/behavior (tests green)
+- If fixing a bug: write reproducing test first, then fix
+
+### Commit Cadence
+
+- Commit after each entity/enum with its tests
+- Commit after each interface + implementation with tests
+- Commit after each endpoint with integration tests
+- Commit after infrastructure additions (Docker, config, migrations)
+- Use conventional commits: `feat:`, `fix:`, `refactor:`, `test:`, `chore:`
 
 ### Rules
 
@@ -67,29 +88,31 @@ Each phase has a Definition of Done (DoD) that must be satisfied before proceedi
 
 ### DoD
 
+- [ ] All code written test-first (no implementation without a prior failing test)
 - [ ] Code compiles without warnings
+- [ ] All tests pass
 - [ ] DI registration complete
 - [ ] Migrations created if needed
+- [ ] Atomic commits for each completed unit of work
 - [ ] No TODO comments left (except deliberate Phase 2+ markers)
 
 ---
 
-## Phase 4: Test
+## Phase 4: Verify
 
-**Goal:** Verify the implementation works correctly.
+**Goal:** Confirm full suite passes and no regressions.
 
 ### Steps
 
-1. Write unit tests for domain logic and validators
-2. Write integration tests for new API endpoints
-3. Run the full test suite (`dotnet test`)
-4. Manual smoke test if it is a user-facing feature
-5. Verify no regressions
+1. Run the full test suite (`dotnet test`) - all tests must pass
+2. Run `dotnet build` with no warnings
+3. Manual smoke test if it is a user-facing feature
+4. Verify no regressions from other milestones
 
 ### DoD
 
-- [ ] All new code has test coverage
-- [ ] All tests pass
+- [ ] Full test suite passes
+- [ ] No build warnings
 - [ ] Edge cases covered (nulls, empty inputs, invalid states)
 
 ---
@@ -197,13 +220,13 @@ Use the template at `docs/adr/000-template.md`. Number sequentially (001, 002, .
 ## Workflow Diagram
 
 ```
-Phase 1         Phase 2         Phase 3         Phase 4         Phase 5         Phase 6
-Understand  --> Plan        --> Implement   --> Test        --> Document    --> Retrospective
-                                                                                    |
-Read plans      List files      Domain first    Unit tests      Changelog       Update learnings.md
-Read learnings  Identify tests  Interfaces      Integration     ADR (maybe)     Update CLAUDE.md
-Check arch      Check ADR need  Conventions     Full suite      Fix stale docs  (if needed)
-                                DI wiring       Smoke test                          |
-                                                                                    v
-                                                                            Next task benefits
+Phase 1         Phase 2         Phase 3              Phase 4         Phase 5         Phase 6
+Understand  --> Plan        --> Implement (TDD)  --> Verify      --> Document    --> Retrospective
+                                                                                        |
+Read plans      List files      RED: failing test    Full suite      Changelog       Update learnings.md
+Read learnings  Identify tests  GREEN: min code      No warnings     ADR (maybe)     Update CLAUDE.md
+Check arch      Check ADR need  REFACTOR: clean up   Smoke test      Fix stale docs  (if needed)
+                                COMMIT: atomic                                           |
+                                Repeat per behavior                                      v
+                                                                                Next task benefits
 ```
