@@ -30,4 +30,14 @@ Read this file FIRST before starting any new work -- it prevents repeating mista
 
 ## Entries
 
-(Entries will be added here as implementation proceeds.)
+### 2026-01-22 - M1 Foundation & M2 Core API
+**Context:** Implementing domain entities, EF Core, repositories, auth, CRUD controller
+**Went well:** Clean Architecture separation works well; FluentValidation integration straightforward
+**Tripped up:**
+- `Monitor` name conflicts with `System.Threading.Monitor` when ImplicitUsings enabled → need `using Monitor = Mkat.Domain.Entities.Monitor;`
+- InMemoryDatabase doesn't support `GetPendingMigrations()` → wrap in try/catch with `EnsureCreated()` fallback
+- xUnit runs test classes in parallel by default → tests sharing environment variables need `[Collection("...")]`
+- `WebApplicationFactory` with `IClassFixture` shares state across tests → per-test factory with unique InMemoryDatabase names for isolation
+- .NET 10 RC SDK building net8.0 projects requires `rollForward: latestMajor` in global.json
+**Pattern:** Integration tests should create their own `WebApplicationFactory` per test class instance with unique DB names
+**Anti-pattern:** Don't use `IClassFixture<WebApplicationFactory>` when tests modify shared state (DB); don't set env vars without `[Collection]` isolation
