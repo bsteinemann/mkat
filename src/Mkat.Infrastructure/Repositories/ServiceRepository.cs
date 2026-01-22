@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Mkat.Application.Interfaces;
 using Mkat.Domain.Entities;
+using Mkat.Domain.Enums;
 using Mkat.Infrastructure.Data;
 
 namespace Mkat.Infrastructure.Repositories;
@@ -53,5 +54,12 @@ public class ServiceRepository : IServiceRepository
     {
         _context.Services.Remove(service);
         return Task.CompletedTask;
+    }
+
+    public async Task<IReadOnlyList<Service>> GetPausedServicesAsync(CancellationToken ct = default)
+    {
+        return await _context.Services
+            .Where(s => s.State == ServiceState.Paused)
+            .ToListAsync(ct);
     }
 }

@@ -10,4 +10,5 @@ public interface IServiceRepository
     Task AddAsync(Service service, CancellationToken ct = default);
     Task UpdateAsync(Service service, CancellationToken ct = default);
     Task DeleteAsync(Service service, CancellationToken ct = default);
+    Task<IReadOnlyList<Service>> GetPausedServicesAsync(CancellationToken ct = default);
 }

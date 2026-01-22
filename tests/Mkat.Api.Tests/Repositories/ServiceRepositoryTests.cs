@@ -199,6 +199,36 @@ public class ServiceRepositoryTests : IDisposable
     }
 
     [Fact]
+    public async Task GetPausedServicesAsync_ReturnsOnlyPausedServices()
+    {
+        await _context.Services.AddRangeAsync(
+            new Service { Id = Guid.NewGuid(), Name = "Paused 1", State = ServiceState.Paused },
+            new Service { Id = Guid.NewGuid(), Name = "Up Service", State = ServiceState.Up },
+            new Service { Id = Guid.NewGuid(), Name = "Paused 2", State = ServiceState.Paused },
+            new Service { Id = Guid.NewGuid(), Name = "Down Service", State = ServiceState.Down }
+        );
+        await _context.SaveChangesAsync();
+
+        var result = await _repository.GetPausedServicesAsync();
+
+        Assert.Equal(2, result.Count);
+        Assert.All(result, s => Assert.Equal(ServiceState.Paused, s.State));
+    }
+
+    [Fact]
+    public async Task GetPausedServicesAsync_ReturnsEmpty_WhenNoPausedServices()
+    {
+        await _context.Services.AddAsync(
+            new Service { Id = Guid.NewGuid(), Name = "Up Service", State = ServiceState.Up }
+        );
+        await _context.SaveChangesAsync();
+
+        var result = await _repository.GetPausedServicesAsync();
+
+        Assert.Empty(result);
+    }
+
+    [Fact]
     public async Task DeleteAsync_RemovesServiceFromDatabase()
     {
         var service = new Service
