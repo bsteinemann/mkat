@@ -7,6 +7,7 @@ using Mkat.Application.Services;
 using Mkat.Application.Validators;
 using Mkat.Infrastructure.Data;
 using Mkat.Infrastructure.Repositories;
+using Mkat.Infrastructure.Workers;
 using Serilog;
 
 Log.Logger = new LoggerConfiguration()
@@ -39,6 +40,8 @@ try
 
     builder.Services.AddScoped<IValidator<CreateServiceRequest>, CreateServiceValidator>();
     builder.Services.AddScoped<IValidator<UpdateServiceRequest>, UpdateServiceValidator>();
+
+    builder.Services.AddHostedService<HeartbeatMonitorWorker>();
 
     var app = builder.Build();
 
