@@ -42,6 +42,7 @@ try
     builder.Services.AddScoped<IValidator<UpdateServiceRequest>, UpdateServiceValidator>();
 
     builder.Services.AddHostedService<HeartbeatMonitorWorker>();
+    builder.Services.AddHostedService<MaintenanceResumeWorker>();
 
     var app = builder.Build();
 
