@@ -6,6 +6,20 @@ All notable changes to mkat, ordered newest-first.
 
 ## [Unreleased]
 
+### 2026-01-22 - M5: Frontend
+
+- Scaffolded React 19 + TypeScript project with Vite 7
+- Configured Tailwind CSS v4 with @tailwindcss/vite plugin
+- Created API client layer (types, client, services, alerts) matching backend DTOs
+- Built Layout with Header, Sidebar, and responsive main content area
+- Created components: StateIndicator (with pulse for Down), ServiceCard, ServiceForm, AlertItem, CopyableUrl, Pagination
+- Implemented pages: Dashboard (status overview + recent alerts), Services (list + pause/resume), ServiceDetail (monitors + alert history), ServiceCreate, ServiceEdit (with delete), Alerts (list + acknowledge), Login
+- Set up TanStack Router with auth guard (redirect to /login when unauthenticated)
+- Configured TanStack Query with auto-refresh (30s interval on dashboard/alerts)
+- Vite dev proxy forwards /api, /webhook, /heartbeat, /health to backend
+- Production build outputs to Mkat.Api/wwwroot
+- API serves SPA with UseDefaultFiles, UseStaticFiles, MapFallbackToFile
+
 ### 2026-01-22 - M4: Notifications
 
 - Added INotificationChannel and INotificationDispatcher interfaces

@@ -85,3 +85,19 @@ Read this file FIRST before starting any new work -- it prevents repeating mista
 - MarkdownV2 requires escaping special chars even in non-formatted text — dots, hyphens, parentheses all need `\` prefix
 **Pattern:** For BackgroundServices that depend on external APIs (Telegram), test only the pure logic (ParseDuration) and configuration checks (IsEnabled). Don't try to integration-test the polling loop.
 **Anti-pattern:** Don't assume NuGet package method names match documentation from older versions. Check actual API signatures by looking at compile errors.
+
+### 2026-01-22 - M5 Frontend
+**Context:** Building React frontend with Vite, Tailwind v4, TanStack Router/Query
+**Went well:**
+- Tailwind v4 setup is simpler than v3: just `@import "tailwindcss"` in CSS + `@tailwindcss/vite` plugin (no tailwind.config.js, no postcss.config.js)
+- TanStack Router v1.154.x route definitions work exactly as documented; auth guard via `beforeLoad` with `throw redirect()`
+- Vite proxy configuration cleanly forwards API calls during development
+- `MapFallbackToFile("index.html")` after `MapControllers()` gives API routes priority over SPA routing
+- TypeScript `--noEmit` check catches type errors before Vite build
+**Tripped up:**
+- Rollup warns about importing interfaces as values (`"Alert" is not exported`) — fix with `import type { Alert }` for type-only imports
+- Vite 7 requires explicit `@tailwindcss/vite` plugin instead of PostCSS-based setup from Tailwind v3
+- `UseStaticFiles()` and `UseDefaultFiles()` must come before auth middleware or static files get blocked
+- Default Vite template includes App.css, assets/react.svg, public/vite.svg — remove these early to avoid confusion
+**Pattern:** For SPA + API in same host: UseDefaultFiles → UseStaticFiles → auth middleware → MapControllers → MapFallbackToFile
+**Anti-pattern:** Don't commit wwwroot build artifacts to git in production (add to .gitignore). For this project it's fine since Docker will build in-container.
