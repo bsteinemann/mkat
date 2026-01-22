@@ -268,4 +268,97 @@ public class ServicesControllerTests : IDisposable
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
         unauthClient.Dispose();
     }
+
+    // --- Pause/Resume ---
+
+    [Fact]
+    public async Task Pause_ExistingService_Returns200()
+    {
+        var createResponse = await _client.PostAsJsonAsync("/api/v1/services", ValidCreateRequest());
+        var created = await createResponse.Content.ReadFromJsonAsync<ServiceResponse>(JsonOptions);
+
+        var response = await _client.PostAsJsonAsync(
+            $"/api/v1/services/{created!.Id}/pause",
+            new { until = DateTime.UtcNow.AddHours(1), autoResume = true });
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var body = await response.Content.ReadFromJsonAsync<JsonElement>();
+        Assert.True(body.GetProperty("paused").GetBoolean());
+    }
+
+    [Fact]
+    public async Task Pause_SetsServiceStateToPaused()
+    {
+        var createResponse = await _client.PostAsJsonAsync("/api/v1/services", ValidCreateRequest());
+        var created = await createResponse.Content.ReadFromJsonAsync<ServiceResponse>(JsonOptions);
+
+        await _client.PostAsJsonAsync(
+            $"/api/v1/services/{created!.Id}/pause",
+            new { autoResume = false });
+
+        var getResponse = await _client.GetAsync($"/api/v1/services/{created.Id}");
+        var service = await getResponse.Content.ReadFromJsonAsync<ServiceResponse>(JsonOptions);
+        Assert.Equal(ServiceState.Paused, service!.State);
+    }
+
+    [Fact]
+    public async Task Pause_NonExistingService_Returns404()
+    {
+        var response = await _client.PostAsJsonAsync(
+            $"/api/v1/services/{Guid.NewGuid()}/pause",
+            new { autoResume = false });
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Resume_PausedService_Returns200()
+    {
+        var createResponse = await _client.PostAsJsonAsync("/api/v1/services", ValidCreateRequest());
+        var created = await createResponse.Content.ReadFromJsonAsync<ServiceResponse>(JsonOptions);
+        await _client.PostAsJsonAsync(
+            $"/api/v1/services/{created!.Id}/pause",
+            new { autoResume = false });
+
+        var response = await _client.PostAsync($"/api/v1/services/{created.Id}/resume", null);
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var body = await response.Content.ReadFromJsonAsync<JsonElement>();
+        Assert.True(body.GetProperty("resumed").GetBoolean());
+    }
+
+    [Fact]
+    public async Task Resume_SetsServiceStateToUnknown()
+    {
+        var createResponse = await _client.PostAsJsonAsync("/api/v1/services", ValidCreateRequest());
+        var created = await createResponse.Content.ReadFromJsonAsync<ServiceResponse>(JsonOptions);
+        await _client.PostAsJsonAsync(
+            $"/api/v1/services/{created!.Id}/pause",
+            new { autoResume = false });
+
+        await _client.PostAsync($"/api/v1/services/{created.Id}/resume", null);
+
+        var getResponse = await _client.GetAsync($"/api/v1/services/{created.Id}");
+        var service = await getResponse.Content.ReadFromJsonAsync<ServiceResponse>(JsonOptions);
+        Assert.Equal(ServiceState.Unknown, service!.State);
+    }
+
+    [Fact]
+    public async Task Resume_NonPausedService_Returns400()
+    {
+        var createResponse = await _client.PostAsJsonAsync("/api/v1/services", ValidCreateRequest());
+        var created = await createResponse.Content.ReadFromJsonAsync<ServiceResponse>(JsonOptions);
+
+        var response = await _client.PostAsync($"/api/v1/services/{created!.Id}/resume", null);
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Resume_NonExistingService_Returns404()
+    {
+        var response = await _client.PostAsync($"/api/v1/services/{Guid.NewGuid()}/resume", null);
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
 }

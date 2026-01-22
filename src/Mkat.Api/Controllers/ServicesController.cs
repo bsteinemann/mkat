@@ -2,6 +2,7 @@ using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using Mkat.Application.DTOs;
 using Mkat.Application.Interfaces;
+using Mkat.Application.Services;
 using Mkat.Domain.Entities;
 using Mkat.Domain.Enums;
 using Monitor = Mkat.Domain.Entities.Monitor;
@@ -14,6 +15,7 @@ public class ServicesController : ControllerBase
 {
     private readonly IServiceRepository _serviceRepo;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IStateService _stateService;
     private readonly IValidator<CreateServiceRequest> _createValidator;
     private readonly IValidator<UpdateServiceRequest> _updateValidator;
     private readonly ILogger<ServicesController> _logger;
@@ -21,12 +23,14 @@ public class ServicesController : ControllerBase
     public ServicesController(
         IServiceRepository serviceRepo,
         IUnitOfWork unitOfWork,
+        IStateService stateService,
         IValidator<CreateServiceRequest> createValidator,
         IValidator<UpdateServiceRequest> updateValidator,
         ILogger<ServicesController> logger)
     {
         _serviceRepo = serviceRepo;
         _unitOfWork = unitOfWork;
+        _stateService = stateService;
         _createValidator = createValidator;
         _updateValidator = updateValidator;
         _logger = logger;
@@ -184,6 +188,58 @@ public class ServicesController : ControllerBase
         _logger.LogInformation("Deleted service {ServiceId}", id);
 
         return NoContent();
+    }
+
+    [HttpPost("{id:guid}/pause")]
+    public async Task<IActionResult> Pause(
+        Guid id,
+        [FromBody] PauseRequest? request,
+        CancellationToken ct = default)
+    {
+        var service = await _serviceRepo.GetByIdAsync(id, ct);
+        if (service == null)
+        {
+            return NotFound(new ErrorResponse
+            {
+                Error = "Service not found",
+                Code = "SERVICE_NOT_FOUND"
+            });
+        }
+
+        await _stateService.PauseServiceAsync(
+            id,
+            request?.Until,
+            request?.AutoResume ?? false,
+            ct);
+
+        return Ok(new { paused = true, until = request?.Until });
+    }
+
+    [HttpPost("{id:guid}/resume")]
+    public async Task<IActionResult> Resume(Guid id, CancellationToken ct = default)
+    {
+        var service = await _serviceRepo.GetByIdAsync(id, ct);
+        if (service == null)
+        {
+            return NotFound(new ErrorResponse
+            {
+                Error = "Service not found",
+                Code = "SERVICE_NOT_FOUND"
+            });
+        }
+
+        if (service.State != ServiceState.Paused)
+        {
+            return BadRequest(new ErrorResponse
+            {
+                Error = "Service is not paused",
+                Code = "SERVICE_NOT_PAUSED"
+            });
+        }
+
+        await _stateService.ResumeServiceAsync(id, ct);
+
+        return Ok(new { resumed = true });
     }
 
     private ServiceResponse MapToResponse(Service service)
