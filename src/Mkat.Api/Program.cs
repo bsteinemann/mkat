@@ -5,6 +5,7 @@ using Mkat.Application.DTOs;
 using Mkat.Application.Interfaces;
 using Mkat.Application.Services;
 using Mkat.Application.Validators;
+using Mkat.Infrastructure.Channels;
 using Mkat.Infrastructure.Data;
 using Mkat.Infrastructure.Repositories;
 using Mkat.Infrastructure.Workers;
@@ -41,8 +42,19 @@ try
     builder.Services.AddScoped<IValidator<CreateServiceRequest>, CreateServiceValidator>();
     builder.Services.AddScoped<IValidator<UpdateServiceRequest>, UpdateServiceValidator>();
 
+    builder.Services.Configure<TelegramOptions>(options =>
+    {
+        options.BotToken = Environment.GetEnvironmentVariable("MKAT_TELEGRAM_BOT_TOKEN") ?? "";
+        options.ChatId = Environment.GetEnvironmentVariable("MKAT_TELEGRAM_CHAT_ID") ?? "";
+    });
+
+    builder.Services.AddSingleton<INotificationChannel, TelegramChannel>();
+    builder.Services.AddScoped<INotificationDispatcher, NotificationDispatcher>();
+
     builder.Services.AddHostedService<HeartbeatMonitorWorker>();
     builder.Services.AddHostedService<MaintenanceResumeWorker>();
+    builder.Services.AddHostedService<AlertDispatchWorker>();
+    builder.Services.AddHostedService<TelegramBotService>();
 
     var app = builder.Build();
 
