@@ -361,4 +361,62 @@ public class ServicesControllerTests : IDisposable
 
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
+
+    // --- Mute ---
+
+    [Fact]
+    public async Task Mute_ExistingService_Returns200()
+    {
+        var createResponse = await _client.PostAsJsonAsync("/api/v1/services", ValidCreateRequest());
+        var created = await createResponse.Content.ReadFromJsonAsync<ServiceResponse>(JsonOptions);
+
+        var response = await _client.PostAsJsonAsync(
+            $"/api/v1/services/{created!.Id}/mute",
+            new { durationMinutes = 30, reason = "Maintenance" });
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var body = await response.Content.ReadFromJsonAsync<JsonElement>();
+        Assert.True(body.GetProperty("muted").GetBoolean());
+        Assert.True(body.TryGetProperty("until", out _));
+    }
+
+    [Fact]
+    public async Task Mute_NonExistingService_Returns404()
+    {
+        var response = await _client.PostAsJsonAsync(
+            $"/api/v1/services/{Guid.NewGuid()}/mute",
+            new { durationMinutes = 30 });
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Mute_SuppressesAlerts()
+    {
+        var request = new CreateServiceRequest
+        {
+            Name = $"Mute Test {Guid.NewGuid():N}",
+            Severity = Severity.Medium,
+            Monitors = new List<CreateMonitorRequest>
+            {
+                new() { Type = MonitorType.Webhook, IntervalSeconds = 300 }
+            }
+        };
+        var createResponse = await _client.PostAsJsonAsync("/api/v1/services", request);
+        var created = await createResponse.Content.ReadFromJsonAsync<ServiceResponse>(JsonOptions);
+        var token = created!.Monitors[0].Token;
+
+        // Mute the service
+        await _client.PostAsJsonAsync(
+            $"/api/v1/services/{created.Id}/mute",
+            new { durationMinutes = 60 });
+
+        // Trigger failure webhook - should NOT create alert due to mute
+        var unauthClient = _factory.CreateClient();
+        var failResponse = await unauthClient.PostAsync($"/webhook/{token}/fail", null);
+        var failBody = await failResponse.Content.ReadFromJsonAsync<JsonElement>();
+
+        Assert.False(failBody.GetProperty("alertCreated").GetBoolean());
+        unauthClient.Dispose();
+    }
 }

@@ -14,6 +14,7 @@ namespace Mkat.Api.Controllers;
 public class ServicesController : ControllerBase
 {
     private readonly IServiceRepository _serviceRepo;
+    private readonly IMuteWindowRepository _muteRepo;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IStateService _stateService;
     private readonly IValidator<CreateServiceRequest> _createValidator;
@@ -22,6 +23,7 @@ public class ServicesController : ControllerBase
 
     public ServicesController(
         IServiceRepository serviceRepo,
+        IMuteWindowRepository muteRepo,
         IUnitOfWork unitOfWork,
         IStateService stateService,
         IValidator<CreateServiceRequest> createValidator,
@@ -29,6 +31,7 @@ public class ServicesController : ControllerBase
         ILogger<ServicesController> logger)
     {
         _serviceRepo = serviceRepo;
+        _muteRepo = muteRepo;
         _unitOfWork = unitOfWork;
         _stateService = stateService;
         _createValidator = createValidator;
@@ -240,6 +243,34 @@ public class ServicesController : ControllerBase
         await _stateService.ResumeServiceAsync(id, ct);
 
         return Ok(new { resumed = true });
+    }
+
+    [HttpPost("{id:guid}/mute")]
+    public async Task<IActionResult> Mute(
+        Guid id,
+        [FromBody] MuteRequest request,
+        CancellationToken ct = default)
+    {
+        var service = await _serviceRepo.GetByIdAsync(id, ct);
+        if (service == null)
+        {
+            return NotFound(new ErrorResponse { Error = "Service not found", Code = "SERVICE_NOT_FOUND" });
+        }
+
+        var mute = new MuteWindow
+        {
+            Id = Guid.NewGuid(),
+            ServiceId = id,
+            StartsAt = DateTime.UtcNow,
+            EndsAt = DateTime.UtcNow.AddMinutes(request.DurationMinutes),
+            Reason = request.Reason,
+            CreatedAt = DateTime.UtcNow
+        };
+
+        await _muteRepo.AddAsync(mute, ct);
+        await _unitOfWork.SaveChangesAsync(ct);
+
+        return Ok(new { muted = true, until = mute.EndsAt });
     }
 
     private ServiceResponse MapToResponse(Service service)
