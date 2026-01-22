@@ -1,0 +1,40 @@
+# Version control
+.git
+.gitignore
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# Development
+.devcontainer
+docker-compose.dev.yml
+
+# Documentation
+docs/
+*.md
+!README.md
+
+# Tests
+tests/
+
+# Node modules (frontend installs in Docker)
+src/mkat-ui/node_modules
+src/mkat-ui/dist
+
+# Build artifacts
+**/bin
+**/obj
+**/publish
+
+# Environment files
+.env
+.env.*
+
+# CI/CD
+.github
+
+# Claude
+.claude
