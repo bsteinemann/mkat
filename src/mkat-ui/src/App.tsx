@@ -1,8 +1,21 @@
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { RouterProvider } from '@tanstack/react-router';
+import { router } from './router';
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      staleTime: 10000,
+    },
+  },
+});
+
 function App() {
   return (
-    <div className="min-h-screen bg-gray-100">
-      <h1 className="text-2xl font-bold p-4">mkat</h1>
-    </div>
+    <QueryClientProvider client={queryClient}>
+      <RouterProvider router={router} />
+    </QueryClientProvider>
   );
 }
 
