@@ -29,6 +29,7 @@ try
     builder.Services.AddScoped<IServiceRepository, ServiceRepository>();
     builder.Services.AddScoped<IMonitorRepository, MonitorRepository>();
     builder.Services.AddScoped<IAlertRepository, AlertRepository>();
+    builder.Services.AddScoped<IMuteWindowRepository, MuteWindowRepository>();
     builder.Services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<MkatDbContext>());
 
     builder.Services.AddControllers();
