@@ -70,6 +70,16 @@ Each phase has a Definition of Done (DoD) that must be satisfied before proceedi
 - Commit after each completed feature/behavior (tests green)
 - If fixing a bug: write reproducing test first, then fix
 
+### TDD Verification Gate
+
+For each unit of work, the sequence MUST be:
+1. Write test → run → observe failure output (RED confirmed)
+2. Write implementation → run → observe pass (GREEN confirmed)
+3. Refactor → run → still passing
+
+If you cannot show a failing test run before implementation, you are not doing TDD.
+This gate exists because previous milestones claimed TDD but wrote implementation first.
+
 ### Commit Cadence
 
 - Commit after each entity/enum with its tests
@@ -139,6 +149,14 @@ Each phase has a Definition of Done (DoD) that must be satisfied before proceedi
 ## Phase 6: Retrospective (Feedback Loop)
 
 **Goal:** Improve the system for next time. This step is NOT optional.
+
+### When to Write Learnings
+
+- **Immediately** when you solve a non-obvious problem (don't wait until end of milestone)
+- **After each feature** if you encountered friction or discovered a pattern
+- **After each milestone** as a summary review
+
+Do NOT batch learnings. If you just debugged a tricky issue, add it to learnings.md NOW before continuing.
 
 ### Steps
 

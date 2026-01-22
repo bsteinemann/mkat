@@ -51,6 +51,17 @@ docs/
   telegram_healthcheck_monitoring_prd.md  # Product requirements
 ```
 
+## Pre-Task Checklist (MANDATORY)
+
+Before writing ANY code, complete these steps and confirm each one:
+
+1. **Read `docs/learnings.md`** - Mention at least one relevant entry (or confirm none apply)
+2. **Read the milestone plan** - `docs/plans/m{N}-*.md` for current milestone
+3. **Identify the first failing test** - What test will you write FIRST? Name it.
+4. **Confirm layer** - Which layer(s) will be modified? (Domain/Application/Infrastructure/API)
+
+If you are a sub-agent: your prompt MUST include the contents of `docs/learnings.md` and the relevant plan file. If they are not in your prompt, request them before proceeding.
+
 ## Key Documents (Read Before Working)
 
 1. `docs/learnings.md` - Check FIRST for known patterns and gotchas
@@ -117,6 +128,16 @@ dotnet ef database update -p src/Mkat.Infrastructure -s src/Mkat.Api
 1. **Red:** Write a failing test that describes the desired behavior
 2. **Green:** Write the minimum code to make the test pass
 3. **Refactor:** Clean up while keeping tests green
+
+### TDD Gate (Enforcement)
+
+Before writing implementation code, you MUST:
+1. Write the test file/method first
+2. Run `dotnet test` and observe the failure (compile error or assertion failure)
+3. Show/log the failing output
+4. ONLY THEN write the implementation
+
+This is a gate, not a suggestion. If you find yourself writing implementation code and realize no failing test exists yet, STOP, delete the implementation, write the test, confirm it fails, then re-implement.
 
 ### TDD Rules
 
@@ -192,6 +213,7 @@ Follow `docs/workflow.md` for every task. Summary:
 6. **Retrospective** - Add to learnings.md, update CLAUDE.md if needed
 
 The retrospective step is NOT optional. It makes future tasks more efficient.
+Write learnings IMMEDIATELY when a problem is solved, not at the end of a milestone.
 
 ## What NOT To Do
 

@@ -30,6 +30,19 @@ Read this file FIRST before starting any new work -- it prevents repeating mista
 
 ## Entries
 
+### 2026-01-22 - Self-Improvement System Effectiveness
+**Context:** Analyzing how learnings.md, workflow.md, and TDD instructions performed during M1-M2
+**Went well:** Commit discipline followed; plan files provided structure; changelog maintained
+**Tripped up:**
+- TDD was not actually followed (implementation written before/alongside tests, not after failing tests)
+- Retrospective was batched at end of M2 instead of after each feature
+- Learnings file has cold-start problem (empty during M1, so no value extracted)
+- Sub-agents don't read CLAUDE.md/learnings.md unless explicitly instructed in their prompt
+- "NEVER write implementation without a failing test" instruction was ignored without consequence
+**Pattern:** Enforcement requires gates, not just instructions. A gate = "show the failing test output before proceeding to implementation"
+**Anti-pattern:** Writing instructions that say "always do X" without a verification mechanism. Agents optimize for task completion, not process compliance.
+**Action:** Added pre-task checklist to CLAUDE.md, added retrospective timing to workflow.md, added sub-agent context requirements, strengthened TDD gate language
+
 ### 2026-01-22 - M1 Foundation & M2 Core API
 **Context:** Implementing domain entities, EF Core, repositories, auth, CRUD controller
 **Went well:** Clean Architecture separation works well; FluentValidation integration straightforward
