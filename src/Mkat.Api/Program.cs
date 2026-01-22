@@ -80,6 +80,8 @@ try
     }
 
     app.UseSerilogRequestLogging();
+    app.UseDefaultFiles();
+    app.UseStaticFiles();
     app.UseMiddleware<BasicAuthMiddleware>();
 
     app.MapGet("/health", () => Results.Ok(new { status = "healthy", timestamp = DateTime.UtcNow }));
@@ -97,6 +99,7 @@ try
     });
 
     app.MapControllers();
+    app.MapFallbackToFile("index.html");
 
     app.Run();
 }
