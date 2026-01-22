@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Mkat.Api.Middleware;
 using Mkat.Application.DTOs;
 using Mkat.Application.Interfaces;
+using Mkat.Application.Services;
 using Mkat.Application.Validators;
 using Mkat.Infrastructure.Data;
 using Mkat.Infrastructure.Repositories;
@@ -31,6 +32,7 @@ try
     builder.Services.AddScoped<IAlertRepository, AlertRepository>();
     builder.Services.AddScoped<IMuteWindowRepository, MuteWindowRepository>();
     builder.Services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<MkatDbContext>());
+    builder.Services.AddScoped<IStateService, StateService>();
 
     builder.Services.AddControllers();
     builder.Services.AddRouting(options => options.LowercaseUrls = true);
