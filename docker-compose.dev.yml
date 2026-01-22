@@ -1,0 +1,18 @@
+services:
+  mkat:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    volumes:
+      - mkat-data:/data
+    environment:
+      - MKAT_DATABASE_PATH=/data/mkat.db
+      - MKAT_USERNAME=${MKAT_USERNAME:-admin}
+      - MKAT_PASSWORD=${MKAT_PASSWORD:-changeme}
+      - MKAT_LOG_LEVEL=${MKAT_LOG_LEVEL:-Information}
+    restart: unless-stopped
+
+volumes:
+  mkat-data:
