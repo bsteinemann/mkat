@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Mkat.Application.Interfaces;
 using Mkat.Domain.Entities;
+using Monitor = Mkat.Domain.Entities.Monitor;
 
 namespace Mkat.Infrastructure.Data;
 

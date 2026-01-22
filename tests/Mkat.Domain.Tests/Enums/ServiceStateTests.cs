@@ -1,4 +1,5 @@
 using Mkat.Domain.Enums;
+using Xunit;
 
 namespace Mkat.Domain.Tests.Enums;
 

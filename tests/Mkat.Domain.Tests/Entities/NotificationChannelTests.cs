@@ -1,4 +1,5 @@
 using Mkat.Domain.Entities;
+using Xunit;
 
 namespace Mkat.Domain.Tests.Entities;
 

@@ -1,4 +1,5 @@
 using Mkat.Domain.Entities;
+using Monitor = Mkat.Domain.Entities.Monitor;
 
 namespace Mkat.Application.Interfaces;
 

@@ -3,6 +3,7 @@ using Mkat.Application.Interfaces;
 using Mkat.Domain.Entities;
 using Mkat.Domain.Enums;
 using Mkat.Infrastructure.Data;
+using Monitor = Mkat.Domain.Entities.Monitor;
 
 namespace Mkat.Infrastructure.Repositories;
 

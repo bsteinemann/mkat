@@ -3,6 +3,8 @@ using Mkat.Domain.Entities;
 using Mkat.Domain.Enums;
 using Mkat.Infrastructure.Data;
 using Mkat.Infrastructure.Repositories;
+using Xunit;
+using Monitor = Mkat.Domain.Entities.Monitor;
 
 namespace Mkat.Api.Tests.Repositories;
 

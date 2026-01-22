@@ -1,5 +1,7 @@
 using Mkat.Domain.Entities;
 using Mkat.Domain.Enums;
+using Xunit;
+using Monitor = Mkat.Domain.Entities.Monitor;
 
 namespace Mkat.Domain.Tests.Entities;
 

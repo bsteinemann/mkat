@@ -5,6 +5,7 @@ using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Mkat.Infrastructure.Data;
+using Xunit;
 
 namespace Mkat.Api.Tests;
 

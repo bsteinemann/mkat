@@ -1,4 +1,5 @@
 using Mkat.Application.Interfaces;
+using Xunit;
 
 namespace Mkat.Application.Tests.Interfaces;
 
