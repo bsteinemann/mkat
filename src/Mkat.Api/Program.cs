@@ -1,5 +1,9 @@
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
+using Mkat.Api.Middleware;
+using Mkat.Application.DTOs;
 using Mkat.Application.Interfaces;
+using Mkat.Application.Validators;
 using Mkat.Infrastructure.Data;
 using Mkat.Infrastructure.Repositories;
 using Serilog;
@@ -28,23 +32,36 @@ try
     builder.Services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<MkatDbContext>());
 
     builder.Services.AddControllers();
+    builder.Services.AddRouting(options => options.LowercaseUrls = true);
+
+    builder.Services.AddScoped<IValidator<CreateServiceRequest>, CreateServiceValidator>();
+    builder.Services.AddScoped<IValidator<UpdateServiceRequest>, UpdateServiceValidator>();
 
     var app = builder.Build();
 
     using (var scope = app.Services.CreateScope())
     {
         var db = scope.ServiceProvider.GetRequiredService<MkatDbContext>();
-        if (db.Database.GetPendingMigrations().Any())
+        try
         {
-            db.Database.Migrate();
+            if (db.Database.GetPendingMigrations().Any())
+            {
+                db.Database.Migrate();
+            }
+            else
+            {
+                db.Database.EnsureCreated();
+            }
         }
-        else
+        catch (InvalidOperationException)
         {
+            // InMemory or other providers that don't support migrations
             db.Database.EnsureCreated();
         }
     }
 
     app.UseSerilogRequestLogging();
+    app.UseMiddleware<BasicAuthMiddleware>();
 
     app.MapGet("/health", () => Results.Ok(new { status = "healthy", timestamp = DateTime.UtcNow }));
     app.MapGet("/health/ready", (MkatDbContext db) =>
