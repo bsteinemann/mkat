@@ -6,10 +6,10 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
     proxy: {
-      '/api': 'http://localhost:5000',
-      '/webhook': 'http://localhost:5000',
-      '/heartbeat': 'http://localhost:5000',
-      '/health': 'http://localhost:5000',
+      '/api': 'http://localhost:8080',
+      '/webhook': 'http://localhost:8080',
+      '/heartbeat': 'http://localhost:8080',
+      '/health': 'http://localhost:8080',
     },
   },
   build: {
