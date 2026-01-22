@@ -1,101 +1,95 @@
-```
 # mkat
 
-      /\_/\ 
+```
+      /\_/\
      ( o.o )   mkat
       > ^ <    always watching
+```
 
-**mkat** is a small, watchful monitoring service for homelabs and small web projects.
+**mkat** is a self-hosted monitoring service for homelabs and small web projects.
 
-It focuses on:
+## Features
 
-**Monitor · Keepalive · Alert · Trigger**
+- **Webhook Monitoring** - Receive failure/recovery signals from your services
+- **Heartbeat Monitoring** - Detect missed check-ins from cron jobs and scheduled tasks
+- **Telegram Notifications** - Interactive alerts with acknowledge and mute buttons
+- **Web Dashboard** - Monitor all services at a glance
+- **Simple Setup** - Single Docker container, minimal configuration
 
----
+## Quick Start
 
-## What is mkat?
+### Docker Compose
 
-mkat helps you answer one simple question:
+```yaml
+services:
+  mkat:
+    image: ghcr.io/bsteinemann/mkat:latest
+    ports:
+      - "8080:8080"
+    volumes:
+      - mkat-data:/data
+    environment:
+      - MKAT_USERNAME=admin
+      - MKAT_PASSWORD=your-secure-password
+      - MKAT_TELEGRAM_BOT_TOKEN=your-bot-token
+      - MKAT_TELEGRAM_CHAT_ID=your-chat-id
 
-> “Is my stuff still working?”
+volumes:
+  mkat-data:
+```
 
-It provides:
-- Health checks for HTTP endpoints
-- Heartbeat / keepalive checks (you *must* ping mkat on time)
-- Failure & recovery notifications
-- Pluggable notification integrations (Telegram first, more later)
-- A simple UI to manage checks, services, and alerts
+### Environment Variables
 
-mkat is designed to be:
-- self-hosted
-- lightweight
-- automation-friendly
-- pleasant to use from a terminal or browser
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `MKAT_USERNAME` | Yes | - | Admin username |
+| `MKAT_PASSWORD` | Yes | - | Admin password |
+| `MKAT_TELEGRAM_BOT_TOKEN` | No | - | Telegram bot token |
+| `MKAT_TELEGRAM_CHAT_ID` | No | - | Telegram chat ID |
+| `MKAT_DATABASE_PATH` | No | `/data/mkat.db` | SQLite database path |
+| `MKAT_LOG_LEVEL` | No | `Information` | Log level |
 
----
+## Telegram Setup
 
-## Core Concepts
+1. Create a bot via [@BotFather](https://t.me/botfather)
+2. Copy the bot token
+3. Start a chat with your bot or add it to a group
+4. Get your chat ID (use @userinfobot or the API)
+5. Set the environment variables
 
-- **Service**  
-  Something you care about (API, job, backup, website)
+See [docs/telegram-setup.md](docs/telegram-setup.md) for detailed instructions.
 
-- **Check**  
-  A rule that determines if a service is healthy  
-  (HTTP check, heartbeat check, webhook-based check)
+## API Reference
 
-- **Incident**  
-  A service entering a failed state
+See [docs/api.md](docs/api.md) for full API documentation.
 
-- **Recovery**  
-  A service returning to healthy state
+### Quick Examples
 
-- **Integration**  
-  A notification or trigger target (Telegram, Email, Webhook, etc.)
+```bash
+# Create a service with heartbeat monitor
+curl -X POST http://localhost:8080/api/v1/services \
+  -u admin:password \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Backup Job",
+    "severity": 2,
+    "monitors": [{"type": 1, "intervalSeconds": 3600}]
+  }'
 
----
+# Send heartbeat
+curl -X POST http://localhost:8080/heartbeat/{token}
 
-## Features (planned)
+# Report failure
+curl -X POST http://localhost:8080/webhook/{token}/fail
 
-- HTTP health endpoint monitoring
-- Heartbeat / keepalive checks (cron-style expectations)
-- Failure & recovery webhooks
-- Telegram notifications
-- Extensible integration system
-- Web UI for configuration & status
-- Clean API for automation
+# Report recovery
+curl -X POST http://localhost:8080/webhook/{token}/recover
+```
 
----
+## Deployment
 
-## Tech Stack
-
-- **Backend / Services:** .NET (Clean Architecture)
-- **Validation:** FluentValidation
-- **Frontend:** React, TanStack, Tailwind CSS
-- **Runtime:** Docker-first, self-hosted
-
----
-
-## Project Status
-
-🚧 **Early development**
-
-This project is under active design and implementation.  
-Expect breaking changes.
-
----
-
-## Philosophy
-
-mkat is intentionally:
-- not an enterprise monitoring platform
-- not Kubernetes-first
-- not bloated
-
-It’s a tool that quietly watches your systems and taps you on the shoulder when something goes wrong.
-
----
+See [docs/deployment.md](docs/deployment.md) for reverse proxy setup, backups, and upgrade procedures.
 
 ## License
 
 MIT
-```
