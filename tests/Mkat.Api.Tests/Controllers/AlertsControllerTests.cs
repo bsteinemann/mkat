@@ -40,6 +40,12 @@ public class AlertsControllerTests : IDisposable
 
                     services.AddDbContext<MkatDbContext>(options =>
                         options.UseInMemoryDatabase(dbName));
+
+                    // Remove background workers to prevent resource contention in tests
+                    var hostedServices = services.Where(
+                        d => d.ServiceType == typeof(Microsoft.Extensions.Hosting.IHostedService)).ToList();
+                    foreach (var svc in hostedServices)
+                        services.Remove(svc);
                 });
             });
 
