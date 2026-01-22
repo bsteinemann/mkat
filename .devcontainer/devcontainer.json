@@ -1,0 +1,48 @@
+{
+  "name": "mkat",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": ".."
+  },
+  "features": {
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {},
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "20"
+    },
+    "ghcr.io/devcontainers/features/dotnet:2": {
+      "version": "8.0"
+    },
+    "ghcr.io/devcontainers/features/git:1": {}
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-dotnettools.csdevkit",
+        "ms-dotnettools.csharp",
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "bradlc.vscode-tailwindcss",
+        "ms-azuretools.vscode-docker",
+        "formulahendry.dotnet-test-explorer",
+        "eamodio.gitlens",
+        "humao.rest-client"
+      ],
+      "settings": {
+        "dotnet.defaultSolution": "Mkat.sln",
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "[csharp]": {
+          "editor.defaultFormatter": "ms-dotnettools.csharp"
+        }
+      }
+    }
+  },
+  "postCreateCommand": ".devcontainer/post-create.sh",
+  "forwardPorts": [5000, 5173, 8080],
+  "portsAttributes": {
+    "5000": { "label": "API (dev)" },
+    "5173": { "label": "Vite (frontend)" },
+    "8080": { "label": "Docker (prod)" }
+  },
+  "remoteUser": "vscode"
+}
