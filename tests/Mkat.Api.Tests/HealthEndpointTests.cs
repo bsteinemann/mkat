@@ -1,18 +1,24 @@
 using System.Net;
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Mkat.Infrastructure.Data;
 
 namespace Mkat.Api.Tests;
 
-public class HealthEndpointTests : IClassFixture<WebApplicationFactory<Program>>
+public class HealthEndpointTests : IClassFixture<WebApplicationFactory<Program>>, IDisposable
 {
     private readonly WebApplicationFactory<Program> _factory;
+    private readonly SqliteConnection _connection;
 
     public HealthEndpointTests(WebApplicationFactory<Program> factory)
     {
+        // Keep a shared connection open so the in-memory database persists
+        _connection = new SqliteConnection("Data Source=:memory:");
+        _connection.Open();
+
         _factory = factory.WithWebHostBuilder(builder =>
         {
             builder.ConfigureServices(services =>
@@ -23,20 +29,24 @@ public class HealthEndpointTests : IClassFixture<WebApplicationFactory<Program>>
                 if (descriptor != null)
                     services.Remove(descriptor);
 
-                // Add in-memory SQLite for testing
+                // Use the shared in-memory SQLite connection
                 services.AddDbContext<MkatDbContext>(options =>
                 {
-                    options.UseSqlite("Data Source=:memory:");
+                    options.UseSqlite(_connection);
                 });
-
-                // Ensure database is created
-                var sp = services.BuildServiceProvider();
-                using var scope = sp.CreateScope();
-                var db = scope.ServiceProvider.GetRequiredService<MkatDbContext>();
-                db.Database.OpenConnection();
-                db.Database.EnsureCreated();
             });
         });
+
+        // Ensure database schema is created
+        using var scope = _factory.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<MkatDbContext>();
+        db.Database.EnsureCreated();
+    }
+
+    public void Dispose()
+    {
+        _connection.Close();
+        _connection.Dispose();
     }
 
     [Fact]
