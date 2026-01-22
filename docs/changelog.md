@@ -6,6 +6,21 @@ All notable changes to mkat, ordered newest-first.
 
 ## [Unreleased]
 
+### 2026-01-22 - M3: Monitoring Engine
+
+- Added StateService with state machine logic (UP/DOWN/PAUSED/UNKNOWN transitions)
+- Created WebhookController (POST /webhook/{token}/fail, /webhook/{token}/recover)
+- Created HeartbeatController (POST /heartbeat/{token})
+- Added Pause/Resume endpoints to ServicesController
+- Created HeartbeatMonitorWorker (detects missed heartbeats, triggers DOWN alerts)
+- Created MaintenanceResumeWorker (auto-resumes paused services after window expires)
+- Added IMuteWindowRepository for alert suppression during mute windows
+- Added GetPausedServicesAsync to IServiceRepository
+- Added PauseRequest DTO
+- Alert creation on state transitions (with mute window checking)
+- Duplicate state transitions produce no duplicate alerts
+- 62 new tests (185 total: 56 Domain + 46 Application + 83 API)
+
 ### 2026-01-22 - M2: Core API
 
 - Added BasicAuthMiddleware (skips /health, /webhook, /heartbeat; 500 if password not configured)

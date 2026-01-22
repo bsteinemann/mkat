@@ -54,3 +54,18 @@ Read this file FIRST before starting any new work -- it prevents repeating mista
 - .NET 10 RC SDK building net8.0 projects requires `rollForward: latestMajor` in global.json
 **Pattern:** Integration tests should create their own `WebApplicationFactory` per test class instance with unique DB names
 **Anti-pattern:** Don't use `IClassFixture<WebApplicationFactory>` when tests modify shared state (DB); don't set env vars without `[Collection]` isolation
+
+### 2026-01-22 - M3 Monitoring Engine
+**Context:** Implementing state machine, webhook/heartbeat endpoints, background workers
+**Went well:**
+- TDD gate properly followed this time: wrote tests first, confirmed RED, then implemented GREEN
+- StateService unit tests with Moq gave fast, reliable coverage of all state transition logic
+- Background workers testable by making `CheckMissedHeartbeatsAsync`/`CheckMaintenanceWindowsAsync` public methods
+- Integration tests for webhook/heartbeat endpoints verify full request flow including state changes
+**Tripped up:**
+- `Monitor` ambiguity hit again in worker test file → always add `using Monitor = Mkat.Domain.Entities.Monitor;` when `Mkat.Domain.Entities` is imported in a file with ImplicitUsings
+- Worker tests reference Infrastructure types, so they belong in Api.Tests (not Application.Tests) since Api.Tests has transitive access through the Api project reference
+- `ServiceRepository.GetPausedServicesAsync` needed `using Mkat.Domain.Enums;` for `ServiceState` reference
+- `IStateService` interface defined in same file as `StateService` implementation (Application/Services/) — works fine but consider splitting if the file grows
+**Pattern:** Background workers using `IServiceProvider.CreateScope()` are testable by building a real `ServiceCollection` with mock registrations in tests
+**Anti-pattern:** Don't put Infrastructure worker tests in Application.Tests — the project doesn't reference Infrastructure. Use Api.Tests which has full access through transitive references.
