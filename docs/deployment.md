@@ -30,57 +30,60 @@ See `docker-compose.yml` in the repository root for a complete example.
 MKAT_USERNAME=admin MKAT_PASSWORD=your-password docker compose up -d
 ```
 
-## Reverse Proxy Setup
+## Infrastructure Stack (Traefik + Watchtower)
 
-### Nginx
+The repository includes `docker-compose.infrastructure.yaml` which provides a production-ready setup with:
 
-```nginx
-server {
-    listen 443 ssl http2;
-    server_name mkat.example.com;
+- **Traefik** - Reverse proxy with automatic Let's Encrypt TLS certificates
+- **Watchtower** - Automatic container image updates
 
-    ssl_certificate /path/to/cert.pem;
-    ssl_certificate_key /path/to/key.pem;
+### Environment Variables
 
-    location / {
-        proxy_pass http://localhost:8080;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection 'upgrade';
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_cache_bypass $http_upgrade;
-    }
-}
+Create a `.env` file (or export these variables):
+
+```bash
+# Required
+DOMAIN=example.com                  # Your domain (mkat runs at mkat.$DOMAIN)
+ACME_EMAIL=you@example.com          # Let's Encrypt registration email
+MKAT_USERNAME=admin
+MKAT_PASSWORD=your-secure-password
+
+# Optional - Traefik dashboard (accessible at traefik.$DOMAIN)
+# Generate with: echo $(htpasswd -nB admin) | sed -e 's/\$/\$\$/g'
+TRAEFIK_DASHBOARD_AUTH=admin:$$2y$$...
+
+# Optional - Telegram notifications
+MKAT_TELEGRAM_BOT_TOKEN=
+MKAT_TELEGRAM_CHAT_ID=
+
+# Optional - Watchtower
+WATCHTOWER_POLL_INTERVAL=3600       # Check for updates every hour (default)
+WATCHTOWER_NOTIFICATIONS=shoutrrr   # Enable notifications via shoutrrr
+WATCHTOWER_NOTIFICATION_URL=        # shoutrrr URL for update notifications
 ```
 
-### Traefik
+### DNS Setup
 
-```yaml
-http:
-  routers:
-    mkat:
-      rule: "Host(`mkat.example.com`)"
-      service: mkat
-      tls:
-        certResolver: letsencrypt
-
-  services:
-    mkat:
-      loadBalancer:
-        servers:
-          - url: "http://mkat:8080"
-```
-
-### Caddy
+Point these records to your server:
 
 ```
-mkat.example.com {
-    reverse_proxy localhost:8080
-}
+mkat.example.com      A    <your-server-ip>
+traefik.example.com   A    <your-server-ip>   # optional, for dashboard
 ```
+
+### Running
+
+```bash
+docker compose -f docker-compose.infrastructure.yaml up -d
+```
+
+### What It Does
+
+- HTTP traffic on port 80 is automatically redirected to HTTPS on port 443
+- TLS certificates are obtained and renewed via Let's Encrypt HTTP challenge
+- mkat is exposed at `https://mkat.<DOMAIN>` with no ports published directly
+- Watchtower polls for new container images and restarts services automatically
+- Traefik dashboard (optional) is available at `https://traefik.<DOMAIN>` behind basic auth
 
 ## Database Backup
 
@@ -103,24 +106,13 @@ find "$BACKUP_DIR" -name "mkat_*.db" -mtime +7 -delete
 
 ## Upgrading
 
-1. Pull the new image
-2. Stop the container
-3. Backup the database
-4. Start with new image
+If using the infrastructure stack, **Watchtower handles upgrades automatically** by polling for new images and restarting containers.
+
+For manual upgrades:
 
 ```bash
-docker pull ghcr.io/bsteinemann/mkat:latest
-docker stop mkat
-# backup...
-docker rm mkat
-docker run ... # same as before
-```
-
-Or with Docker Compose:
-
-```bash
-docker compose pull
-docker compose up -d
+docker compose -f docker-compose.infrastructure.yaml pull
+docker compose -f docker-compose.infrastructure.yaml up -d
 ```
 
 ## Troubleshooting

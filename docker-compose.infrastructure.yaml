@@ -1,0 +1,84 @@
+services:
+  traefik:
+    image: traefik:v3.2
+    container_name: traefik
+    restart: unless-stopped
+    command:
+      - "--api.dashboard=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--providers.docker.network=proxy"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
+      - "--certificatesresolvers.letsencrypt.acme.email=${ACME_EMAIL:?ACME_EMAIL is required}"
+      - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
+      - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - letsencrypt:/letsencrypt
+    networks:
+      - proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.traefik.rule=Host(`traefik.${DOMAIN:?DOMAIN is required}`)"
+      - "traefik.http.routers.traefik.entrypoints=websecure"
+      - "traefik.http.routers.traefik.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.traefik.service=api@internal"
+      - "traefik.http.routers.traefik.middlewares=traefik-auth"
+      - "traefik.http.middlewares.traefik-auth.basicauth.users=${TRAEFIK_DASHBOARD_AUTH:-}"
+
+  mkat:
+    image: ghcr.io/bsteinemann/mkat:latest
+    container_name: mkat
+    restart: unless-stopped
+    volumes:
+      - mkat-data:/data
+    environment:
+      - MKAT_USERNAME=${MKAT_USERNAME:?MKAT_USERNAME is required}
+      - MKAT_PASSWORD=${MKAT_PASSWORD:?MKAT_PASSWORD is required}
+      - MKAT_TELEGRAM_BOT_TOKEN=${MKAT_TELEGRAM_BOT_TOKEN:-}
+      - MKAT_TELEGRAM_CHAT_ID=${MKAT_TELEGRAM_CHAT_ID:-}
+      - MKAT_DATABASE_PATH=/data/mkat.db
+      - MKAT_LOG_LEVEL=${MKAT_LOG_LEVEL:-Information}
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+    networks:
+      - proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.mkat.rule=Host(`mkat.${DOMAIN}`)"
+      - "traefik.http.routers.mkat.entrypoints=websecure"
+      - "traefik.http.routers.mkat.tls.certresolver=letsencrypt"
+      - "traefik.http.services.mkat.loadbalancer.server.port=8080"
+
+  watchtower:
+    image: containrrr/watchtower:latest
+    container_name: watchtower
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - WATCHTOWER_CLEANUP=true
+      - WATCHTOWER_POLL_INTERVAL=${WATCHTOWER_POLL_INTERVAL:-3600}
+      - WATCHTOWER_INCLUDE_STOPPED=false
+      - WATCHTOWER_NOTIFICATIONS=${WATCHTOWER_NOTIFICATIONS:-}
+      - WATCHTOWER_NOTIFICATION_URL=${WATCHTOWER_NOTIFICATION_URL:-}
+
+networks:
+  proxy:
+    name: proxy
+
+volumes:
+  letsencrypt:
+    driver: local
+  mkat-data:
+    driver: local
