@@ -69,3 +69,19 @@ Read this file FIRST before starting any new work -- it prevents repeating mista
 - `IStateService` interface defined in same file as `StateService` implementation (Application/Services/) — works fine but consider splitting if the file grows
 **Pattern:** Background workers using `IServiceProvider.CreateScope()` are testable by building a real `ServiceCollection` with mock registrations in tests
 **Anti-pattern:** Don't put Infrastructure worker tests in Application.Tests — the project doesn't reference Infrastructure. Use Api.Tests which has full access through transitive references.
+
+### 2026-01-22 - M4 Notifications
+**Context:** Implementing notification channels, Telegram integration, alert dispatch, and alerts API
+**Went well:**
+- TDD gate properly followed: ParseDuration tests written first (RED), then implemented (GREEN)
+- NotificationDispatcher unit tests with Moq gave comprehensive coverage of dispatch logic and edge cases
+- Integration tests for AlertsController and Mute endpoint use same WebApplicationFactory pattern from M3
+- TelegramChannel constructor wrapped in try/catch for token validation (Telegram.Bot validates format eagerly)
+- Reusing `TelegramChannel.EscapeMarkdown` as public static method from TelegramBotService avoids duplication
+**Tripped up:**
+- Telegram.Bot v22.8.1 uses `SendMessage` not `SendTextMessageAsync`, `GetMe` not `GetMeAsync`, `AnswerCallbackQuery` not `AnswerCallbackQueryAsync` — API method names changed from older versions
+- `TelegramBotClient("fake-token")` throws `ArgumentException` at construction — must wrap in try/catch in constructor, not just check IsEnabled
+- Moq package needed in both test projects (Application.Tests and Api.Tests) — each has its own csproj
+- MarkdownV2 requires escaping special chars even in non-formatted text — dots, hyphens, parentheses all need `\` prefix
+**Pattern:** For BackgroundServices that depend on external APIs (Telegram), test only the pure logic (ParseDuration) and configuration checks (IsEnabled). Don't try to integration-test the polling loop.
+**Anti-pattern:** Don't assume NuGet package method names match documentation from older versions. Check actual API signatures by looking at compile errors.

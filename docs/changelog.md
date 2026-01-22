@@ -6,6 +6,19 @@ All notable changes to mkat, ordered newest-first.
 
 ## [Unreleased]
 
+### 2026-01-22 - M4: Notifications
+
+- Added INotificationChannel and INotificationDispatcher interfaces
+- Created NotificationDispatcher service (dispatches to all enabled channels, marks DispatchedAt)
+- Created TelegramChannel with MarkdownV2 formatting, inline keyboards, retry logic
+- Created TelegramBotService with command handling (/status, /list, /mute) and callback handling (ack, mute buttons)
+- Created AlertDispatchWorker (polls pending alerts every 5s)
+- Created AlertsController (GET /api/v1/alerts, GET /{id}, POST /{id}/ack)
+- Added Mute endpoint to ServicesController (POST /api/v1/services/{id}/mute)
+- Added AlertResponse and MuteRequest DTOs
+- Wired all notification DI: TelegramOptions, TelegramChannel, NotificationDispatcher, AlertDispatchWorker, TelegramBotService
+- 52 new tests (237 total: 56 Domain + 55 Application + 126 API)
+
 ### 2026-01-22 - M3: Monitoring Engine
 
 - Added StateService with state machine logic (UP/DOWN/PAUSED/UNKNOWN transitions)
