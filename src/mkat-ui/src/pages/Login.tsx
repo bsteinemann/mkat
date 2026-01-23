@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
+import { getBasePath } from '../config';
 
 export function Login() {
   const navigate = useNavigate();
@@ -14,7 +15,7 @@ export function Login() {
     const credentials = btoa(`${username}:${password}`);
 
     try {
-      const response = await fetch('/api/v1/services?page=1&pageSize=1', {
+      const response = await fetch(`${getBasePath()}/api/v1/services?page=1&pageSize=1`, {
         headers: { Authorization: `Basic ${credentials}` },
       });
 
