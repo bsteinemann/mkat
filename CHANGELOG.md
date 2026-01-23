@@ -1,3 +1,39 @@
+# [1.1.0](https://github.com/bsteinemann/mkat/compare/v1.0.0...v1.1.0) (2026-01-23)
+
+
+### Bug Fixes
+
+* pass Telegram env vars to container and escape MarkdownV2 time string ([8f6c2f0](https://github.com/bsteinemann/mkat/commit/8f6c2f00d2e8debf1c5168d02801a7fe0e25daed))
+* remove useEffect setState in ContactsSection to satisfy lint rule ([8208547](https://github.com/bsteinemann/mkat/commit/8208547814f4292c6927dcd34a8f2c0de4b3f555))
+* serialize HealthEndpointTests to prevent Serilog race condition ([e25a5c0](https://github.com/bsteinemann/mkat/commit/e25a5c0ad98943a898a0202dbc8e8e9f6e6dc674))
+
+
+### Features
+
+* add channel management endpoints for contacts ([19b305d](https://github.com/bsteinemann/mkat/commit/19b305dc1ecb0cd78b871e7a04cf0e2c63fe63ca))
+* add Contact CRUD endpoints with validation ([db553a9](https://github.com/bsteinemann/mkat/commit/db553a9a2d3ff848874ffb45158c2b31ce8f0d2c))
+* add contact picker to service edit page ([dbc8ae0](https://github.com/bsteinemann/mkat/commit/dbc8ae048c47d12711f6f2ad37faf1c0532c8e2d))
+* add Contact, ContactChannel, ServiceContact entities and EF migration ([7468535](https://github.com/bsteinemann/mkat/commit/74685356a9c0b3c7dd9ffcaee23ae6be6c9301c9))
+* add FluentValidation rules for metric monitor config ([1f56ab4](https://github.com/bsteinemann/mkat/commit/1f56ab447fbdabd86f39ac91dc9bf1e925ad8be4))
+* add frontend contacts page and service contact picker ([962c7f3](https://github.com/bsteinemann/mkat/commit/962c7f310ccc55f22a988c305056b4c72ea7ef9b))
+* add frontend metric monitor support ([7ed4af2](https://github.com/bsteinemann/mkat/commit/7ed4af234c6b445c935c2177201954460ce22016))
+* add frontend peers page with pairing dialog ([d463247](https://github.com/bsteinemann/mkat/commit/d463247a6b4b05bcb2d3f5b510679ddf3a03c606))
+* add IMetricReadingRepository, implementation, and EF migration ([e09b5f3](https://github.com/bsteinemann/mkat/commit/e09b5f3cc799c61ebc2f34b76575480cbbea8e55))
+* add metric history and latest endpoints ([e2a08dd](https://github.com/bsteinemann/mkat/commit/e2a08dd7a52ded3b08a732793d59273ee91c30d3))
+* add metric push endpoint (POST /metric/{token}) ([7ad1206](https://github.com/bsteinemann/mkat/commit/7ad1206a0b5243dc8345864c045b2b27e4148e90))
+* add MetricEvaluator with all 4 threshold strategies ([dc0dbe0](https://github.com/bsteinemann/mkat/commit/dc0dbe082708d8bde53e76eaedfb3e63ba7bc407))
+* add MetricReading entity and metric fields to Monitor ([55a5b80](https://github.com/bsteinemann/mkat/commit/55a5b80c6e5c8bdc2a35df2e39c525235a2ea4b5))
+* add MetricRetentionWorker for metric history cleanup ([cb2c548](https://github.com/bsteinemann/mkat/commit/cb2c548610a1e3aae5a44fad99015f5082b30773))
+* add notification failure hook to AlertDispatchWorker ([a7eba2c](https://github.com/bsteinemann/mkat/commit/a7eba2c5854c484583f567802ffe9cc049fde54b))
+* add pairing token generation and validation service ([09b4358](https://github.com/bsteinemann/mkat/commit/09b43589746aa27d85cb2285b0f4442befd85b1d))
+* add Peer entity, repository, and EF migration ([7320a95](https://github.com/bsteinemann/mkat/commit/7320a95993cdb2c8ec709f298f8f1dd657ec6df8))
+* add peer pairing API endpoints (initiate, complete, accept) ([f86b46c](https://github.com/bsteinemann/mkat/commit/f86b46c265916881abfabd76c62d2de42d744dcb))
+* add PeerHeartbeatWorker for sending heartbeats to peers ([979a911](https://github.com/bsteinemann/mkat/commit/979a911c5a12643e8624f412e2e8e1ed8ad28635))
+* add service-contact assignment endpoints ([d48e52b](https://github.com/bsteinemann/mkat/commit/d48e52b204d88f7613384fb8945a2688c84bd6a3))
+* add ThresholdStrategy enum and MonitorType.Metric ([ccd6550](https://github.com/bsteinemann/mkat/commit/ccd65500db0fd3d3b0e6f634b149a4493fa1e513))
+* update alert dispatch to route via contacts with fallback ([0b46975](https://github.com/bsteinemann/mkat/commit/0b46975947c37c283b7deaf8b1a5626f044f90d6))
+* update monitor CRUD to support Metric type ([cc5eb71](https://github.com/bsteinemann/mkat/commit/cc5eb7157ed673b2f9be0d5e74aa76e2bf5fbd84))
+
 # 1.0.0 (2026-01-23)
 
 
