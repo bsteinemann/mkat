@@ -48,6 +48,11 @@ try
     builder.Services.AddScoped<IValidator<UpdateServiceRequest>, UpdateServiceValidator>();
     builder.Services.AddScoped<IValidator<AddMonitorRequest>, AddMonitorValidator>();
     builder.Services.AddScoped<IValidator<UpdateMonitorRequest>, UpdateMonitorValidator>();
+    builder.Services.AddScoped<IValidator<CreateContactRequest>, CreateContactValidator>();
+    builder.Services.AddScoped<IValidator<UpdateContactRequest>, UpdateContactValidator>();
+    builder.Services.AddScoped<IValidator<AddChannelRequest>, AddChannelValidator>();
+    builder.Services.AddScoped<IValidator<UpdateChannelRequest>, UpdateChannelValidator>();
+    builder.Services.AddScoped<IValidator<SetServiceContactsRequest>, SetServiceContactsValidator>();
     builder.Services.AddScoped<IValidator<PeerInitiateRequest>, PeerInitiateValidator>();
     builder.Services.AddScoped<IValidator<PeerAcceptRequest>, PeerAcceptValidator>();
     builder.Services.AddScoped<IValidator<PeerCompleteRequest>, PeerCompleteValidator>();
