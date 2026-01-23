@@ -5,6 +5,7 @@ import {
   Outlet,
   redirect,
 } from '@tanstack/react-router';
+import { getBasePath } from './config';
 import { Layout } from './components/layout/Layout';
 import { Dashboard } from './pages/Dashboard';
 import { Services } from './pages/Services';
@@ -103,7 +104,7 @@ const routeTree = rootRoute.addChildren([
   ]),
 ]);
 
-export const router = createRouter({ routeTree });
+export const router = createRouter({ routeTree, basepath: getBasePath() });
 
 declare module '@tanstack/react-router' {
   interface Register {
