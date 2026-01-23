@@ -84,3 +84,8 @@ export interface UpdateServiceRequest {
   description?: string;
   severity: Severity;
 }
+
+export interface UpdateMonitorRequest {
+  intervalSeconds: number;
+  gracePeriodSeconds?: number;
+}

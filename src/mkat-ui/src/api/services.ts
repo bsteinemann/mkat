@@ -1,9 +1,12 @@
 import { api } from './client';
 import type {
   Service,
+  Monitor,
   PagedResponse,
   CreateServiceRequest,
+  CreateMonitorRequest,
   UpdateServiceRequest,
+  UpdateMonitorRequest,
 } from './types';
 
 export const servicesApi = {
@@ -26,4 +29,13 @@ export const servicesApi = {
 
   mute: (id: string, durationMinutes: number, reason?: string) =>
     api.post<{ muted: boolean }>(`/services/${id}/mute`, { durationMinutes, reason }),
+
+  addMonitor: (serviceId: string, data: CreateMonitorRequest) =>
+    api.post<Monitor>(`/services/${serviceId}/monitors`, data),
+
+  updateMonitor: (serviceId: string, monitorId: string, data: UpdateMonitorRequest) =>
+    api.put<Monitor>(`/services/${serviceId}/monitors/${monitorId}`, data),
+
+  deleteMonitor: (serviceId: string, monitorId: string) =>
+    api.delete<void>(`/services/${serviceId}/monitors/${monitorId}`),
 };

@@ -1,8 +1,10 @@
+import { useState } from 'react';
 import { useNavigate, useParams } from '@tanstack/react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { servicesApi } from '../api/services';
 import { ServiceForm } from '../components/services/ServiceForm';
-import type { CreateServiceRequest, UpdateServiceRequest } from '../api/types';
+import { MonitorType } from '../api/types';
+import type { CreateServiceRequest, UpdateServiceRequest, CreateMonitorRequest, UpdateMonitorRequest, Monitor } from '../api/types';
 
 export function ServiceEdit() {
   const { serviceId } = useParams({ strict: false }) as { serviceId: string };
@@ -18,7 +20,6 @@ export function ServiceEdit() {
     mutationFn: (data: UpdateServiceRequest) => servicesApi.update(serviceId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['services'] });
-      navigate({ to: '/services/$serviceId', params: { serviceId } });
     },
   });
 
@@ -27,6 +28,28 @@ export function ServiceEdit() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['services'] });
       navigate({ to: '/services' });
+    },
+  });
+
+  const addMonitorMutation = useMutation({
+    mutationFn: (data: CreateMonitorRequest) => servicesApi.addMonitor(serviceId, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['services', serviceId] });
+    },
+  });
+
+  const updateMonitorMutation = useMutation({
+    mutationFn: ({ monitorId, data }: { monitorId: string; data: UpdateMonitorRequest }) =>
+      servicesApi.updateMonitor(serviceId, monitorId, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['services', serviceId] });
+    },
+  });
+
+  const deleteMonitorMutation = useMutation({
+    mutationFn: (monitorId: string) => servicesApi.deleteMonitor(serviceId, monitorId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['services', serviceId] });
     },
   });
 
@@ -62,6 +85,16 @@ export function ServiceEdit() {
         )}
       </div>
 
+      <MonitorSection
+        monitors={service.monitors}
+        onAdd={(data) => addMonitorMutation.mutate(data)}
+        onUpdate={(monitorId, data) => updateMonitorMutation.mutate({ monitorId, data })}
+        onDelete={(monitorId) => deleteMonitorMutation.mutate(monitorId)}
+        isAdding={addMonitorMutation.isPending}
+        addError={addMonitorMutation.isError ? (addMonitorMutation.error as Error).message : undefined}
+        deleteError={deleteMonitorMutation.isError ? (deleteMonitorMutation.error as Error).message : undefined}
+      />
+
       <div className="mt-6 bg-white rounded-lg shadow p-6 border border-red-200">
         <h2 className="text-lg font-semibold text-red-800 mb-2">Danger Zone</h2>
         <p className="text-sm text-gray-600 mb-4">
@@ -78,6 +111,217 @@ export function ServiceEdit() {
           Delete Service
         </button>
       </div>
+    </div>
+  );
+}
+
+function MonitorSection({
+  monitors,
+  onAdd,
+  onUpdate,
+  onDelete,
+  isAdding,
+  addError,
+  deleteError,
+}: {
+  monitors: Monitor[];
+  onAdd: (data: CreateMonitorRequest) => void;
+  onUpdate: (monitorId: string, data: UpdateMonitorRequest) => void;
+  onDelete: (monitorId: string) => void;
+  isAdding: boolean;
+  addError?: string;
+  deleteError?: string;
+}) {
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [newType, setNewType] = useState<MonitorType>(MonitorType.Heartbeat);
+  const [newInterval, setNewInterval] = useState(300);
+  const [newGrace, setNewGrace] = useState(60);
+
+  const handleAdd = () => {
+    onAdd({ type: newType, intervalSeconds: newInterval, gracePeriodSeconds: newGrace });
+    setShowAddForm(false);
+    setNewInterval(300);
+    setNewGrace(60);
+  };
+
+  return (
+    <div className="mt-6 bg-white rounded-lg shadow p-6">
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-lg font-semibold text-gray-900">Monitors</h2>
+        <button
+          type="button"
+          onClick={() => setShowAddForm(!showAddForm)}
+          className="text-sm text-blue-600 hover:text-blue-800"
+        >
+          {showAddForm ? 'Cancel' : '+ Add Monitor'}
+        </button>
+      </div>
+
+      {showAddForm && (
+        <div className="border rounded p-4 mb-4 bg-gray-50 space-y-3">
+          <div>
+            <label className="block text-xs text-gray-600">Type</label>
+            <select
+              value={newType}
+              onChange={e => setNewType(Number(e.target.value) as MonitorType)}
+              className="mt-1 block w-full rounded border-gray-300 shadow-sm text-sm px-2 py-1 border"
+            >
+              <option value={MonitorType.Webhook}>Webhook</option>
+              <option value={MonitorType.Heartbeat}>Heartbeat</option>
+            </select>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs text-gray-600">Interval (seconds)</label>
+              <input
+                type="number"
+                value={newInterval}
+                onChange={e => setNewInterval(Number(e.target.value))}
+                className="mt-1 block w-full rounded border-gray-300 shadow-sm text-sm px-2 py-1 border"
+                min={30}
+              />
+            </div>
+            <div>
+              <label className="block text-xs text-gray-600">Grace period (seconds)</label>
+              <input
+                type="number"
+                value={newGrace}
+                onChange={e => setNewGrace(Number(e.target.value))}
+                className="mt-1 block w-full rounded border-gray-300 shadow-sm text-sm px-2 py-1 border"
+                min={60}
+              />
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={handleAdd}
+            disabled={isAdding}
+            className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 disabled:opacity-50"
+          >
+            {isAdding ? 'Adding...' : 'Add'}
+          </button>
+          {addError && <p className="text-red-600 text-xs">{addError}</p>}
+        </div>
+      )}
+
+      {deleteError && <p className="text-red-600 text-xs mb-2">{deleteError}</p>}
+
+      <div className="space-y-3">
+        {monitors.map(monitor => (
+          <MonitorRow
+            key={monitor.id}
+            monitor={monitor}
+            canDelete={monitors.length > 1}
+            onUpdate={(data) => onUpdate(monitor.id, data)}
+            onDelete={() => onDelete(monitor.id)}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function MonitorRow({
+  monitor,
+  canDelete,
+  onUpdate,
+  onDelete,
+}: {
+  monitor: Monitor;
+  canDelete: boolean;
+  onUpdate: (data: UpdateMonitorRequest) => void;
+  onDelete: () => void;
+}) {
+  const [editing, setEditing] = useState(false);
+  const [interval, setInterval] = useState(monitor.intervalSeconds);
+  const [grace, setGrace] = useState(monitor.gracePeriodSeconds);
+
+  const typeLabel = monitor.type === MonitorType.Webhook ? 'Webhook' : 'Heartbeat';
+
+  const handleSave = () => {
+    onUpdate({ intervalSeconds: interval, gracePeriodSeconds: grace });
+    setEditing(false);
+  };
+
+  const handleCancel = () => {
+    setInterval(monitor.intervalSeconds);
+    setGrace(monitor.gracePeriodSeconds);
+    setEditing(false);
+  };
+
+  return (
+    <div className="border rounded p-3">
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-sm font-medium text-gray-700">{typeLabel}</span>
+        <div className="flex gap-2">
+          {!editing && (
+            <button
+              type="button"
+              onClick={() => setEditing(true)}
+              className="text-xs text-blue-600 hover:text-blue-800"
+            >
+              Edit
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={() => {
+              if (confirm('Remove this monitor?')) onDelete();
+            }}
+            disabled={!canDelete}
+            className="text-xs text-red-600 hover:text-red-800 disabled:opacity-30 disabled:cursor-not-allowed"
+          >
+            Remove
+          </button>
+        </div>
+      </div>
+
+      {editing ? (
+        <div className="space-y-2">
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs text-gray-600">Interval (seconds)</label>
+              <input
+                type="number"
+                value={interval}
+                onChange={e => setInterval(Number(e.target.value))}
+                className="mt-1 block w-full rounded border-gray-300 shadow-sm text-sm px-2 py-1 border"
+                min={30}
+              />
+            </div>
+            <div>
+              <label className="block text-xs text-gray-600">Grace period (seconds)</label>
+              <input
+                type="number"
+                value={grace}
+                onChange={e => setGrace(Number(e.target.value))}
+                className="mt-1 block w-full rounded border-gray-300 shadow-sm text-sm px-2 py-1 border"
+                min={60}
+              />
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={handleSave}
+              className="px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700"
+            >
+              Save
+            </button>
+            <button
+              type="button"
+              onClick={handleCancel}
+              className="px-2 py-1 bg-gray-200 text-gray-700 text-xs rounded hover:bg-gray-300"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="text-xs text-gray-500">
+          Interval: {monitor.intervalSeconds}s | Grace: {monitor.gracePeriodSeconds}s
+        </div>
+      )}
     </div>
   );
 }
