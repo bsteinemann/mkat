@@ -194,6 +194,46 @@ public class PeersControllerTests : IDisposable
     }
 
     [Fact]
+    public async Task Unpair_ExistingPeer_ReturnsNoContent()
+    {
+        // Create a peer via accept
+        var pairingService = _factory.Services.GetRequiredService<IPairingService>();
+        var baseUrl = _authClient.BaseAddress!.ToString().TrimEnd('/');
+        var token = pairingService.GenerateToken(baseUrl, "Instance A");
+        var data = pairingService.DecodeToken(token)!;
+
+        await _noAuthClient.PostAsJsonAsync("/api/v1/peers/pair/accept", new PeerAcceptRequest
+        {
+            Secret = data.Secret,
+            Url = "https://instance-b.example.com",
+            Name = "Instance B"
+        });
+
+        // Get peer ID
+        var peersResponse = await _authClient.GetAsync("/api/v1/peers");
+        var peers = await peersResponse.Content.ReadFromJsonAsync<JsonElement>(JsonOptions);
+        var peerId = peers.EnumerateArray().First().GetProperty("id").GetString();
+
+        // Unpair
+        var response = await _authClient.DeleteAsync($"/api/v1/peers/{peerId}");
+
+        Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+
+        // Verify peer is gone
+        var afterResponse = await _authClient.GetAsync("/api/v1/peers");
+        var afterPeers = await afterResponse.Content.ReadFromJsonAsync<JsonElement>(JsonOptions);
+        Assert.Equal(0, afterPeers.GetArrayLength());
+    }
+
+    [Fact]
+    public async Task Unpair_NonexistentPeer_Returns404()
+    {
+        var response = await _authClient.DeleteAsync($"/api/v1/peers/{Guid.NewGuid()}");
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
     public async Task Accept_EmptyUrl_ReturnsBadRequest()
     {
         var pairingService = _factory.Services.GetRequiredService<IPairingService>();
