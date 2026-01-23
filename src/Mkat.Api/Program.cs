@@ -35,6 +35,7 @@ try
     builder.Services.AddScoped<IMuteWindowRepository, MuteWindowRepository>();
     builder.Services.AddScoped<IMetricReadingRepository, MetricReadingRepository>();
     builder.Services.AddScoped<IPeerRepository, PeerRepository>();
+    builder.Services.AddScoped<IContactRepository, ContactRepository>();
     builder.Services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<MkatDbContext>());
     builder.Services.AddScoped<IStateService, StateService>();
     builder.Services.AddScoped<IMetricEvaluator, MetricEvaluator>();

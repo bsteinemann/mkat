@@ -18,6 +18,9 @@ public class MkatDbContext : DbContext, IUnitOfWork
     public DbSet<MuteWindow> MuteWindows => Set<MuteWindow>();
     public DbSet<MetricReading> MetricReadings => Set<MetricReading>();
     public DbSet<Peer> Peers => Set<Peer>();
+    public DbSet<Contact> Contacts => Set<Contact>();
+    public DbSet<ContactChannel> ContactChannels => Set<ContactChannel>();
+    public DbSet<ServiceContact> ServiceContacts => Set<ServiceContact>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -101,6 +104,36 @@ public class MkatDbContext : DbContext, IUnitOfWork
             entity.HasOne(e => e.Service)
                 .WithMany()
                 .HasForeignKey(e => e.ServiceId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<Contact>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Name).IsRequired().HasMaxLength(200);
+        });
+
+        modelBuilder.Entity<ContactChannel>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Type).HasConversion<string>().HasMaxLength(20);
+            entity.Property(e => e.Configuration).IsRequired().HasMaxLength(4000);
+            entity.HasOne(e => e.Contact)
+                .WithMany(c => c.Channels)
+                .HasForeignKey(e => e.ContactId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<ServiceContact>(entity =>
+        {
+            entity.HasKey(e => new { e.ServiceId, e.ContactId });
+            entity.HasOne(e => e.Service)
+                .WithMany(s => s.ServiceContacts)
+                .HasForeignKey(e => e.ServiceId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(e => e.Contact)
+                .WithMany(c => c.ServiceContacts)
+                .HasForeignKey(e => e.ContactId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
     }

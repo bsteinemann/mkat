@@ -18,4 +18,5 @@ public class Service
     public ICollection<Monitor> Monitors { get; set; } = new List<Monitor>();
     public ICollection<Alert> Alerts { get; set; } = new List<Alert>();
     public ICollection<MuteWindow> MuteWindows { get; set; } = new List<MuteWindow>();
+    public ICollection<ServiceContact> ServiceContacts { get; set; } = new List<ServiceContact>();
 }
