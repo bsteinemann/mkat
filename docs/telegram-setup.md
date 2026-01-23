@@ -11,24 +11,25 @@
 
 ## Getting Your Chat ID
 
-### Option 1: Personal Chat
+### Option 1: Using @userinfobot (Recommended)
 
-1. Send a message to your new bot
+1. Open Telegram and search for [@userinfobot](https://t.me/userinfobot)
+2. Send it any message
+3. It will reply with your chat ID
+
+### Option 2: Using the Bot API
+
+1. Send `/start` to your new bot
 2. Visit: `https://api.telegram.org/bot<YOUR_BOT_TOKEN>/getUpdates`
 3. Look for `"chat":{"id":123456789` in the response
 4. The number is your chat ID
 
-### Option 2: Group Chat
+### Option 3: Group Chat
 
 1. Add the bot to your group
 2. Send a message in the group mentioning the bot
 3. Visit: `https://api.telegram.org/bot<YOUR_BOT_TOKEN>/getUpdates`
 4. Look for the group chat ID (negative number for groups)
-
-### Option 3: Using @userinfobot
-
-1. Forward a message from your target chat to @userinfobot
-2. It will reply with the chat ID
 
 ## Configuration
 
