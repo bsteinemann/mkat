@@ -38,6 +38,7 @@ try
     builder.Services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<MkatDbContext>());
     builder.Services.AddScoped<IStateService, StateService>();
     builder.Services.AddScoped<IMetricEvaluator, MetricEvaluator>();
+    builder.Services.AddSingleton<IPairingService, PairingService>();
 
     builder.Services.AddControllers();
     builder.Services.AddRouting(options => options.LowercaseUrls = true);
