@@ -141,3 +141,35 @@ export interface MetricLatestResponse {
   outOfRange: boolean;
   monitorId: string;
 }
+
+export interface Peer {
+  id: string;
+  name: string;
+  url: string;
+  serviceId: string;
+  pairedAt: string;
+  heartbeatIntervalSeconds: number;
+  serviceState: ServiceState | null;
+}
+
+export interface PeerInitiateRequest {
+  name: string;
+}
+
+export interface PeerInitiateResponse {
+  token: string;
+}
+
+export interface PeerCompleteRequest {
+  token: string;
+}
+
+export interface PeerResponse {
+  id: string;
+  name: string;
+  url: string;
+  serviceId: string;
+  pairedAt: string;
+  heartbeatIntervalSeconds: number;
+  serviceState: ServiceState | null;
+}

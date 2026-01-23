@@ -9,6 +9,9 @@ import type {
   UpdateMonitorRequest,
   MetricHistoryResponse,
   MetricLatestResponse,
+  Peer,
+  PeerInitiateResponse,
+  PeerResponse,
 } from './types';
 
 export const servicesApi = {
@@ -40,6 +43,18 @@ export const servicesApi = {
 
   deleteMonitor: (serviceId: string, monitorId: string) =>
     api.delete<void>(`/services/${serviceId}/monitors/${monitorId}`),
+};
+
+export const peersApi = {
+  list: () => api.get<Peer[]>('/peers'),
+
+  initiate: (name: string) =>
+    api.post<PeerInitiateResponse>('/peers/pair/initiate', { name }),
+
+  complete: (token: string) =>
+    api.post<PeerResponse>('/peers/pair/complete', { token }),
+
+  unpair: (id: string) => api.delete<void>(`/peers/${id}`),
 };
 
 export const metricsApi = {

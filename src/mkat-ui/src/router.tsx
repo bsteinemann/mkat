@@ -12,6 +12,7 @@ import { ServiceDetail } from './pages/ServiceDetail';
 import { ServiceCreate } from './pages/ServiceCreate';
 import { ServiceEdit } from './pages/ServiceEdit';
 import { Alerts } from './pages/Alerts';
+import { Peers } from './pages/Peers';
 import { Login } from './pages/Login';
 
 const rootRoute = createRootRoute({
@@ -75,6 +76,12 @@ const alertsRoute = createRoute({
   component: Alerts,
 });
 
+const peersRoute = createRoute({
+  getParentRoute: () => authenticatedRoute,
+  path: '/peers',
+  component: Peers,
+});
+
 const routeTree = rootRoute.addChildren([
   loginRoute,
   authenticatedRoute.addChildren([
@@ -84,6 +91,7 @@ const routeTree = rootRoute.addChildren([
     serviceDetailRoute,
     serviceEditRoute,
     alertsRoute,
+    peersRoute,
   ]),
 ]);
 

@@ -226,6 +226,48 @@ namespace Mkat.Infrastructure.Migrations
                     b.ToTable("NotificationChannels");
                 });
 
+            modelBuilder.Entity("Mkat.Domain.Entities.Peer", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("HeartbeatIntervalSeconds")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("HeartbeatToken")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("PairedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("ServiceId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Url")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("WebhookToken")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ServiceId");
+
+                    b.ToTable("Peers");
+                });
+
             modelBuilder.Entity("Mkat.Domain.Entities.Service", b =>
                 {
                     b.Property<Guid>("Id")
@@ -312,6 +354,17 @@ namespace Mkat.Infrastructure.Migrations
                 {
                     b.HasOne("Mkat.Domain.Entities.Service", "Service")
                         .WithMany("MuteWindows")
+                        .HasForeignKey("ServiceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Service");
+                });
+
+            modelBuilder.Entity("Mkat.Domain.Entities.Peer", b =>
+                {
+                    b.HasOne("Mkat.Domain.Entities.Service", "Service")
+                        .WithMany()
                         .HasForeignKey("ServiceId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
