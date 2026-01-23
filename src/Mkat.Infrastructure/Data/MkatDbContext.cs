@@ -16,6 +16,7 @@ public class MkatDbContext : DbContext, IUnitOfWork
     public DbSet<Alert> Alerts => Set<Alert>();
     public DbSet<NotificationChannel> NotificationChannels => Set<NotificationChannel>();
     public DbSet<MuteWindow> MuteWindows => Set<MuteWindow>();
+    public DbSet<MetricReading> MetricReadings => Set<MetricReading>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -38,10 +39,21 @@ public class MkatDbContext : DbContext, IUnitOfWork
             entity.Property(e => e.Token).IsRequired().HasMaxLength(100);
             entity.Property(e => e.Type).HasConversion<string>().HasMaxLength(20);
             entity.Property(e => e.ConfigJson).HasMaxLength(4000);
+            entity.Property(e => e.ThresholdStrategy).HasConversion<string>().HasMaxLength(30);
             entity.HasIndex(e => e.Token).IsUnique();
             entity.HasOne(e => e.Service)
                 .WithMany(s => s.Monitors)
                 .HasForeignKey(e => e.ServiceId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<MetricReading>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => new { e.MonitorId, e.RecordedAt });
+            entity.HasOne(e => e.Monitor)
+                .WithMany()
+                .HasForeignKey(e => e.MonitorId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
 

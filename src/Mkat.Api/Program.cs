@@ -33,6 +33,7 @@ try
     builder.Services.AddScoped<IMonitorRepository, MonitorRepository>();
     builder.Services.AddScoped<IAlertRepository, AlertRepository>();
     builder.Services.AddScoped<IMuteWindowRepository, MuteWindowRepository>();
+    builder.Services.AddScoped<IMetricReadingRepository, MetricReadingRepository>();
     builder.Services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<MkatDbContext>());
     builder.Services.AddScoped<IStateService, StateService>();
 
