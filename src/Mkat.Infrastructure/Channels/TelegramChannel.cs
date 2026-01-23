@@ -115,7 +115,7 @@ public class TelegramChannel : INotificationChannel
         var stateText = alert.Type == AlertType.Recovery ? "RECOVERED" : "DOWN";
         var name = EscapeMarkdown(service.Name);
         var msg = EscapeMarkdown(alert.Message);
-        var time = alert.CreatedAt.ToString("yyyy\\-MM\\-dd HH:mm:ss UTC");
+        var time = EscapeMarkdown(alert.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss") + " UTC");
 
         return $"{emoji} *{stateText}*: {name}\n\n{severityText}\n{msg}\n\n_{time}_";
     }
