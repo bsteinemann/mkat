@@ -1,7 +1,7 @@
 # Plan: User Documentation Site (VitePress)
 
 ## Goal
-Add a VitePress documentation site served from the Docker container at `/docs`, covering Getting Started, Concepts, and Use Case Recipes.
+Add a VitePress documentation site published to GitHub Pages, covering Getting Started, Concepts, and Use Case Recipes.
 
 ---
 
@@ -10,10 +10,38 @@ Add a VitePress documentation site served from the Docker container at `/docs`, 
 **Files:** `docs-site/package.json`, `docs-site/.vitepress/config.ts`
 
 - Create `docs-site/` at repo root with VitePress dependency
-- Configure `base: '/docs/'`, title, nav, sidebar
+- Configure `base: '/mkat/'`, title, nav, sidebar
 - Run `npm install` to generate lock file
 
-## Task 2: Write content pages
+## Task 2: Feature audit and screenshot collection
+
+Audit the current app to produce a complete feature inventory before writing docs. This ensures documentation reflects the actual state of the application.
+
+**Output:** `docs-site/feature-inventory.md` (working document, not published)
+
+### Steps:
+1. Review API endpoints (`src/Mkat.Api/Controllers/`) and list all user-facing operations
+2. Review the frontend (`src/mkat-ui/src/`) and catalog each page/view and its functionality
+3. Document the current feature set:
+   - Service management (CRUD, state transitions, severity levels)
+   - Monitor types and configuration (webhook, heartbeat, intervals, grace periods)
+   - Alert system (lifecycle, acknowledge, mute windows)
+   - Notification channels (Telegram setup, delivery)
+   - Dashboard / overview page
+   - Any other implemented features
+4. Identify which features need screenshots — request them from the user
+   - Place screenshots in `docs-site/public/images/`
+   - Name convention: `<page>-<feature>.png` (e.g. `dashboard-overview.png`, `service-edit.png`)
+5. Cross-reference against PRD (`docs/telegram_healthcheck_monitoring_prd.md`) to note what's implemented vs planned
+
+### Screenshot requests will include:
+- Which page/view to capture
+- What state the app should be in (e.g. "a service in DOWN state")
+- Desired crop/focus area if relevant
+
+## Task 3: Write content pages
+
+Content must be based on the feature audit from Task 2, not assumptions.
 
 **Files:**
 - `docs-site/index.md` - Landing page
@@ -26,78 +54,79 @@ Add a VitePress documentation site served from the Docker container at `/docs`, 
 - `docs-site/recipes/telegram.md` - Adapted from docs/telegram-setup.md
 - `docs-site/api-reference.md` - Adapted from docs/api.md
 
-## Task 3: Add URL rewrite middleware for clean URLs
+## Task 4: Add GitHub Actions workflow for Pages deployment
 
-**File:** `src/Mkat.Api/Program.cs`
+**File:** `.github/workflows/docs.yml`
 
-Add before `UseDefaultFiles()`:
-- `/docs` → redirect to `/docs/`
-- `/docs/getting-started` → rewrite to `/docs/getting-started.html`
+Deploy to GitHub Pages on push to `main` when `docs-site/` changes:
 
-This prevents the SPA fallback from catching docs paths.
+```yaml
+name: Deploy Docs
 
-```csharp
-app.Use(async (context, next) =>
-{
-    var path = context.Request.Path.Value ?? "";
+on:
+  push:
+    branches: [main]
+    paths: ['docs-site/**']
+  workflow_dispatch:
 
-    if (path == "/docs")
-    {
-        context.Response.Redirect("/docs/", permanent: false);
-        return;
-    }
+permissions:
+  contents: read
+  pages: write
+  id-token: write
 
-    if (path.StartsWith("/docs/") && !Path.HasExtension(path) && !path.EndsWith("/"))
-    {
-        var htmlPath = path + ".html";
-        var filePath = Path.Combine(app.Environment.WebRootPath, htmlPath.TrimStart('/'));
-        if (File.Exists(filePath))
-        {
-            context.Request.Path = htmlPath;
-        }
-    }
+concurrency:
+  group: pages
+  cancel-in-progress: false
 
-    await next();
-});
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: docs-site/package-lock.json
+      - run: npm ci
+        working-directory: docs-site
+      - run: npm run build
+        working-directory: docs-site
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs-site/.vitepress/dist
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
 ```
 
-## Task 4: Update Dockerfile with docs-build stage
-
-**File:** `Dockerfile`
-
-Add a `docs-build` stage (node:20-alpine) that runs `npm ci && npm run build`. Copy `.vitepress/dist` output to `wwwroot/docs/` in the backend-build stage, after the frontend COPY.
-
-```dockerfile
-# Stage 1b: Build documentation site
-FROM node:20-alpine AS docs-build
-WORKDIR /docs
-COPY docs-site/package.json docs-site/package-lock.json ./
-RUN npm ci
-COPY docs-site/ ./
-RUN npm run build
-
-# In backend-build stage, after frontend COPY:
-COPY --from=docs-build /docs/.vitepress/dist src/Mkat.Api/wwwroot/docs/
-```
-
-## Task 5: Update .gitignore and .dockerignore
+## Task 5: Update .gitignore
 
 - `.gitignore`: add `docs-site/.vitepress/dist/`, `docs-site/.vitepress/cache/`, `docs-site/node_modules/`
-- `.dockerignore`: add `docs-site/node_modules`, `docs-site/.vitepress/cache`
 
-## Task 6: Verify locally
+## Task 6: Enable GitHub Pages in repository settings
 
-- Build Docker image, run container
-- Verify `/docs/` serves VitePress landing page
-- Verify `/docs/getting-started` serves correct page (clean URL)
-- Verify SPA still works at `/`
-- Verify `/api/v1/services` still works
+Manual step: Go to repo Settings → Pages → Source: "GitHub Actions"
+
+## Task 7: Verify deployment
+
+- Push to `main` with docs-site changes
+- Verify GitHub Actions workflow runs successfully
+- Verify `https://bsteinemann.github.io/mkat/` serves the landing page
+- Verify clean URLs work (e.g. `/mkat/getting-started`)
 
 ---
 
 ## Key Architecture Decisions
 
 - **Separate from `docs/`**: The existing `docs/` folder is internal dev docs (plans, ADRs, learnings). User docs live in `docs-site/`.
-- **Clean URLs via middleware**: VitePress generates `.html` files. A small rewrite middleware maps `/docs/foo` → `/docs/foo.html` before static files middleware runs.
-- **No auth on docs**: `BasicAuthMiddleware` only protects `/api/` paths, so docs are publicly accessible.
-- **Separate Docker build stage**: Docs and SPA have independent dependency trees, separate stages improve caching.
+- **GitHub Pages deployment**: Docs are published as a static site to GitHub Pages, decoupled from the application Docker image. This keeps the Docker image lean and allows docs updates without redeploying the app.
+- **Base path `/mkat/`**: GitHub Pages for project repos serves at `https://<user>.github.io/<repo>/`, so VitePress base must match the repo name.
+- **Path-filtered workflow**: The deploy workflow only triggers when files in `docs-site/` change, avoiding unnecessary rebuilds on app-only commits.
