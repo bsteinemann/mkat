@@ -1,4 +1,8 @@
-const API_BASE = '/api/v1';
+import { getBasePath } from '../config';
+
+function getApiBase(): string {
+  return `${getBasePath()}/api/v1`;
+}
 
 export class ApiError extends Error {
   constructor(public status: number, public code: string, message: string) {
@@ -17,7 +21,7 @@ export async function apiRequest<T>(
   path: string,
   body?: unknown
 ): Promise<T> {
-  const response = await fetch(`${API_BASE}${path}`, {
+  const response = await fetch(`${getApiBase()}${path}`, {
     method,
     headers: {
       'Content-Type': 'application/json',
@@ -28,7 +32,7 @@ export async function apiRequest<T>(
 
   if (response.status === 401) {
     localStorage.removeItem('mkat_credentials');
-    window.location.href = '/login';
+    window.location.href = `${getBasePath()}/login`;
     throw new ApiError(401, 'UNAUTHORIZED', 'Session expired');
   }
 
