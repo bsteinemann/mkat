@@ -36,6 +36,22 @@ export function ServiceDetail() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['alerts'] }),
   });
 
+  const webhookFailMutation = useMutation({
+    mutationFn: (url: string) => fetch(url, { method: 'POST' }).then(r => {
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      return r.json();
+    }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['services'] }),
+  });
+
+  const webhookRecoverMutation = useMutation({
+    mutationFn: (url: string) => fetch(url, { method: 'POST' }).then(r => {
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      return r.json();
+    }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['services'] }),
+  });
+
   if (isLoading || !service) return <div>Loading...</div>;
 
   return (
@@ -92,8 +108,24 @@ export function ServiceDetail() {
 
               {monitor.type === MonitorType.Webhook ? (
                 <div className="space-y-3">
-                  <CopyableUrl label="Failure URL" url={monitor.webhookFailUrl} />
-                  <CopyableUrl label="Recovery URL" url={monitor.webhookRecoverUrl} />
+                  <CopyableUrl label="Failure URL (HTTP POST)" url={monitor.webhookFailUrl} />
+                  <CopyableUrl label="Recovery URL (HTTP POST)" url={monitor.webhookRecoverUrl} />
+                  <div className="flex gap-2 mt-2">
+                    <button
+                      onClick={() => webhookFailMutation.mutate(monitor.webhookFailUrl)}
+                      disabled={webhookFailMutation.isPending}
+                      className="px-3 py-1.5 text-sm bg-red-100 text-red-800 rounded hover:bg-red-200 disabled:opacity-50"
+                    >
+                      {webhookFailMutation.isPending ? 'Sending...' : 'Test Fail'}
+                    </button>
+                    <button
+                      onClick={() => webhookRecoverMutation.mutate(monitor.webhookRecoverUrl)}
+                      disabled={webhookRecoverMutation.isPending}
+                      className="px-3 py-1.5 text-sm bg-green-100 text-green-800 rounded hover:bg-green-200 disabled:opacity-50"
+                    >
+                      {webhookRecoverMutation.isPending ? 'Sending...' : 'Test Recover'}
+                    </button>
+                  </div>
                 </div>
               ) : (
                 <CopyableUrl label="Heartbeat URL" url={monitor.heartbeatUrl} />
