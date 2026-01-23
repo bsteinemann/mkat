@@ -39,3 +39,6 @@ cd src/mkat-ui && npm run build    # Build frontend to wwwroot
 ## Remaining Milestones
 
 - **M6:** Polish & Documentation (Docker, error handling, docs)
+- **M7:** Metrics Monitor (push-based metric ingestion, configurable thresholds, history)
+- **M8:** Peer Monitoring (mutual instance monitoring via heartbeats, notification failure detection)
+- **M9:** Contacts & Notification Routing (per-service routing to named contacts with multiple channels)

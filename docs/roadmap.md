@@ -9,7 +9,7 @@ This document outlines the implementation roadmap for mkat Phase 1 (MVP).
 Phase 1 is divided into 6 milestones, each building on the previous. Each milestone produces working, testable functionality.
 
 ```
-M1: Foundation → M2: Core API → M3: Monitoring → M4: Notifications → M5: Frontend → M6: Polish
+M1: Foundation → M2: Core API → M3: Monitoring → M4: Notifications → M5: Frontend → M6: Polish → M7: Metrics → M8: Peers → M9: Contacts
 ```
 
 ---
@@ -263,6 +263,126 @@ POST   /api/v1/channels/{id}/test Send test notification
 
 ---
 
+## Milestone 7: Metrics Monitor
+
+**Goal:** Metric value ingestion with configurable range thresholds
+
+### Deliverables
+- [ ] `MetricReading` entity and repository
+- [ ] `MonitorType.Metric` enum value and `ThresholdStrategy` enum
+- [ ] Metric config fields on Monitor (range, threshold, retention)
+- [ ] Push endpoint (`/metric/{token}`)
+- [ ] Threshold evaluation logic (Immediate, ConsecutiveCount, TimeDurationAverage, SampleCountAverage)
+- [ ] Metric history query endpoints
+- [ ] `MetricRetentionWorker` (background cleanup)
+- [ ] FluentValidation for metric monitor config
+- [ ] Frontend: metric monitor form, history view, latest value display
+- [ ] Unit and integration tests
+
+### API Endpoints
+```
+POST   /metric/{token}                          Push metric value (no auth)
+GET    /api/v1/monitors/{id}/metrics            Metric history (paginated)
+GET    /api/v1/monitors/{id}/metrics/latest     Latest value + status
+```
+
+### Dependencies
+- Milestone 3 (Monitoring Engine)
+- Milestone 5 (Frontend)
+
+### Definition of Done
+- Push endpoint stores readings and evaluates thresholds
+- Out-of-range triggers DOWN, recovery triggers UP
+- All 4 threshold strategies work correctly
+- History queryable with time range
+- Retention worker cleans old data
+- Frontend displays metric config and history
+- All tests pass
+
+---
+
+## Milestone 8: Peer Monitoring
+
+**Goal:** Mutual availability monitoring and notification failure detection between mkat instances
+
+### Deliverables
+- [ ] `Peer` entity and repository
+- [ ] Token-based pairing flow (initiate, complete, accept)
+- [ ] Auto-creation of Service + Heartbeat Monitor + Webhook Monitor during pairing
+- [ ] `PeerHeartbeatWorker` (sends heartbeats to peers)
+- [ ] Notification failure hook in `AlertDispatchWorker`
+- [ ] Unpair cleanup logic
+- [ ] Frontend: peers page, pair dialog, peer status on dashboard
+- [ ] Unit and integration tests
+
+### API Endpoints
+```
+POST   /api/v1/peers/pair/initiate    Generate pairing token
+POST   /api/v1/peers/pair/complete    Accept token and establish connection
+POST   /api/v1/peers/pair/accept      Called between instances during pairing
+GET    /api/v1/peers                   List paired instances
+DELETE /api/v1/peers/{id}              Unpair
+```
+
+### Dependencies
+- Milestone 3 (Monitoring Engine)
+- Milestone 4 (Notifications)
+- Milestone 5 (Frontend)
+
+### Definition of Done
+- Two instances can pair via token exchange
+- Both send heartbeats and detect peer downtime
+- Notification failures reported to peer via webhook
+- Unpairing cleans up both sides
+- Frontend shows peer status and pairing flow
+- All tests pass
+
+---
+
+## Milestone 9: Contacts & Notification Routing
+
+**Goal:** Per-service notification routing through named contacts with multiple channels
+
+### Deliverables
+- [ ] `Contact` and `ContactChannel` entities and repositories
+- [ ] `ServiceContact` join entity (many-to-many)
+- [ ] EF Core migration (new tables + data migration from global channel)
+- [ ] Contact CRUD and channel management endpoints
+- [ ] Service-contact assignment endpoints
+- [ ] Updated `AlertDispatchWorker` to route via contacts
+- [ ] Default contact creation and fallback logic
+- [ ] Frontend: contacts page, channel management, service contact picker
+- [ ] Unit and integration tests
+
+### API Endpoints
+```
+POST   /api/v1/contacts                            Create contact
+GET    /api/v1/contacts                            List contacts
+GET    /api/v1/contacts/{id}                       Get contact (with channels)
+PUT    /api/v1/contacts/{id}                       Update contact
+DELETE /api/v1/contacts/{id}                       Delete contact
+POST   /api/v1/contacts/{id}/channels              Add channel
+PUT    /api/v1/contacts/{id}/channels/{chId}       Update channel
+DELETE /api/v1/contacts/{id}/channels/{chId}       Remove channel
+POST   /api/v1/contacts/{id}/channels/{chId}/test  Test notification
+PUT    /api/v1/services/{id}/contacts              Set contacts for service
+GET    /api/v1/services/{id}/contacts              Get contacts for service
+```
+
+### Dependencies
+- Milestone 4 (Notifications)
+- Milestone 5 (Frontend)
+
+### Definition of Done
+- Contacts with multiple channels can be created and managed
+- Services can be assigned one or more contacts
+- Alerts route to all enabled channels of all assigned contacts
+- Default contact provides backward compatibility
+- Cannot leave a service with zero contacts
+- All tests pass
+
+---
+
 ## Dependency Graph
 
 ```
@@ -281,6 +401,15 @@ M4 Notifications ──┘         │
               │
               ▼
          M6 Polish
+              │
+              ▼
+    M7 Metrics Monitor ◄── M3 + M5
+              │
+              ▼
+    M8 Peer Monitoring ◄── M3 + M4 + M5
+              │
+              ▼
+    M9 Contacts ◄── M4 + M5
 ```
 
 ---
