@@ -19,13 +19,13 @@ M1: Foundation → M2: Core API → M3: Monitoring → M4: Notifications → M5:
 **Goal:** Project structure, database, and basic infrastructure
 
 ### Deliverables
-- [ ] Solution structure (Clean Architecture layers)
-- [ ] Domain entities and value objects
-- [ ] EF Core DbContext and migrations
-- [ ] SQLite configuration
-- [ ] Basic logging (Serilog)
-- [ ] Health endpoints (`/health`, `/health/ready`)
-- [ ] Docker setup (Dockerfile, docker-compose.dev.yml)
+- [x] Solution structure (Clean Architecture layers)
+- [x] Domain entities and value objects
+- [x] EF Core DbContext and migrations
+- [x] SQLite configuration
+- [x] Basic logging (Serilog)
+- [x] Health endpoints (`/health`, `/health/ready`)
+- [x] Docker setup (Dockerfile, docker-compose.dev.yml)
 
 ### Components
 | Component | Layer | Description |
@@ -48,13 +48,13 @@ M1: Foundation → M2: Core API → M3: Monitoring → M4: Notifications → M5:
 **Goal:** Service CRUD operations with authentication
 
 ### Deliverables
-- [ ] Basic Auth middleware
-- [ ] Service entity and repository
-- [ ] Service CRUD endpoints
-- [ ] FluentValidation for service commands
-- [ ] API versioning (`/api/v1/...`)
-- [ ] Error response format
-- [ ] Pagination support
+- [x] Basic Auth middleware
+- [x] Service entity and repository
+- [x] Service CRUD endpoints
+- [x] FluentValidation for service commands
+- [x] API versioning (`/api/v1/...`)
+- [x] Error response format
+- [x] Pagination support
 
 ### API Endpoints
 ```
@@ -82,13 +82,13 @@ DELETE /api/v1/services/{id}     Delete service
 **Goal:** Webhook and heartbeat monitoring with state machine
 
 ### Deliverables
-- [ ] Monitor entity and repository
-- [ ] State machine implementation
-- [ ] Webhook endpoints (no auth)
-- [ ] Heartbeat endpoint (no auth)
-- [ ] HeartbeatMonitorWorker (background service)
-- [ ] Pause/resume functionality
-- [ ] MaintenanceResumeWorker (auto-resume)
+- [x] Monitor entity and repository
+- [x] State machine implementation
+- [x] Webhook endpoints (no auth)
+- [x] Heartbeat endpoint (no auth)
+- [x] HeartbeatMonitorWorker (background service)
+- [x] Pause/resume functionality
+- [x] MaintenanceResumeWorker (auto-resume)
 
 ### API Endpoints
 ```
@@ -132,16 +132,16 @@ PAUSED → UNKNOWN (resume)
 **Goal:** Alert system and Telegram integration
 
 ### Deliverables
-- [ ] Alert entity and repository
-- [ ] NotificationChannel entity and repository
-- [ ] MuteWindow entity and repository
-- [ ] INotificationChannel interface
-- [ ] TelegramChannel implementation
-- [ ] AlertDispatchWorker (background service)
-- [ ] Mute functionality
-- [ ] Alert acknowledgment
-- [ ] Telegram inline buttons
-- [ ] Telegram bot commands
+- [x] Alert entity and repository
+- [x] NotificationChannel entity and repository
+- [x] MuteWindow entity and repository
+- [x] INotificationChannel interface
+- [x] TelegramChannel implementation
+- [x] AlertDispatchWorker (background service)
+- [x] Mute functionality
+- [x] Alert acknowledgment
+- [x] Telegram inline buttons
+- [x] Telegram bot commands
 
 ### API Endpoints
 ```
@@ -186,15 +186,15 @@ POST   /api/v1/channels/{id}/test Send test notification
 **Goal:** React UI for service management and monitoring
 
 ### Deliverables
-- [ ] React project setup (Vite, TanStack, Tailwind)
-- [ ] Basic auth login flow
-- [ ] Dashboard page
-- [ ] Services list page
-- [ ] Service detail page
-- [ ] Service create/edit forms
-- [ ] Alerts page
-- [ ] API integration (TanStack Query)
-- [ ] Static asset serving from API
+- [x] React project setup (Vite, TanStack, Tailwind)
+- [x] Basic auth login flow
+- [x] Dashboard page
+- [x] Services list page
+- [x] Service detail page
+- [x] Service create/edit forms
+- [x] Alerts page
+- [x] API integration (TanStack Query)
+- [x] Static asset serving from API
 
 ### Pages
 | Page | Route | Features |
@@ -233,15 +233,15 @@ POST   /api/v1/channels/{id}/test Send test notification
 **Goal:** Production readiness
 
 ### Deliverables
-- [ ] Environment variable documentation
-- [ ] Docker production image
-- [ ] docker-compose.yml for deployment
-- [ ] README with setup instructions
-- [ ] API documentation (OpenAPI/Swagger)
-- [ ] Error handling improvements
-- [ ] Logging improvements
-- [ ] Performance review
-- [ ] Security review
+- [x] Environment variable documentation
+- [x] Docker production image
+- [x] docker-compose.yml for deployment
+- [x] README with setup instructions
+- [x] API documentation (OpenAPI/Swagger)
+- [x] Error handling improvements
+- [x] Logging improvements
+- [x] Performance review
+- [x] Security review
 
 ### Documentation
 | Document | Content |

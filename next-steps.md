@@ -1,7 +1,7 @@
 ## Current State
 
-**Completed:** M1 (Foundation), M2 (Core API), M3 (Monitoring Engine), M4 (Notifications), M5 (Frontend)
-**Next:** M6 (Polish & Documentation)
+**Completed:** M1 (Foundation), M2 (Core API), M3 (Monitoring Engine), M4 (Notifications), M5 (Frontend), M6 (Polish & Documentation)
+**Next:** M7 (Metrics Monitor)
 
 **Test suite:** 237 tests passing (56 Domain + 55 Application + 126 API)
 **Frontend:** React 19 + Vite 7 + Tailwind v4, builds to wwwroot
@@ -9,7 +9,7 @@
 
 ## To Continue
 
-1. Read `docs/plans/m6-polish.md` for the implementation plan
+1. Read `docs/plans/m7-metrics-monitor.md` for the implementation plan
 2. Read `docs/learnings.md` for known gotchas
 3. Follow TDD workflow defined in `docs/workflow.md` Phase 3
 4. Commit after each feature/bugfix using conventional commits (`feat:`, `fix:`, `test:`, etc.)
@@ -38,7 +38,6 @@ cd src/mkat-ui && npm run build    # Build frontend to wwwroot
 
 ## Remaining Milestones
 
-- **M6:** Polish & Documentation (Docker, error handling, docs)
 - **M7:** Metrics Monitor (push-based metric ingestion, configurable thresholds, history)
 - **M8:** Peer Monitoring (mutual instance monitoring via heartbeats, notification failure detection)
 - **M9:** Contacts & Notification Routing (per-service routing to named contacts with multiple channels)
