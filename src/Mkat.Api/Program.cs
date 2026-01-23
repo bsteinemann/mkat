@@ -62,6 +62,8 @@ try
     builder.Services.AddHostedService<AlertDispatchWorker>();
     builder.Services.AddHostedService<TelegramBotService>();
     builder.Services.AddHostedService<MetricRetentionWorker>();
+    builder.Services.AddHttpClient();
+    builder.Services.AddHostedService<PeerHeartbeatWorker>();
 
     var app = builder.Build();
 
