@@ -36,6 +36,7 @@ try
     builder.Services.AddScoped<IMetricReadingRepository, MetricReadingRepository>();
     builder.Services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<MkatDbContext>());
     builder.Services.AddScoped<IStateService, StateService>();
+    builder.Services.AddScoped<IMetricEvaluator, MetricEvaluator>();
 
     builder.Services.AddControllers();
     builder.Services.AddRouting(options => options.LowercaseUrls = true);
