@@ -1,5 +1,9 @@
 # mkat
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![CI](https://github.com/bsteinemann/mkat/actions/workflows/ci.yml/badge.svg)](https://github.com/bsteinemann/mkat/actions/workflows/ci.yml)
+[![Docker](https://img.shields.io/badge/ghcr.io-bsteinemann%2Fmkat-blue)](https://ghcr.io/bsteinemann/mkat)
+
 ```
       /\_/\
      ( o.o )   mkat
