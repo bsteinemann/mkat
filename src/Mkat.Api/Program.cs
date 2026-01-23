@@ -64,6 +64,7 @@ try
     });
 
     builder.Services.AddSingleton<INotificationChannel, TelegramChannel>();
+    builder.Services.AddScoped<IContactChannelSender, ContactChannelSender>();
     builder.Services.AddScoped<INotificationDispatcher, NotificationDispatcher>();
 
     builder.Services.AddHostedService<HeartbeatMonitorWorker>();

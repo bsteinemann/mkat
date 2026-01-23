@@ -12,6 +12,8 @@ public class NotificationDispatcherTests
 {
     private readonly Mock<IServiceRepository> _serviceRepoMock;
     private readonly Mock<IAlertRepository> _alertRepoMock;
+    private readonly Mock<IContactRepository> _contactRepoMock;
+    private readonly Mock<IContactChannelSender> _channelSenderMock;
     private readonly Mock<IUnitOfWork> _unitOfWorkMock;
     private readonly Mock<INotificationChannel> _channelMock;
 
@@ -19,9 +21,17 @@ public class NotificationDispatcherTests
     {
         _serviceRepoMock = new Mock<IServiceRepository>();
         _alertRepoMock = new Mock<IAlertRepository>();
+        _contactRepoMock = new Mock<IContactRepository>();
+        _channelSenderMock = new Mock<IContactChannelSender>();
         _unitOfWorkMock = new Mock<IUnitOfWork>();
         _channelMock = new Mock<INotificationChannel>();
         _channelMock.Setup(c => c.ChannelType).Returns("test");
+
+        // Default: no contacts assigned, no default contact → falls back to DI channels
+        _contactRepoMock.Setup(r => r.GetByServiceIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<Contact>());
+        _contactRepoMock.Setup(r => r.GetDefaultAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync((Contact?)null);
     }
 
     private NotificationDispatcher CreateDispatcher(params INotificationChannel[] channels)
@@ -31,6 +41,8 @@ public class NotificationDispatcherTests
             channels,
             _serviceRepoMock.Object,
             _alertRepoMock.Object,
+            _contactRepoMock.Object,
+            _channelSenderMock.Object,
             _unitOfWorkMock.Object,
             loggerMock.Object);
     }
