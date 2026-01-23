@@ -173,3 +173,25 @@ export interface PeerResponse {
   heartbeatIntervalSeconds: number;
   serviceState: ServiceState | null;
 }
+
+export enum ChannelType {
+  Telegram = 0,
+  Email = 1,
+}
+
+export interface ContactChannel {
+  id: string;
+  type: ChannelType;
+  configuration: string;
+  isEnabled: boolean;
+  createdAt: string;
+}
+
+export interface Contact {
+  id: string;
+  name: string;
+  isDefault: boolean;
+  createdAt: string;
+  channels: ContactChannel[];
+  serviceCount: number;
+}

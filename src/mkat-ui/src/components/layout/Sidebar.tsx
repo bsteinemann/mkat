@@ -5,6 +5,7 @@ const navItems = [
   { to: '/services' as const, label: 'Services' },
   { to: '/alerts' as const, label: 'Alerts' },
   { to: '/peers' as const, label: 'Peers' },
+  { to: '/contacts' as const, label: 'Contacts' },
 ];
 
 export function Sidebar() {

@@ -12,6 +12,8 @@ import type {
   Peer,
   PeerInitiateResponse,
   PeerResponse,
+  Contact,
+  ContactChannel,
 } from './types';
 
 export const servicesApi = {
@@ -55,6 +57,36 @@ export const peersApi = {
     api.post<PeerResponse>('/peers/pair/complete', { token }),
 
   unpair: (id: string) => api.delete<void>(`/peers/${id}`),
+};
+
+export const contactsApi = {
+  list: () => api.get<Contact[]>('/contacts'),
+
+  get: (id: string) => api.get<Contact>(`/contacts/${id}`),
+
+  create: (name: string) => api.post<Contact>('/contacts', { name }),
+
+  update: (id: string, name: string) => api.put<Contact>(`/contacts/${id}`, { name }),
+
+  delete: (id: string) => api.delete<void>(`/contacts/${id}`),
+
+  addChannel: (contactId: string, type: number, configuration: string) =>
+    api.post<ContactChannel>(`/contacts/${contactId}/channels`, { type, configuration }),
+
+  updateChannel: (contactId: string, channelId: string, configuration: string, isEnabled: boolean) =>
+    api.put<ContactChannel>(`/contacts/${contactId}/channels/${channelId}`, { configuration, isEnabled }),
+
+  deleteChannel: (contactId: string, channelId: string) =>
+    api.delete<void>(`/contacts/${contactId}/channels/${channelId}`),
+
+  testChannel: (contactId: string, channelId: string) =>
+    api.post<{ success: boolean }>(`/contacts/${contactId}/channels/${channelId}/test`),
+
+  getServiceContacts: (serviceId: string) =>
+    api.get<Contact[]>(`/services/${serviceId}/contacts`),
+
+  setServiceContacts: (serviceId: string, contactIds: string[]) =>
+    api.put<{ assigned: number }>(`/services/${serviceId}/contacts`, { contactIds }),
 };
 
 export const metricsApi = {
