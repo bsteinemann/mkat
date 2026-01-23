@@ -111,7 +111,7 @@ public class ServicesController : ControllerBase
             var gracePeriod = monitorReq.GracePeriodSeconds
                 ?? Math.Max(60, monitorReq.IntervalSeconds / 10);
 
-            service.Monitors.Add(new Monitor
+            var monitor = new Monitor
             {
                 Id = Guid.NewGuid(),
                 ServiceId = service.Id,
@@ -119,7 +119,20 @@ public class ServicesController : ControllerBase
                 Token = Guid.NewGuid().ToString("N"),
                 IntervalSeconds = monitorReq.IntervalSeconds,
                 GracePeriodSeconds = gracePeriod
-            });
+            };
+
+            if (monitorReq.Type == MonitorType.Metric)
+            {
+                monitor.MinValue = monitorReq.MinValue;
+                monitor.MaxValue = monitorReq.MaxValue;
+                monitor.ThresholdStrategy = monitorReq.ThresholdStrategy;
+                monitor.ThresholdCount = monitorReq.ThresholdCount;
+                monitor.WindowSeconds = monitorReq.WindowSeconds;
+                monitor.WindowSampleCount = monitorReq.WindowSampleCount;
+                monitor.RetentionDays = monitorReq.RetentionDays;
+            }
+
+            service.Monitors.Add(monitor);
         }
 
         await _serviceRepo.AddAsync(service, ct);
@@ -273,6 +286,32 @@ public class ServicesController : ControllerBase
         return Ok(new { muted = true, until = mute.EndsAt });
     }
 
+    internal static MonitorResponse MapMonitorToResponse(Monitor monitor, string baseUrl)
+    {
+        return new MonitorResponse
+        {
+            Id = monitor.Id,
+            Type = monitor.Type,
+            Token = monitor.Token,
+            IntervalSeconds = monitor.IntervalSeconds,
+            GracePeriodSeconds = monitor.GracePeriodSeconds,
+            LastCheckIn = monitor.LastCheckIn,
+            WebhookFailUrl = $"{baseUrl}/webhook/{monitor.Token}/fail",
+            WebhookRecoverUrl = $"{baseUrl}/webhook/{monitor.Token}/recover",
+            HeartbeatUrl = $"{baseUrl}/heartbeat/{monitor.Token}",
+            MetricUrl = $"{baseUrl}/metric/{monitor.Token}",
+            MinValue = monitor.MinValue,
+            MaxValue = monitor.MaxValue,
+            ThresholdStrategy = monitor.Type == MonitorType.Metric ? monitor.ThresholdStrategy : null,
+            ThresholdCount = monitor.ThresholdCount,
+            WindowSeconds = monitor.WindowSeconds,
+            WindowSampleCount = monitor.WindowSampleCount,
+            RetentionDays = monitor.Type == MonitorType.Metric ? monitor.RetentionDays : null,
+            LastMetricValue = monitor.LastMetricValue,
+            LastMetricAt = monitor.LastMetricAt
+        };
+    }
+
     private ServiceResponse MapToResponse(Service service)
     {
         var baseUrl = $"{Request.Scheme}://{Request.Host}";
@@ -287,18 +326,7 @@ public class ServicesController : ControllerBase
             PausedUntil = service.PausedUntil,
             CreatedAt = service.CreatedAt,
             UpdatedAt = service.UpdatedAt,
-            Monitors = service.Monitors.Select(m => new MonitorResponse
-            {
-                Id = m.Id,
-                Type = m.Type,
-                Token = m.Token,
-                IntervalSeconds = m.IntervalSeconds,
-                GracePeriodSeconds = m.GracePeriodSeconds,
-                LastCheckIn = m.LastCheckIn,
-                WebhookFailUrl = $"{baseUrl}/webhook/{m.Token}/fail",
-                WebhookRecoverUrl = $"{baseUrl}/webhook/{m.Token}/recover",
-                HeartbeatUrl = $"{baseUrl}/heartbeat/{m.Token}"
-            }).ToList()
+            Monitors = service.Monitors.Select(m => MapMonitorToResponse(m, baseUrl)).ToList()
         };
     }
 }

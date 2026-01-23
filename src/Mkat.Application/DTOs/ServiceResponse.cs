@@ -26,4 +26,16 @@ public record MonitorResponse
     public string WebhookFailUrl { get; init; } = string.Empty;
     public string WebhookRecoverUrl { get; init; } = string.Empty;
     public string HeartbeatUrl { get; init; } = string.Empty;
+    public string MetricUrl { get; init; } = string.Empty;
+
+    // Metric monitor fields
+    public double? MinValue { get; init; }
+    public double? MaxValue { get; init; }
+    public ThresholdStrategy? ThresholdStrategy { get; init; }
+    public int? ThresholdCount { get; init; }
+    public int? WindowSeconds { get; init; }
+    public int? WindowSampleCount { get; init; }
+    public int? RetentionDays { get; init; }
+    public double? LastMetricValue { get; init; }
+    public DateTime? LastMetricAt { get; init; }
 }

@@ -76,6 +76,17 @@ public class MonitorsController : ControllerBase
             GracePeriodSeconds = gracePeriod
         };
 
+        if (request.Type == Domain.Enums.MonitorType.Metric)
+        {
+            monitor.MinValue = request.MinValue;
+            monitor.MaxValue = request.MaxValue;
+            monitor.ThresholdStrategy = request.ThresholdStrategy;
+            monitor.ThresholdCount = request.ThresholdCount;
+            monitor.WindowSeconds = request.WindowSeconds;
+            monitor.WindowSampleCount = request.WindowSampleCount;
+            monitor.RetentionDays = request.RetentionDays;
+        }
+
         await _monitorRepo.AddAsync(monitor, ct);
         await _unitOfWork.SaveChangesAsync(ct);
 
@@ -129,6 +140,19 @@ public class MonitorsController : ControllerBase
         monitor.IntervalSeconds = request.IntervalSeconds;
         monitor.GracePeriodSeconds = request.GracePeriodSeconds
             ?? Math.Max(60, request.IntervalSeconds / 10);
+
+        if (monitor.Type == Domain.Enums.MonitorType.Metric)
+        {
+            monitor.MinValue = request.MinValue;
+            monitor.MaxValue = request.MaxValue;
+            if (request.ThresholdStrategy.HasValue)
+                monitor.ThresholdStrategy = request.ThresholdStrategy.Value;
+            monitor.ThresholdCount = request.ThresholdCount;
+            monitor.WindowSeconds = request.WindowSeconds;
+            monitor.WindowSampleCount = request.WindowSampleCount;
+            if (request.RetentionDays.HasValue)
+                monitor.RetentionDays = request.RetentionDays.Value;
+        }
 
         await _monitorRepo.UpdateAsync(monitor, ct);
         await _unitOfWork.SaveChangesAsync(ct);
@@ -187,17 +211,6 @@ public class MonitorsController : ControllerBase
 
     private static MonitorResponse MapToResponse(Monitor monitor, string baseUrl)
     {
-        return new MonitorResponse
-        {
-            Id = monitor.Id,
-            Type = monitor.Type,
-            Token = monitor.Token,
-            IntervalSeconds = monitor.IntervalSeconds,
-            GracePeriodSeconds = monitor.GracePeriodSeconds,
-            LastCheckIn = monitor.LastCheckIn,
-            WebhookFailUrl = $"{baseUrl}/webhook/{monitor.Token}/fail",
-            WebhookRecoverUrl = $"{baseUrl}/webhook/{monitor.Token}/recover",
-            HeartbeatUrl = $"{baseUrl}/heartbeat/{monitor.Token}"
-        };
+        return ServicesController.MapMonitorToResponse(monitor, baseUrl);
     }
 }
