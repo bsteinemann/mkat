@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate, useParams } from '@tanstack/react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { servicesApi, contactsApi } from '../api/services';
@@ -330,36 +330,30 @@ function ContactsSection({ serviceId }: { serviceId: string }) {
     queryFn: () => contactsApi.getServiceContacts(serviceId),
   });
 
-  const [selected, setSelected] = useState<Set<string>>(new Set());
-  const [dirty, setDirty] = useState(false);
+  const [localSelected, setLocalSelected] = useState<Set<string> | null>(null);
 
-  useEffect(() => {
-    if (assignedContacts) {
-      setSelected(new Set(assignedContacts.map(c => c.id)));
-      setDirty(false);
-    }
-  }, [assignedContacts]);
+  const serverSet = new Set(assignedContacts?.map(c => c.id) ?? []);
+  const selected = localSelected ?? serverSet;
+  const dirty = localSelected !== null;
 
   const saveMutation = useMutation({
     mutationFn: (contactIds: string[]) => contactsApi.setServiceContacts(serviceId, contactIds),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['services', serviceId, 'contacts'] });
       queryClient.invalidateQueries({ queryKey: ['contacts'] });
-      setDirty(false);
+      setLocalSelected(null);
     },
   });
 
   const toggle = (id: string) => {
-    setSelected(prev => {
-      const next = new Set(prev);
-      if (next.has(id)) {
-        next.delete(id);
-      } else {
-        next.add(id);
-      }
-      return next;
-    });
-    setDirty(true);
+    const current = localSelected ?? serverSet;
+    const next = new Set(current);
+    if (next.has(id)) {
+      next.delete(id);
+    } else {
+      next.add(id);
+    }
+    setLocalSelected(next);
   };
 
   if (loadingContacts || loadingAssigned) {
@@ -412,12 +406,7 @@ function ContactsSection({ serviceId }: { serviceId: string }) {
             {saveMutation.isPending ? 'Saving...' : 'Save Contacts'}
           </button>
           <button
-            onClick={() => {
-              if (assignedContacts) {
-                setSelected(new Set(assignedContacts.map(c => c.id)));
-              }
-              setDirty(false);
-            }}
+            onClick={() => setLocalSelected(null)}
             className="px-3 py-1 bg-gray-200 text-gray-700 text-sm rounded hover:bg-gray-300"
           >
             Cancel
