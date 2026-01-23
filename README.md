@@ -52,6 +52,7 @@ volumes:
 | `MKAT_TELEGRAM_CHAT_ID` | No | - | Telegram chat ID |
 | `MKAT_DATABASE_PATH` | No | `/data/mkat.db` | SQLite database path |
 | `MKAT_LOG_LEVEL` | No | `Information` | Log level |
+| `MKAT_BASE_PATH` | No | - | URL prefix for reverse proxy (e.g., `/mkat`) |
 
 ## Telegram Setup
 
