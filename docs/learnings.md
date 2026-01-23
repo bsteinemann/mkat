@@ -101,3 +101,18 @@ Read this file FIRST before starting any new work -- it prevents repeating mista
 - Default Vite template includes App.css, assets/react.svg, public/vite.svg — remove these early to avoid confusion
 **Pattern:** For SPA + API in same host: UseDefaultFiles → UseStaticFiles → auth middleware → MapControllers → MapFallbackToFile
 **Anti-pattern:** Don't commit wwwroot build artifacts to git in production (add to .gitignore). For this project it's fine since Docker will build in-container.
+
+### 2026-01-23 - Configurable Base Path (Runtime)
+**Context:** Adding runtime-configurable URL prefix so mkat can run under a subpath (e.g., `/mkat/`) behind a reverse proxy
+**Went well:**
+- ASP.NET Core's `UsePathBase()` handles the server-side routing cleanly — strips prefix on incoming, doesn't reject non-prefixed requests
+- Vite `base: './'` makes asset paths relative without needing a build-time base path
+- TanStack Router's `basepath` option works seamlessly — route definitions don't change
+- Injecting `window.__MKAT_BASE_PATH__` via a custom `MapFallback` handler is simple and effective
+- `UsePathBase` is transparent to container healthchecks (`/health` still works directly)
+**Tripped up:**
+- `MapFallbackToFile` can't inject runtime config — had to replace with custom `MapFallback` that reads + modifies HTML
+- `window.location.href` for 401 redirects is outside router control — needs manual base path prefixing
+- Login page makes a direct `fetch()` call (not through the API client) — easy to miss when updating API base URLs
+**Pattern:** For runtime-configurable base path without rebuild: UsePathBase (server) + relative Vite assets + injected window variable (client) + router basepath option
+**Anti-pattern:** Don't use `MapFallbackToFile` if you need to inject runtime config into the HTML. Use a custom `MapFallback` handler instead.
