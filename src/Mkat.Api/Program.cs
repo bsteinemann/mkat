@@ -98,6 +98,14 @@ try
         }
     }
 
+    var basePath = Environment.GetEnvironmentVariable("MKAT_BASE_PATH") ?? "";
+    if (!string.IsNullOrEmpty(basePath))
+    {
+        if (!basePath.StartsWith('/')) basePath = "/" + basePath;
+        basePath = basePath.TrimEnd('/');
+        app.UsePathBase(basePath);
+    }
+
     app.UseMiddleware<ExceptionHandlingMiddleware>();
     app.UseMiddleware<SecurityHeadersMiddleware>();
     app.UseSerilogRequestLogging(options =>
@@ -128,7 +136,25 @@ try
     });
 
     app.MapControllers();
-    app.MapFallbackToFile("index.html");
+    app.MapFallback(async context =>
+    {
+        var webRootPath = app.Environment.WebRootPath ?? Path.Combine(app.Environment.ContentRootPath, "wwwroot");
+        var indexPath = Path.Combine(webRootPath, "index.html");
+        if (!File.Exists(indexPath))
+        {
+            context.Response.StatusCode = 404;
+            return;
+        }
+
+        var html = await File.ReadAllTextAsync(indexPath);
+
+        // Inject runtime base path config before </head>
+        var configScript = $"<script>window.__MKAT_BASE_PATH__=\"{basePath}\";</script>";
+        html = html.Replace("</head>", $"{configScript}\n</head>");
+
+        context.Response.ContentType = "text/html";
+        await context.Response.WriteAsync(html);
+    });
 
     app.Run();
 }

@@ -8,7 +8,7 @@ using Xunit;
 
 namespace Mkat.Api.Tests;
 
-[Collection("BasePath")]
+[Collection("BasicAuth")]
 public class BasePathTests : IDisposable
 {
     private readonly WebApplicationFactory<Program> _factory;
