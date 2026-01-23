@@ -17,6 +17,7 @@ public class MkatDbContext : DbContext, IUnitOfWork
     public DbSet<NotificationChannel> NotificationChannels => Set<NotificationChannel>();
     public DbSet<MuteWindow> MuteWindows => Set<MuteWindow>();
     public DbSet<MetricReading> MetricReadings => Set<MetricReading>();
+    public DbSet<Peer> Peers => Set<Peer>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -86,6 +87,19 @@ public class MkatDbContext : DbContext, IUnitOfWork
             entity.HasIndex(e => new { e.ServiceId, e.StartsAt, e.EndsAt });
             entity.HasOne(e => e.Service)
                 .WithMany(s => s.MuteWindows)
+                .HasForeignKey(e => e.ServiceId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<Peer>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Name).IsRequired().HasMaxLength(200);
+            entity.Property(e => e.Url).IsRequired().HasMaxLength(500);
+            entity.Property(e => e.HeartbeatToken).IsRequired().HasMaxLength(100);
+            entity.Property(e => e.WebhookToken).IsRequired().HasMaxLength(100);
+            entity.HasOne(e => e.Service)
+                .WithMany()
                 .HasForeignKey(e => e.ServiceId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
