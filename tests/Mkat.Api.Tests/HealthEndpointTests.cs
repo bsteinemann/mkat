@@ -9,40 +9,45 @@ using Xunit;
 
 namespace Mkat.Api.Tests;
 
-public class HealthEndpointTests : IClassFixture<WebApplicationFactory<Program>>, IDisposable
+[Collection("BasicAuth")]
+public class HealthEndpointTests : IDisposable
 {
     private readonly WebApplicationFactory<Program> _factory;
     private readonly SqliteConnection _connection;
 
-    public HealthEndpointTests(WebApplicationFactory<Program> factory)
+    public HealthEndpointTests()
     {
+        Environment.SetEnvironmentVariable("MKAT_USERNAME", "admin");
+        Environment.SetEnvironmentVariable("MKAT_PASSWORD", "test123");
+
         // Keep a shared connection open so the in-memory database persists
         _connection = new SqliteConnection("Data Source=:memory:");
         _connection.Open();
 
-        _factory = factory.WithWebHostBuilder(builder =>
-        {
-            builder.ConfigureServices(services =>
+        _factory = new WebApplicationFactory<Program>()
+            .WithWebHostBuilder(builder =>
             {
-                // Remove the existing DbContext registration
-                var descriptor = services.SingleOrDefault(
-                    d => d.ServiceType == typeof(DbContextOptions<MkatDbContext>));
-                if (descriptor != null)
-                    services.Remove(descriptor);
-
-                // Use the shared in-memory SQLite connection
-                services.AddDbContext<MkatDbContext>(options =>
+                builder.ConfigureServices(services =>
                 {
-                    options.UseSqlite(_connection);
-                });
+                    // Remove the existing DbContext registration
+                    var descriptor = services.SingleOrDefault(
+                        d => d.ServiceType == typeof(DbContextOptions<MkatDbContext>));
+                    if (descriptor != null)
+                        services.Remove(descriptor);
 
-                // Remove background workers to prevent resource contention in tests
-                var hostedServices = services.Where(
-                    d => d.ServiceType == typeof(Microsoft.Extensions.Hosting.IHostedService)).ToList();
-                foreach (var svc in hostedServices)
-                    services.Remove(svc);
+                    // Use the shared in-memory SQLite connection
+                    services.AddDbContext<MkatDbContext>(options =>
+                    {
+                        options.UseSqlite(_connection);
+                    });
+
+                    // Remove background workers to prevent resource contention in tests
+                    var hostedServices = services.Where(
+                        d => d.ServiceType == typeof(Microsoft.Extensions.Hosting.IHostedService)).ToList();
+                    foreach (var svc in hostedServices)
+                        services.Remove(svc);
+                });
             });
-        });
 
         // Ensure database schema is created
         using var scope = _factory.Services.CreateScope();
@@ -52,8 +57,11 @@ public class HealthEndpointTests : IClassFixture<WebApplicationFactory<Program>>
 
     public void Dispose()
     {
+        _factory.Dispose();
         _connection.Close();
         _connection.Dispose();
+        Environment.SetEnvironmentVariable("MKAT_USERNAME", null);
+        Environment.SetEnvironmentVariable("MKAT_PASSWORD", null);
     }
 
     [Fact]
