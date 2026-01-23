@@ -3,7 +3,7 @@ import { useNavigate, useParams } from '@tanstack/react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { servicesApi } from '../api/services';
 import { ServiceForm } from '../components/services/ServiceForm';
-import { MonitorType } from '../api/types';
+import { MonitorType, ThresholdStrategy } from '../api/types';
 import type { CreateServiceRequest, UpdateServiceRequest, CreateMonitorRequest, UpdateMonitorRequest, Monitor } from '../api/types';
 
 export function ServiceEdit() {
@@ -136,12 +136,37 @@ function MonitorSection({
   const [newType, setNewType] = useState<MonitorType>(MonitorType.Heartbeat);
   const [newInterval, setNewInterval] = useState(300);
   const [newGrace, setNewGrace] = useState(60);
+  const [newMinValue, setNewMinValue] = useState<number | undefined>(undefined);
+  const [newMaxValue, setNewMaxValue] = useState<number | undefined>(undefined);
+  const [newThresholdStrategy, setNewThresholdStrategy] = useState<ThresholdStrategy>(ThresholdStrategy.Immediate);
+  const [newThresholdCount, setNewThresholdCount] = useState(3);
+  const [newRetentionDays, setNewRetentionDays] = useState(7);
 
   const handleAdd = () => {
-    onAdd({ type: newType, intervalSeconds: newInterval, gracePeriodSeconds: newGrace });
+    const data: CreateMonitorRequest = {
+      type: newType,
+      intervalSeconds: newInterval,
+      gracePeriodSeconds: newGrace,
+    };
+    if (newType === MonitorType.Metric) {
+      data.minValue = newMinValue;
+      data.maxValue = newMaxValue;
+      data.thresholdStrategy = newThresholdStrategy;
+      if (newThresholdStrategy === ThresholdStrategy.ConsecutiveCount ||
+          newThresholdStrategy === ThresholdStrategy.SampleCountAverage) {
+        data.thresholdCount = newThresholdCount;
+      }
+      data.retentionDays = newRetentionDays;
+    }
+    onAdd(data);
     setShowAddForm(false);
     setNewInterval(300);
     setNewGrace(60);
+    setNewMinValue(undefined);
+    setNewMaxValue(undefined);
+    setNewThresholdStrategy(ThresholdStrategy.Immediate);
+    setNewThresholdCount(3);
+    setNewRetentionDays(7);
   };
 
   return (
@@ -168,6 +193,8 @@ function MonitorSection({
             >
               <option value={MonitorType.Webhook}>Webhook</option>
               <option value={MonitorType.Heartbeat}>Heartbeat</option>
+              <option value={MonitorType.HealthCheck}>Health Check</option>
+              <option value={MonitorType.Metric}>Metric</option>
             </select>
           </div>
           <div className="grid grid-cols-2 gap-3">
@@ -192,6 +219,73 @@ function MonitorSection({
               />
             </div>
           </div>
+          {newType === MonitorType.Metric && (
+            <div className="space-y-3 border-t pt-3">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs text-gray-600">Min Value</label>
+                  <input
+                    type="number"
+                    step="any"
+                    value={newMinValue ?? ''}
+                    onChange={e => setNewMinValue(e.target.value ? Number(e.target.value) : undefined)}
+                    className="mt-1 block w-full rounded border-gray-300 shadow-sm text-sm px-2 py-1 border"
+                    placeholder="Optional"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-600">Max Value</label>
+                  <input
+                    type="number"
+                    step="any"
+                    value={newMaxValue ?? ''}
+                    onChange={e => setNewMaxValue(e.target.value ? Number(e.target.value) : undefined)}
+                    className="mt-1 block w-full rounded border-gray-300 shadow-sm text-sm px-2 py-1 border"
+                    placeholder="Optional"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs text-gray-600">Threshold Strategy</label>
+                  <select
+                    value={newThresholdStrategy}
+                    onChange={e => setNewThresholdStrategy(Number(e.target.value) as ThresholdStrategy)}
+                    className="mt-1 block w-full rounded border-gray-300 shadow-sm text-sm px-2 py-1 border"
+                  >
+                    <option value={ThresholdStrategy.Immediate}>Immediate</option>
+                    <option value={ThresholdStrategy.ConsecutiveCount}>Consecutive Count</option>
+                    <option value={ThresholdStrategy.TimeDurationAverage}>Time Window Average</option>
+                    <option value={ThresholdStrategy.SampleCountAverage}>Sample Count Average</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-600">Retention (days)</label>
+                  <input
+                    type="number"
+                    value={newRetentionDays}
+                    onChange={e => setNewRetentionDays(Number(e.target.value))}
+                    className="mt-1 block w-full rounded border-gray-300 shadow-sm text-sm px-2 py-1 border"
+                    min={1}
+                    max={365}
+                  />
+                </div>
+              </div>
+              {(newThresholdStrategy === ThresholdStrategy.ConsecutiveCount ||
+                newThresholdStrategy === ThresholdStrategy.SampleCountAverage) && (
+                <div>
+                  <label className="block text-xs text-gray-600">Threshold Count</label>
+                  <input
+                    type="number"
+                    value={newThresholdCount}
+                    onChange={e => setNewThresholdCount(Number(e.target.value))}
+                    className="mt-1 block w-full rounded border-gray-300 shadow-sm text-sm px-2 py-1 border"
+                    min={2}
+                  />
+                </div>
+              )}
+            </div>
+          )}
           <button
             type="button"
             onClick={handleAdd}
@@ -235,24 +329,50 @@ function MonitorRow({
   const [editing, setEditing] = useState(false);
   const [interval, setInterval] = useState(monitor.intervalSeconds);
   const [grace, setGrace] = useState(monitor.gracePeriodSeconds);
+  const [minValue, setMinValue] = useState<number | undefined>(monitor.minValue ?? undefined);
+  const [maxValue, setMaxValue] = useState<number | undefined>(monitor.maxValue ?? undefined);
+  const [thresholdStrategy, setThresholdStrategy] = useState<ThresholdStrategy>(monitor.thresholdStrategy ?? ThresholdStrategy.Immediate);
+  const [thresholdCount, setThresholdCount] = useState(monitor.thresholdCount ?? 3);
+  const [retentionDays, setRetentionDays] = useState(monitor.retentionDays ?? 7);
 
-  const typeLabel = monitor.type === MonitorType.Webhook ? 'Webhook' : 'Heartbeat';
+  const typeLabels: Record<MonitorType, string> = {
+    [MonitorType.Webhook]: 'Webhook',
+    [MonitorType.Heartbeat]: 'Heartbeat',
+    [MonitorType.HealthCheck]: 'Health Check',
+    [MonitorType.Metric]: 'Metric',
+  };
 
   const handleSave = () => {
-    onUpdate({ intervalSeconds: interval, gracePeriodSeconds: grace });
+    const data: UpdateMonitorRequest = { intervalSeconds: interval, gracePeriodSeconds: grace };
+    if (monitor.type === MonitorType.Metric) {
+      data.minValue = minValue;
+      data.maxValue = maxValue;
+      data.thresholdStrategy = thresholdStrategy;
+      if (thresholdStrategy === ThresholdStrategy.ConsecutiveCount ||
+          thresholdStrategy === ThresholdStrategy.SampleCountAverage) {
+        data.thresholdCount = thresholdCount;
+      }
+      data.retentionDays = retentionDays;
+    }
+    onUpdate(data);
     setEditing(false);
   };
 
   const handleCancel = () => {
     setInterval(monitor.intervalSeconds);
     setGrace(monitor.gracePeriodSeconds);
+    setMinValue(monitor.minValue ?? undefined);
+    setMaxValue(monitor.maxValue ?? undefined);
+    setThresholdStrategy(monitor.thresholdStrategy ?? ThresholdStrategy.Immediate);
+    setThresholdCount(monitor.thresholdCount ?? 3);
+    setRetentionDays(monitor.retentionDays ?? 7);
     setEditing(false);
   };
 
   return (
     <div className="border rounded p-3">
       <div className="flex items-center justify-between mb-2">
-        <span className="text-sm font-medium text-gray-700">{typeLabel}</span>
+        <span className="text-sm font-medium text-gray-700">{typeLabels[monitor.type]}</span>
         <div className="flex gap-2">
           {!editing && (
             <button
@@ -300,6 +420,73 @@ function MonitorRow({
               />
             </div>
           </div>
+          {monitor.type === MonitorType.Metric && (
+            <div className="space-y-2 border-t pt-2 mt-2">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs text-gray-600">Min Value</label>
+                  <input
+                    type="number"
+                    step="any"
+                    value={minValue ?? ''}
+                    onChange={e => setMinValue(e.target.value ? Number(e.target.value) : undefined)}
+                    className="mt-1 block w-full rounded border-gray-300 shadow-sm text-sm px-2 py-1 border"
+                    placeholder="Optional"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-600">Max Value</label>
+                  <input
+                    type="number"
+                    step="any"
+                    value={maxValue ?? ''}
+                    onChange={e => setMaxValue(e.target.value ? Number(e.target.value) : undefined)}
+                    className="mt-1 block w-full rounded border-gray-300 shadow-sm text-sm px-2 py-1 border"
+                    placeholder="Optional"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs text-gray-600">Threshold Strategy</label>
+                  <select
+                    value={thresholdStrategy}
+                    onChange={e => setThresholdStrategy(Number(e.target.value) as ThresholdStrategy)}
+                    className="mt-1 block w-full rounded border-gray-300 shadow-sm text-sm px-2 py-1 border"
+                  >
+                    <option value={ThresholdStrategy.Immediate}>Immediate</option>
+                    <option value={ThresholdStrategy.ConsecutiveCount}>Consecutive Count</option>
+                    <option value={ThresholdStrategy.TimeDurationAverage}>Time Window Average</option>
+                    <option value={ThresholdStrategy.SampleCountAverage}>Sample Count Average</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-600">Retention (days)</label>
+                  <input
+                    type="number"
+                    value={retentionDays}
+                    onChange={e => setRetentionDays(Number(e.target.value))}
+                    className="mt-1 block w-full rounded border-gray-300 shadow-sm text-sm px-2 py-1 border"
+                    min={1}
+                    max={365}
+                  />
+                </div>
+              </div>
+              {(thresholdStrategy === ThresholdStrategy.ConsecutiveCount ||
+                thresholdStrategy === ThresholdStrategy.SampleCountAverage) && (
+                <div>
+                  <label className="block text-xs text-gray-600">Threshold Count</label>
+                  <input
+                    type="number"
+                    value={thresholdCount}
+                    onChange={e => setThresholdCount(Number(e.target.value))}
+                    className="mt-1 block w-full rounded border-gray-300 shadow-sm text-sm px-2 py-1 border"
+                    min={2}
+                  />
+                </div>
+              )}
+            </div>
+          )}
           <div className="flex gap-2">
             <button
               type="button"
@@ -320,6 +507,13 @@ function MonitorRow({
       ) : (
         <div className="text-xs text-gray-500">
           Interval: {monitor.intervalSeconds}s | Grace: {monitor.gracePeriodSeconds}s
+          {monitor.type === MonitorType.Metric && (
+            <span>
+              {monitor.minValue != null && ` | Min: ${monitor.minValue}`}
+              {monitor.maxValue != null && ` | Max: ${monitor.maxValue}`}
+              {monitor.thresholdStrategy != null && ` | ${ThresholdStrategy[monitor.thresholdStrategy]}`}
+            </span>
+          )}
         </div>
       )}
     </div>

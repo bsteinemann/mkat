@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link, useParams } from '@tanstack/react-router';
 import { servicesApi } from '../api/services';
 import { alertsApi } from '../api/alerts';
-import { MonitorType } from '../api/types';
+import { MonitorType, ThresholdStrategy } from '../api/types';
 import { StateIndicator } from '../components/services/StateIndicator';
 import { CopyableUrl } from '../components/common/CopyableUrl';
 import { AlertItem } from '../components/alerts/AlertItem';
@@ -99,14 +99,17 @@ export function ServiceDetail() {
             <div key={monitor.id} className="border-b pb-4 last:border-0">
               <div className="flex items-center gap-2 mb-3">
                 <span className="font-medium">
-                  {monitor.type === MonitorType.Webhook ? 'Webhook' : 'Heartbeat'}
+                  {monitor.type === MonitorType.Webhook && 'Webhook'}
+                  {monitor.type === MonitorType.Heartbeat && 'Heartbeat'}
+                  {monitor.type === MonitorType.HealthCheck && 'Health Check'}
+                  {monitor.type === MonitorType.Metric && 'Metric'}
                 </span>
                 <span className="text-sm text-gray-500">
                   ({monitor.intervalSeconds}s interval)
                 </span>
               </div>
 
-              {monitor.type === MonitorType.Webhook ? (
+              {monitor.type === MonitorType.Webhook && (
                 <div className="space-y-3">
                   <CopyableUrl label="Failure URL (HTTP POST)" url={monitor.webhookFailUrl} />
                   <CopyableUrl label="Recovery URL (HTTP POST)" url={monitor.webhookRecoverUrl} />
@@ -127,8 +130,38 @@ export function ServiceDetail() {
                     </button>
                   </div>
                 </div>
-              ) : (
+              )}
+
+              {monitor.type === MonitorType.Heartbeat && (
                 <CopyableUrl label="Heartbeat URL" url={monitor.heartbeatUrl} />
+              )}
+
+              {monitor.type === MonitorType.Metric && (
+                <div className="space-y-3">
+                  <CopyableUrl label="Metric Push URL (POST with value)" url={monitor.metricUrl} />
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm text-gray-600 mt-2">
+                    {monitor.minValue != null && (
+                      <span>Min: {monitor.minValue}</span>
+                    )}
+                    {monitor.maxValue != null && (
+                      <span>Max: {monitor.maxValue}</span>
+                    )}
+                    {monitor.thresholdStrategy != null && (
+                      <span>Strategy: {ThresholdStrategy[monitor.thresholdStrategy]}</span>
+                    )}
+                    {monitor.thresholdCount != null && (
+                      <span>Count: {monitor.thresholdCount}</span>
+                    )}
+                    {monitor.retentionDays != null && (
+                      <span>Retention: {monitor.retentionDays}d</span>
+                    )}
+                  </div>
+                  {monitor.lastMetricValue != null && monitor.lastMetricAt && (
+                    <p className="text-sm text-gray-500 mt-2">
+                      Latest: {monitor.lastMetricValue} at {new Date(monitor.lastMetricAt).toLocaleString()}
+                    </p>
+                  )}
+                </div>
               )}
 
               {monitor.lastCheckIn && (

@@ -9,6 +9,14 @@ export enum MonitorType {
   Webhook = 0,
   Heartbeat = 1,
   HealthCheck = 2,
+  Metric = 3,
+}
+
+export enum ThresholdStrategy {
+  Immediate = 0,
+  ConsecutiveCount = 1,
+  TimeDurationAverage = 2,
+  SampleCountAverage = 3,
 }
 
 export enum AlertType {
@@ -34,6 +42,16 @@ export interface Monitor {
   webhookFailUrl: string;
   webhookRecoverUrl: string;
   heartbeatUrl: string;
+  metricUrl: string;
+  minValue: number | null;
+  maxValue: number | null;
+  thresholdStrategy: ThresholdStrategy | null;
+  thresholdCount: number | null;
+  windowSeconds: number | null;
+  windowSampleCount: number | null;
+  retentionDays: number | null;
+  lastMetricValue: number | null;
+  lastMetricAt: string | null;
 }
 
 export interface Service {
@@ -77,6 +95,13 @@ export interface CreateMonitorRequest {
   type: MonitorType;
   intervalSeconds: number;
   gracePeriodSeconds?: number;
+  minValue?: number;
+  maxValue?: number;
+  thresholdStrategy?: ThresholdStrategy;
+  thresholdCount?: number;
+  windowSeconds?: number;
+  windowSampleCount?: number;
+  retentionDays?: number;
 }
 
 export interface UpdateServiceRequest {
@@ -86,6 +111,33 @@ export interface UpdateServiceRequest {
 }
 
 export interface UpdateMonitorRequest {
+  type?: MonitorType;
   intervalSeconds: number;
   gracePeriodSeconds?: number;
+  minValue?: number;
+  maxValue?: number;
+  thresholdStrategy?: ThresholdStrategy;
+  thresholdCount?: number;
+  windowSeconds?: number;
+  windowSampleCount?: number;
+  retentionDays?: number;
+}
+
+export interface MetricReading {
+  id: string;
+  value: number;
+  recordedAt: string;
+  outOfRange: boolean;
+}
+
+export interface MetricHistoryResponse {
+  monitorId: string;
+  readings: MetricReading[];
+}
+
+export interface MetricLatestResponse {
+  value: number;
+  recordedAt: string;
+  outOfRange: boolean;
+  monitorId: string;
 }
