@@ -59,6 +59,7 @@ try
     builder.Services.AddHostedService<MaintenanceResumeWorker>();
     builder.Services.AddHostedService<AlertDispatchWorker>();
     builder.Services.AddHostedService<TelegramBotService>();
+    builder.Services.AddHostedService<MetricRetentionWorker>();
 
     var app = builder.Build();
 
