@@ -15,6 +15,7 @@ public class ServicesController : ControllerBase
 {
     private readonly IServiceRepository _serviceRepo;
     private readonly IMuteWindowRepository _muteRepo;
+    private readonly IContactRepository _contactRepo;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IStateService _stateService;
     private readonly IValidator<CreateServiceRequest> _createValidator;
@@ -24,6 +25,7 @@ public class ServicesController : ControllerBase
     public ServicesController(
         IServiceRepository serviceRepo,
         IMuteWindowRepository muteRepo,
+        IContactRepository contactRepo,
         IUnitOfWork unitOfWork,
         IStateService stateService,
         IValidator<CreateServiceRequest> createValidator,
@@ -32,6 +34,7 @@ public class ServicesController : ControllerBase
     {
         _serviceRepo = serviceRepo;
         _muteRepo = muteRepo;
+        _contactRepo = contactRepo;
         _unitOfWork = unitOfWork;
         _stateService = stateService;
         _createValidator = createValidator;
@@ -284,6 +287,55 @@ public class ServicesController : ControllerBase
         await _unitOfWork.SaveChangesAsync(ct);
 
         return Ok(new { muted = true, until = mute.EndsAt });
+    }
+
+    [HttpPut("{id:guid}/contacts")]
+    public async Task<IActionResult> SetContacts(
+        Guid id,
+        [FromBody] SetServiceContactsRequest request,
+        [FromServices] IValidator<SetServiceContactsRequest> validator,
+        CancellationToken ct)
+    {
+        var validation = await validator.ValidateAsync(request, ct);
+        if (!validation.IsValid)
+            return BadRequest(new { errors = validation.Errors.Select(e => e.ErrorMessage) });
+
+        var service = await _serviceRepo.GetByIdAsync(id, ct);
+        if (service == null)
+            return NotFound();
+
+        await _contactRepo.SetServiceContactsAsync(id, request.ContactIds, ct);
+        await _unitOfWork.SaveChangesAsync(ct);
+
+        return Ok(new { assigned = request.ContactIds.Count });
+    }
+
+    [HttpGet("{id:guid}/contacts")]
+    public async Task<IActionResult> GetContacts(Guid id, CancellationToken ct)
+    {
+        var service = await _serviceRepo.GetByIdAsync(id, ct);
+        if (service == null)
+            return NotFound();
+
+        var contacts = await _contactRepo.GetByServiceIdAsync(id, ct);
+        var responses = contacts.Select(c => new ContactResponse
+        {
+            Id = c.Id,
+            Name = c.Name,
+            IsDefault = c.IsDefault,
+            CreatedAt = c.CreatedAt,
+            Channels = c.Channels.Select(ch => new ContactChannelResponse
+            {
+                Id = ch.Id,
+                Type = ch.Type,
+                Configuration = ch.Configuration,
+                IsEnabled = ch.IsEnabled,
+                CreatedAt = ch.CreatedAt
+            }).ToList(),
+            ServiceCount = c.ServiceContacts.Count
+        }).ToList();
+
+        return Ok(responses);
     }
 
     internal static MonitorResponse MapMonitorToResponse(Monitor monitor, string baseUrl)
