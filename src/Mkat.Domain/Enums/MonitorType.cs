@@ -4,5 +4,6 @@ public enum MonitorType
 {
     Webhook = 0,
     Heartbeat = 1,
-    HealthCheck = 2
+    HealthCheck = 2,
+    Metric = 3
 }

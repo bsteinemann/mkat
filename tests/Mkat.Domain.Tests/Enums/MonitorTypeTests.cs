@@ -24,9 +24,16 @@ public class MonitorTypeTests
     }
 
     [Fact]
-    public void MonitorType_HasExactlyThreeValues()
+    public void Metric_HasValue_Three()
+    {
+        Assert.Equal(3, (int)MonitorType.Metric);
+    }
+
+    [Fact]
+    public void MonitorType_HasExactlyFourValues()
     {
         var values = Enum.GetValues<MonitorType>();
-        Assert.Equal(3, values.Length);
+        Assert.Equal(4, values.Length);
     }
+
 }
