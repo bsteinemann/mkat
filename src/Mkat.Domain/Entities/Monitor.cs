@@ -15,5 +15,16 @@ public class Monitor
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
+    // Metric monitor fields
+    public double? MinValue { get; set; }
+    public double? MaxValue { get; set; }
+    public ThresholdStrategy ThresholdStrategy { get; set; } = ThresholdStrategy.Immediate;
+    public int? ThresholdCount { get; set; }
+    public int? WindowSeconds { get; set; }
+    public int? WindowSampleCount { get; set; }
+    public int RetentionDays { get; set; } = 7;
+    public double? LastMetricValue { get; set; }
+    public DateTime? LastMetricAt { get; set; }
+
     public Service Service { get; set; } = null!;
 }

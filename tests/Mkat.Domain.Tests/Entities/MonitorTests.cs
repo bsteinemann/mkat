@@ -90,4 +90,50 @@ public class MonitorTests
         var monitor = new Monitor();
         Assert.Equal(0, monitor.GracePeriodSeconds);
     }
+
+    [Fact]
+    public void NewMonitor_MetricFields_HaveDefaults()
+    {
+        var monitor = new Monitor();
+
+        Assert.Null(monitor.MinValue);
+        Assert.Null(monitor.MaxValue);
+        Assert.Equal(ThresholdStrategy.Immediate, monitor.ThresholdStrategy);
+        Assert.Null(monitor.ThresholdCount);
+        Assert.Null(monitor.WindowSeconds);
+        Assert.Null(monitor.WindowSampleCount);
+        Assert.Equal(7, monitor.RetentionDays);
+        Assert.Null(monitor.LastMetricValue);
+        Assert.Null(monitor.LastMetricAt);
+    }
+
+    [Fact]
+    public void Monitor_CanSetMetricProperties()
+    {
+        var now = DateTime.UtcNow;
+        var monitor = new Monitor
+        {
+            Type = MonitorType.Metric,
+            MinValue = 0.0,
+            MaxValue = 100.0,
+            ThresholdStrategy = ThresholdStrategy.ConsecutiveCount,
+            ThresholdCount = 3,
+            WindowSeconds = 60,
+            WindowSampleCount = 10,
+            RetentionDays = 30,
+            LastMetricValue = 42.5,
+            LastMetricAt = now
+        };
+
+        Assert.Equal(MonitorType.Metric, monitor.Type);
+        Assert.Equal(0.0, monitor.MinValue);
+        Assert.Equal(100.0, monitor.MaxValue);
+        Assert.Equal(ThresholdStrategy.ConsecutiveCount, monitor.ThresholdStrategy);
+        Assert.Equal(3, monitor.ThresholdCount);
+        Assert.Equal(60, monitor.WindowSeconds);
+        Assert.Equal(10, monitor.WindowSampleCount);
+        Assert.Equal(30, monitor.RetentionDays);
+        Assert.Equal(42.5, monitor.LastMetricValue);
+        Assert.Equal(now, monitor.LastMetricAt);
+    }
 }
