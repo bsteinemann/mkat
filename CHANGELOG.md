@@ -1,3 +1,20 @@
+# [1.2.0](https://github.com/bsteinemann/mkat/compare/v1.1.0...v1.2.0) (2026-01-23)
+
+
+### Bug Fixes
+
+* sanitize base path injection and cache fallback HTML ([7429bf3](https://github.com/bsteinemann/mkat/commit/7429bf3a9cda4eab2dfd3c39443a44478df5cb74))
+
+
+### Features
+
+* add getBasePath runtime config utility ([481d393](https://github.com/bsteinemann/mkat/commit/481d393f9458b733afcd430012ea41debcebcd64))
+* add UsePathBase and runtime config injection for base path support ([f8e42c9](https://github.com/bsteinemann/mkat/commit/f8e42c9d6d8678a5b5467b3fdbecccc7d2bd9eed))
+* configure TanStack Router with runtime basepath ([7cc544c](https://github.com/bsteinemann/mkat/commit/7cc544c25b68865bde0ab5656e6b4da606e2257f))
+* configure Vite for relative asset paths ([9372fee](https://github.com/bsteinemann/mkat/commit/9372feeb39fbf726280fcb9f3cc7889d0fe6ed73))
+* update API client to use runtime base path ([d768590](https://github.com/bsteinemann/mkat/commit/d76859044092315542956b2a2d841549d91162ac))
+* update login page to use base path for auth check ([cd5b27c](https://github.com/bsteinemann/mkat/commit/cd5b27c7eea37d7f0391a9eb9e12001be26861cd))
+
 # [1.1.0](https://github.com/bsteinemann/mkat/compare/v1.0.0...v1.1.0) (2026-01-23)
 
 
