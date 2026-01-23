@@ -1,5 +1,3 @@
-// src/mkat-ui/src/config.ts
-
 declare global {
   interface Window {
     __MKAT_BASE_PATH__?: string;
