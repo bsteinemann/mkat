@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from '@tanstack/react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { servicesApi } from '../api/services';
+import { servicesApi, contactsApi } from '../api/services';
 import { ServiceForm } from '../components/services/ServiceForm';
 import { MonitorType, ThresholdStrategy } from '../api/types';
 import type { CreateServiceRequest, UpdateServiceRequest, CreateMonitorRequest, UpdateMonitorRequest, Monitor } from '../api/types';
@@ -94,6 +94,8 @@ export function ServiceEdit() {
         addError={addMonitorMutation.isError ? (addMonitorMutation.error as Error).message : undefined}
         deleteError={deleteMonitorMutation.isError ? (deleteMonitorMutation.error as Error).message : undefined}
       />
+
+      <ContactsSection serviceId={serviceId} />
 
       <div className="mt-6 bg-white rounded-lg shadow p-6 border border-red-200">
         <h2 className="text-lg font-semibold text-red-800 mb-2">Danger Zone</h2>
@@ -311,6 +313,123 @@ function MonitorSection({
           />
         ))}
       </div>
+    </div>
+  );
+}
+
+function ContactsSection({ serviceId }: { serviceId: string }) {
+  const queryClient = useQueryClient();
+
+  const { data: allContacts, isLoading: loadingContacts } = useQuery({
+    queryKey: ['contacts'],
+    queryFn: () => contactsApi.list(),
+  });
+
+  const { data: assignedContacts, isLoading: loadingAssigned } = useQuery({
+    queryKey: ['services', serviceId, 'contacts'],
+    queryFn: () => contactsApi.getServiceContacts(serviceId),
+  });
+
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [dirty, setDirty] = useState(false);
+
+  useEffect(() => {
+    if (assignedContacts) {
+      setSelected(new Set(assignedContacts.map(c => c.id)));
+      setDirty(false);
+    }
+  }, [assignedContacts]);
+
+  const saveMutation = useMutation({
+    mutationFn: (contactIds: string[]) => contactsApi.setServiceContacts(serviceId, contactIds),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['services', serviceId, 'contacts'] });
+      queryClient.invalidateQueries({ queryKey: ['contacts'] });
+      setDirty(false);
+    },
+  });
+
+  const toggle = (id: string) => {
+    setSelected(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+    setDirty(true);
+  };
+
+  if (loadingContacts || loadingAssigned) {
+    return (
+      <div className="mt-6 bg-white rounded-lg shadow p-6">
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">Contacts</h2>
+        <p className="text-sm text-gray-500">Loading...</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-6 bg-white rounded-lg shadow p-6">
+      <h2 className="text-lg font-semibold text-gray-900 mb-2">Contacts</h2>
+      <p className="text-xs text-gray-500 mb-4">
+        Select which contacts receive alerts for this service. If none are assigned, the default contact is used.
+      </p>
+
+      {!allContacts || allContacts.length === 0 ? (
+        <p className="text-sm text-gray-500">No contacts configured yet.</p>
+      ) : (
+        <div className="space-y-2">
+          {allContacts.map(contact => (
+            <label key={contact.id} className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={selected.has(contact.id)}
+                onChange={() => toggle(contact.id)}
+                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              />
+              <span className="text-sm text-gray-700">{contact.name}</span>
+              {contact.isDefault && (
+                <span className="text-xs text-gray-400">(default)</span>
+              )}
+              {contact.channels.length === 0 && (
+                <span className="text-xs text-amber-600">(no channels)</span>
+              )}
+            </label>
+          ))}
+        </div>
+      )}
+
+      {dirty && (
+        <div className="mt-4 flex items-center gap-2">
+          <button
+            onClick={() => saveMutation.mutate(Array.from(selected))}
+            disabled={saveMutation.isPending}
+            className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 disabled:opacity-50"
+          >
+            {saveMutation.isPending ? 'Saving...' : 'Save Contacts'}
+          </button>
+          <button
+            onClick={() => {
+              if (assignedContacts) {
+                setSelected(new Set(assignedContacts.map(c => c.id)));
+              }
+              setDirty(false);
+            }}
+            className="px-3 py-1 bg-gray-200 text-gray-700 text-sm rounded hover:bg-gray-300"
+          >
+            Cancel
+          </button>
+        </div>
+      )}
+
+      {saveMutation.isError && (
+        <p className="text-red-600 text-xs mt-2">
+          {(saveMutation.error as Error).message}
+        </p>
+      )}
     </div>
   );
 }
