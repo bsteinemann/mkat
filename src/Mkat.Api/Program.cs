@@ -47,6 +47,9 @@ try
     builder.Services.AddScoped<IValidator<UpdateServiceRequest>, UpdateServiceValidator>();
     builder.Services.AddScoped<IValidator<AddMonitorRequest>, AddMonitorValidator>();
     builder.Services.AddScoped<IValidator<UpdateMonitorRequest>, UpdateMonitorValidator>();
+    builder.Services.AddScoped<IValidator<PeerInitiateRequest>, PeerInitiateValidator>();
+    builder.Services.AddScoped<IValidator<PeerAcceptRequest>, PeerAcceptValidator>();
+    builder.Services.AddScoped<IValidator<PeerCompleteRequest>, PeerCompleteValidator>();
 
     builder.Services.Configure<TelegramOptions>(options =>
     {

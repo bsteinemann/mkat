@@ -22,6 +22,14 @@ public class BasicAuthMiddleware
             return;
         }
 
+        // Peer pairing protocol endpoints use secret-based auth, not Basic Auth
+        if (path.Equals("/api/v1/peers/pair/accept", StringComparison.OrdinalIgnoreCase) ||
+            path.Equals("/api/v1/peers/pair/unpair", StringComparison.OrdinalIgnoreCase))
+        {
+            await _next(context);
+            return;
+        }
+
         if (!context.Request.Headers.TryGetValue("Authorization", out var authHeader))
         {
             context.Response.StatusCode = 401;
