@@ -37,9 +37,10 @@ public class BasicAuthMiddleware
             return;
         }
 
+        string authValue;
         try
         {
-            var authValue = authHeader.ToString();
+            authValue = authHeader.ToString();
             if (!authValue.StartsWith("Basic ", StringComparison.OrdinalIgnoreCase))
             {
                 context.Response.StatusCode = 401;
@@ -76,13 +77,14 @@ public class BasicAuthMiddleware
                 context.Response.StatusCode = 401;
                 return;
             }
-
-            await _next(context);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error processing authentication");
             context.Response.StatusCode = 401;
+            return;
         }
+
+        await _next(context);
     }
 }

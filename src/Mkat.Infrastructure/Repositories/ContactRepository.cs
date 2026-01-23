@@ -87,6 +87,17 @@ public class ContactRepository : IContactRepository
         await _context.ServiceContacts.AddRangeAsync(newLinks, ct);
     }
 
+    public async Task AddChannelAsync(ContactChannel channel, CancellationToken ct = default)
+    {
+        await _context.ContactChannels.AddAsync(channel, ct);
+    }
+
+    public async Task RemoveChannelAsync(ContactChannel channel, CancellationToken ct = default)
+    {
+        _context.ContactChannels.Remove(channel);
+        await Task.CompletedTask;
+    }
+
     public async Task<bool> IsOnlyContactForAnyServiceAsync(Guid contactId, CancellationToken ct = default)
     {
         var serviceIds = await _context.ServiceContacts

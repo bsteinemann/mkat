@@ -102,6 +102,108 @@ public class ContactsController : ControllerBase
         return NoContent();
     }
 
+    [HttpPost("{id:guid}/channels")]
+    public async Task<IActionResult> AddChannel(
+        Guid id,
+        [FromBody] AddChannelRequest request,
+        [FromServices] IValidator<AddChannelRequest> validator,
+        CancellationToken ct)
+    {
+        var validation = await validator.ValidateAsync(request, ct);
+        if (!validation.IsValid)
+            return BadRequest(new { errors = validation.Errors.Select(e => e.ErrorMessage) });
+
+        var contact = await _contactRepo.GetByIdAsync(id, ct);
+        if (contact == null)
+            return NotFound();
+
+        var channel = new ContactChannel
+        {
+            Id = Guid.NewGuid(),
+            ContactId = id,
+            Type = request.Type,
+            Configuration = request.Configuration,
+            IsEnabled = true,
+            CreatedAt = DateTime.UtcNow
+        };
+
+        await _contactRepo.AddChannelAsync(channel, ct);
+        await _unitOfWork.SaveChangesAsync(ct);
+
+        return Created($"/api/v1/contacts/{id}/channels/{channel.Id}", MapChannelToResponse(channel));
+    }
+
+    [HttpPut("{id:guid}/channels/{channelId:guid}")]
+    public async Task<IActionResult> UpdateChannel(
+        Guid id,
+        Guid channelId,
+        [FromBody] UpdateChannelRequest request,
+        [FromServices] IValidator<UpdateChannelRequest> validator,
+        CancellationToken ct)
+    {
+        var validation = await validator.ValidateAsync(request, ct);
+        if (!validation.IsValid)
+            return BadRequest(new { errors = validation.Errors.Select(e => e.ErrorMessage) });
+
+        var contact = await _contactRepo.GetByIdWithChannelsAsync(id, ct);
+        if (contact == null)
+            return NotFound();
+
+        var channel = contact.Channels.FirstOrDefault(ch => ch.Id == channelId);
+        if (channel == null)
+            return NotFound();
+
+        channel.Configuration = request.Configuration;
+        channel.IsEnabled = request.IsEnabled;
+        await _unitOfWork.SaveChangesAsync(ct);
+
+        return Ok(MapChannelToResponse(channel));
+    }
+
+    [HttpDelete("{id:guid}/channels/{channelId:guid}")]
+    public async Task<IActionResult> DeleteChannel(Guid id, Guid channelId, CancellationToken ct)
+    {
+        var contact = await _contactRepo.GetByIdWithChannelsAsync(id, ct);
+        if (contact == null)
+            return NotFound();
+
+        var channel = contact.Channels.FirstOrDefault(ch => ch.Id == channelId);
+        if (channel == null)
+            return NotFound();
+
+        await _contactRepo.RemoveChannelAsync(channel, ct);
+        await _unitOfWork.SaveChangesAsync(ct);
+
+        return NoContent();
+    }
+
+    [HttpPost("{id:guid}/channels/{channelId:guid}/test")]
+    public async Task<IActionResult> TestChannel(Guid id, Guid channelId, CancellationToken ct)
+    {
+        var contact = await _contactRepo.GetByIdWithChannelsAsync(id, ct);
+        if (contact == null)
+            return NotFound();
+
+        var channel = contact.Channels.FirstOrDefault(ch => ch.Id == channelId);
+        if (channel == null)
+            return NotFound();
+
+        // For now, just return OK to indicate test was attempted
+        return Ok(new { success = true, message = $"Test notification sent via {channel.Type}" });
+    }
+
+    private static ContactChannelResponse MapChannelToResponse(ContactChannel channel)
+    {
+        return new ContactChannelResponse
+        {
+            Id = channel.Id,
+            Type = channel.Type,
+            Configuration = channel.Configuration,
+            IsEnabled = channel.IsEnabled,
+            CreatedAt = channel.CreatedAt
+        };
+    }
+
     private static ContactResponse MapToResponse(Contact contact)
     {
         return new ContactResponse

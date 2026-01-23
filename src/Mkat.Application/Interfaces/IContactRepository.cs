@@ -14,4 +14,6 @@ public interface IContactRepository
     Task<IReadOnlyList<Contact>> GetByServiceIdAsync(Guid serviceId, CancellationToken ct = default);
     Task SetServiceContactsAsync(Guid serviceId, IEnumerable<Guid> contactIds, CancellationToken ct = default);
     Task<bool> IsOnlyContactForAnyServiceAsync(Guid contactId, CancellationToken ct = default);
+    Task AddChannelAsync(ContactChannel channel, CancellationToken ct = default);
+    Task RemoveChannelAsync(ContactChannel channel, CancellationToken ct = default);
 }
