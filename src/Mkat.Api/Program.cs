@@ -67,6 +67,15 @@ try
     });
 
     builder.Services.AddSingleton<INotificationChannel, TelegramChannel>();
+
+    builder.Services.Configure<VapidOptions>(options =>
+    {
+        options.PublicKey = Environment.GetEnvironmentVariable("MKAT_VAPID_PUBLIC_KEY") ?? "";
+        options.PrivateKey = Environment.GetEnvironmentVariable("MKAT_VAPID_PRIVATE_KEY") ?? "";
+        options.Subject = Environment.GetEnvironmentVariable("MKAT_VAPID_SUBJECT") ?? "mailto:admin@localhost";
+    });
+    builder.Services.AddScoped<INotificationChannel, WebPushChannel>();
+
     builder.Services.AddScoped<IContactChannelSender, ContactChannelSender>();
     builder.Services.AddScoped<INotificationDispatcher, NotificationDispatcher>();
 
