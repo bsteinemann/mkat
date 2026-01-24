@@ -1,3 +1,20 @@
+# [1.3.0](https://github.com/bsteinemann/mkat/compare/v1.2.1...v1.3.0) (2026-01-24)
+
+
+### Features
+
+* add EventBroadcaster with Channel-based pub/sub ([9541270](https://github.com/bsteinemann/mkat/commit/954127050486e4b48334e2148cb04add38e67e8e))
+* add frontend push subscription and SSE connection ([45715fa](https://github.com/bsteinemann/mkat/commit/45715fada9de80f3fac5836ca41d800f142e88a4))
+* add IEventBroadcaster interface and ServerEvent DTO ([b82f7ed](https://github.com/bsteinemann/mkat/commit/b82f7ed08716e863b3ed2517eb3fe301ece6ed57))
+* add push subscription API endpoints ([3607bcd](https://github.com/bsteinemann/mkat/commit/3607bcdb88da99ab375a98e0d60df49888554e84))
+* add PushSubscription domain entity ([c70478f](https://github.com/bsteinemann/mkat/commit/c70478fbc7ee86e7e75f6146c1555da1a27c207b))
+* add PushSubscription repository and EF Core mapping ([d049460](https://github.com/bsteinemann/mkat/commit/d049460ba04a66a619d5c968b503ca9c8800c42b))
+* add PWA manifest and app icons ([b5b7549](https://github.com/bsteinemann/mkat/commit/b5b7549e73014daf989a9fc7e6dd276e2359a813))
+* add service worker for push notifications ([dbb1150](https://github.com/bsteinemann/mkat/commit/dbb11509854ee5ccded06d46c9f1cd5915c6313e))
+* add SSE events stream endpoint ([c623fd6](https://github.com/bsteinemann/mkat/commit/c623fd64bd24849d98bfdcf2dca044657d0ea23a))
+* add WebPushChannel with VAPID support ([19b1ec2](https://github.com/bsteinemann/mkat/commit/19b1ec26fe0ff958a4227575d8f494089ad88414))
+* broadcast SSE event after successful alert dispatch ([a9beaae](https://github.com/bsteinemann/mkat/commit/a9beaae0164bd30752d14ca05c6464069d5cd5c0))
+
 ## [1.2.1](https://github.com/bsteinemann/mkat/compare/v1.2.0...v1.2.1) (2026-01-24)
 
 
