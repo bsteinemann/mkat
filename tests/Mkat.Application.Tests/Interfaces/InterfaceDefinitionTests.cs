@@ -1,3 +1,4 @@
+using Mkat.Application.DTOs;
 using Mkat.Application.Interfaces;
 using Xunit;
 
@@ -104,5 +105,33 @@ public class InterfaceDefinitionTests
     {
         var method = typeof(IUnitOfWork).GetMethod("SaveChangesAsync");
         Assert.NotNull(method);
+    }
+
+    [Fact]
+    public void IEventBroadcaster_HasExpectedMethods()
+    {
+        var type = typeof(IEventBroadcaster);
+        Assert.NotNull(type);
+        Assert.True(type.IsInterface);
+
+        var broadcast = type.GetMethod("BroadcastAsync");
+        Assert.NotNull(broadcast);
+        Assert.Equal(typeof(Task), broadcast!.ReturnType);
+
+        var subscribe = type.GetMethod("Subscribe");
+        Assert.NotNull(subscribe);
+    }
+
+    [Fact]
+    public void ServerEvent_HasExpectedProperties()
+    {
+        var evt = new ServerEvent
+        {
+            Type = "alert_created",
+            Payload = "{}"
+        };
+        Assert.Equal("alert_created", evt.Type);
+        Assert.Equal("{}", evt.Payload);
+        Assert.True(evt.Timestamp <= DateTime.UtcNow);
     }
 }
