@@ -1,3 +1,10 @@
+## [1.2.1](https://github.com/bsteinemann/mkat/compare/v1.2.0...v1.2.1) (2026-01-24)
+
+
+### Bug Fixes
+
+* **ci:** write semantic-release outputs to GITHUB_OUTPUT ([a8da3a1](https://github.com/bsteinemann/mkat/commit/a8da3a160dd4862acb4343ccf78e5dbb03b12b96))
+
 # [1.2.0](https://github.com/bsteinemann/mkat/compare/v1.1.0...v1.2.0) (2026-01-23)
 
 
