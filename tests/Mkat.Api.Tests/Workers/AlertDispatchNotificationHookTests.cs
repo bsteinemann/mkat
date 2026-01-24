@@ -45,6 +45,7 @@ public class AlertDispatchNotificationHookTests
         services.AddSingleton(_dispatcher.Object);
         services.AddSingleton(_peerRepo.Object);
         services.AddSingleton(httpClientFactory.Object);
+        services.AddSingleton(new Mock<IEventBroadcaster>().Object);
 
         _serviceProvider = services.BuildServiceProvider();
         _worker = new AlertDispatchWorker(_serviceProvider, _logger.Object);

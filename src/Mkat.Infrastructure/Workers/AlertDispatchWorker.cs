@@ -1,6 +1,8 @@
+using System.Text.Json;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Mkat.Application.DTOs;
 using Mkat.Application.Interfaces;
 
 namespace Mkat.Infrastructure.Workers;
@@ -50,6 +52,7 @@ public class AlertDispatchWorker : BackgroundService
         using var scope = _serviceProvider.CreateScope();
         var alertRepo = scope.ServiceProvider.GetRequiredService<IAlertRepository>();
         var dispatcher = scope.ServiceProvider.GetRequiredService<INotificationDispatcher>();
+        var broadcaster = scope.ServiceProvider.GetRequiredService<IEventBroadcaster>();
 
         var pendingAlerts = await alertRepo.GetPendingDispatchAsync(ct);
 
@@ -59,6 +62,18 @@ public class AlertDispatchWorker : BackgroundService
             try
             {
                 await dispatcher.DispatchAsync(alert, ct);
+                await broadcaster.BroadcastAsync(new ServerEvent
+                {
+                    Type = "alert_dispatched",
+                    Payload = JsonSerializer.Serialize(new
+                    {
+                        alertId = alert.Id,
+                        serviceId = alert.ServiceId,
+                        message = alert.Message,
+                        severity = alert.Severity.ToString(),
+                        type = alert.Type.ToString()
+                    })
+                }, ct);
             }
             catch (Exception ex)
             {
