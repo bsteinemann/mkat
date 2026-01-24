@@ -8,6 +8,7 @@ using Mkat.Application.Validators;
 using Mkat.Infrastructure.Channels;
 using Mkat.Infrastructure.Data;
 using Mkat.Infrastructure.Repositories;
+using Mkat.Infrastructure.Services;
 using Mkat.Infrastructure.Workers;
 using Serilog;
 
@@ -40,6 +41,7 @@ try
     builder.Services.AddScoped<IStateService, StateService>();
     builder.Services.AddScoped<IMetricEvaluator, MetricEvaluator>();
     builder.Services.AddSingleton<IPairingService, PairingService>();
+    builder.Services.AddSingleton<IEventBroadcaster, EventBroadcaster>();
 
     builder.Services.AddControllers();
     builder.Services.AddRouting(options => options.LowercaseUrls = true);
