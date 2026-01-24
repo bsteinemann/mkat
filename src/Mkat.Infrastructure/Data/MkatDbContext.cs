@@ -21,6 +21,7 @@ public class MkatDbContext : DbContext, IUnitOfWork
     public DbSet<Contact> Contacts => Set<Contact>();
     public DbSet<ContactChannel> ContactChannels => Set<ContactChannel>();
     public DbSet<ServiceContact> ServiceContacts => Set<ServiceContact>();
+    public DbSet<PushSubscription> PushSubscriptions => Set<PushSubscription>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -135,6 +136,15 @@ public class MkatDbContext : DbContext, IUnitOfWork
                 .WithMany(c => c.ServiceContacts)
                 .HasForeignKey(e => e.ContactId)
                 .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<PushSubscription>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Endpoint).IsRequired().HasMaxLength(2000);
+            entity.Property(e => e.P256dhKey).IsRequired().HasMaxLength(500);
+            entity.Property(e => e.AuthKey).IsRequired().HasMaxLength(500);
+            entity.HasIndex(e => e.Endpoint).IsUnique();
         });
     }
 }
