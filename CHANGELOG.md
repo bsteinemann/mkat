@@ -1,3 +1,10 @@
+## [1.4.1](https://github.com/bsteinemann/mkat/compare/v1.4.0...v1.4.1) (2026-01-25)
+
+
+### Bug Fixes
+
+* move UsePathBase before routing to fix /mkat path handling ([eb4dd59](https://github.com/bsteinemann/mkat/commit/eb4dd5927e9d77c1baeaf7f0fc7dce353a2b2498))
+
 # [1.4.0](https://github.com/bsteinemann/mkat/compare/v1.3.0...v1.4.0) (2026-01-25)
 
 
