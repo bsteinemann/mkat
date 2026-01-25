@@ -1,3 +1,10 @@
+## [1.4.3](https://github.com/bsteinemann/mkat/compare/v1.4.2...v1.4.3) (2026-01-25)
+
+
+### Bug Fixes
+
+* use forwarded headers for correct HTTPS URLs behind reverse proxy ([bd3623d](https://github.com/bsteinemann/mkat/commit/bd3623d0b133d9fbb559828e0201308f0fb76165))
+
 ## [1.4.2](https://github.com/bsteinemann/mkat/compare/v1.4.1...v1.4.2) (2026-01-25)
 
 
