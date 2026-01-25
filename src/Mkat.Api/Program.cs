@@ -1,4 +1,5 @@
 using FluentValidation;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using Mkat.Api.Middleware;
 using Mkat.Application.DTOs;
@@ -87,7 +88,19 @@ try
     builder.Services.AddHttpClient();
     builder.Services.AddHostedService<PeerHeartbeatWorker>();
 
+    // Configure forwarded headers for reverse proxy (Traefik, nginx, etc.)
+    builder.Services.Configure<ForwardedHeadersOptions>(options =>
+    {
+        options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedHost;
+        // Clear default limits to trust all proxies in containerized environments
+        options.KnownNetworks.Clear();
+        options.KnownProxies.Clear();
+    });
+
     var app = builder.Build();
+
+    // Forwarded headers must be first to ensure correct scheme/host in Request
+    app.UseForwardedHeaders();
 
     // App is served at /mkat - must be FIRST before any routing
     app.UsePathBase("/mkat");
