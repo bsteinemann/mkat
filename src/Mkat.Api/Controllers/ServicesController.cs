@@ -366,7 +366,7 @@ public class ServicesController : ControllerBase
 
     private ServiceResponse MapToResponse(Service service)
     {
-        var baseUrl = $"{Request.Scheme}://{Request.Host}";
+        var baseUrl = $"{Request.Scheme}://{Request.Host}{Request.PathBase}";
 
         return new ServiceResponse
         {

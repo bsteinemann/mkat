@@ -64,7 +64,7 @@ public class PeersController : ControllerBase
             });
         }
 
-        var baseUrl = $"{Request.Scheme}://{Request.Host}";
+        var baseUrl = $"{Request.Scheme}://{Request.Host}{Request.PathBase}";
         var token = _pairingService.GenerateToken(baseUrl, request.Name);
 
         _logger.LogInformation("Generated pairing token for instance {Name}", request.Name);
@@ -199,7 +199,7 @@ public class PeersController : ControllerBase
         }
 
         // Call the remote instance's accept endpoint
-        var baseUrl = $"{Request.Scheme}://{Request.Host}";
+        var baseUrl = $"{Request.Scheme}://{Request.Host}{Request.PathBase}";
         var acceptRequest = new PeerAcceptRequest
         {
             Secret = tokenData.Secret,
@@ -336,7 +336,7 @@ public class PeersController : ControllerBase
             var client = _httpClientFactory.CreateClient("PeerPairing");
             await client.PostAsJsonAsync(
                 $"{peer.Url}/api/v1/peers/pair/unpair",
-                new { url = $"{Request.Scheme}://{Request.Host}" },
+                new { url = $"{Request.Scheme}://{Request.Host}{Request.PathBase}" },
                 ct);
         }
         catch (Exception ex)

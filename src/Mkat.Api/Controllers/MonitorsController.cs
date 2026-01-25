@@ -93,7 +93,7 @@ public class MonitorsController : ControllerBase
         _logger.LogInformation("Added monitor {MonitorId} to service {ServiceId}",
             monitor.Id, serviceId);
 
-        var baseUrl = $"{Request.Scheme}://{Request.Host}";
+        var baseUrl = $"{Request.Scheme}://{Request.Host}{Request.PathBase}";
         return CreatedAtAction(nameof(Add), new { serviceId, monitorId = monitor.Id }, MapToResponse(monitor, baseUrl));
     }
 
@@ -160,7 +160,7 @@ public class MonitorsController : ControllerBase
         _logger.LogInformation("Updated monitor {MonitorId} on service {ServiceId}",
             monitorId, serviceId);
 
-        var baseUrl = $"{Request.Scheme}://{Request.Host}";
+        var baseUrl = $"{Request.Scheme}://{Request.Host}{Request.PathBase}";
         return Ok(MapToResponse(monitor, baseUrl));
     }
 
