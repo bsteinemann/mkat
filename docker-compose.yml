@@ -14,9 +14,8 @@ services:
       - MKAT_TELEGRAM_CHAT_ID=${MKAT_TELEGRAM_CHAT_ID:-}
       - MKAT_DATABASE_PATH=/data/mkat.db
       - MKAT_LOG_LEVEL=${MKAT_LOG_LEVEL:-Information}
-      # - MKAT_BASE_PATH=/mkat  # Optional: URL prefix for reverse proxy
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/health"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/mkat/health"]
       interval: 30s
       timeout: 3s
       retries: 3

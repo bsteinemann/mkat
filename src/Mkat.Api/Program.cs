@@ -110,13 +110,8 @@ try
         }
     }
 
-    var basePath = Environment.GetEnvironmentVariable("MKAT_BASE_PATH") ?? "";
-    if (!string.IsNullOrEmpty(basePath))
-    {
-        if (!basePath.StartsWith('/')) basePath = "/" + basePath;
-        basePath = basePath.TrimEnd('/');
-        app.UsePathBase(basePath);
-    }
+    // App is served at /mkat - baked into frontend build
+    app.UsePathBase("/mkat");
 
     app.UseMiddleware<ExceptionHandlingMiddleware>();
     app.UseMiddleware<SecurityHeadersMiddleware>();
@@ -148,35 +143,7 @@ try
     });
 
     app.MapControllers();
-    // Pre-compute the fallback HTML with injected base path config
-    string? cachedFallbackHtml = null;
-    app.MapFallback(async context =>
-    {
-        if (cachedFallbackHtml == null)
-        {
-            var webRootPath = app.Environment.WebRootPath ?? Path.Combine(app.Environment.ContentRootPath, "wwwroot");
-            var indexPath = Path.Combine(webRootPath, "index.html");
-            if (!File.Exists(indexPath))
-            {
-                context.Response.StatusCode = 404;
-                return;
-            }
-
-            var html = await File.ReadAllTextAsync(indexPath, context.RequestAborted);
-
-            // Escape base path for safe injection into JavaScript string
-            var escapedBasePath = basePath
-                .Replace("\\", "\\\\")
-                .Replace("\"", "\\\"")
-                .Replace("<", "\\u003c")
-                .Replace(">", "\\u003e");
-            var configScript = $"<script>window.__MKAT_BASE_PATH__=\"{escapedBasePath}\";</script>";
-            cachedFallbackHtml = html.Replace("</head>", $"{configScript}\n</head>");
-        }
-
-        context.Response.ContentType = "text/html";
-        await context.Response.WriteAsync(cachedFallbackHtml, context.RequestAborted);
-    });
+    app.MapFallbackToFile("index.html");
 
     app.Run();
 }

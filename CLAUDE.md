@@ -257,4 +257,5 @@ Alerts are sent only on state transitions.
 | MKAT_TELEGRAM_CHAT_ID | Conditional | Telegram chat ID |
 | MKAT_DATABASE_PATH | No | SQLite path (default: mkat.db) |
 | MKAT_LOG_LEVEL | No | Log level (default: Information) |
-| MKAT_BASE_PATH | No | URL prefix for reverse proxy (default: none, e.g., /mkat) |
+
+**Note:** The app is always served at `/mkat`. To serve at root, use reverse proxy URL rewriting.

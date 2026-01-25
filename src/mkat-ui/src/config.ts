@@ -1,11 +1,4 @@
-declare global {
-  interface Window {
-    __MKAT_BASE_PATH__?: string;
-  }
-}
-
+// Base path is baked into the build - app always runs at /mkat
 export function getBasePath(): string {
-  const base = window.__MKAT_BASE_PATH__ ?? '';
-  // Ensure no trailing slash (TanStack Router expects "/mkat" not "/mkat/")
-  return base.endsWith('/') ? base.slice(0, -1) : base;
+  return '/mkat';
 }

@@ -8,6 +8,10 @@ using Xunit;
 
 namespace Mkat.Api.Tests;
 
+/// <summary>
+/// Tests for the /mkat base path behavior.
+/// The app is always served at /mkat (baked into the build).
+/// </summary>
 [Collection("BasicAuth")]
 public class BasePathTests : IDisposable
 {
@@ -16,7 +20,6 @@ public class BasePathTests : IDisposable
 
     public BasePathTests()
     {
-        Environment.SetEnvironmentVariable("MKAT_BASE_PATH", "/mkat");
         Environment.SetEnvironmentVariable("MKAT_USERNAME", "admin");
         Environment.SetEnvironmentVariable("MKAT_PASSWORD", "testpass");
 
@@ -56,6 +59,7 @@ public class BasePathTests : IDisposable
     [Fact]
     public async Task HealthEndpoint_WithoutBasePath_StillWorks()
     {
+        // UsePathBase doesn't reject non-prefixed requests
         var response = await _client.GetAsync("/health");
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
     }
@@ -79,18 +83,17 @@ public class BasePathTests : IDisposable
     }
 
     [Fact]
-    public async Task SpaFallback_WithBasePath_ReturnsHtmlWithConfig()
+    public async Task SpaFallback_WithBasePath_ReturnsHtml()
     {
         var response = await _client.GetAsync("/mkat/dashboard");
         var content = await response.Content.ReadAsStringAsync();
 
-        Assert.Contains("__MKAT_BASE_PATH__", content);
-        Assert.Contains("/mkat", content);
+        // Should serve index.html with /mkat asset paths (baked into build)
+        Assert.Contains("/mkat/assets/", content);
     }
 
     public void Dispose()
     {
-        Environment.SetEnvironmentVariable("MKAT_BASE_PATH", null);
         Environment.SetEnvironmentVariable("MKAT_USERNAME", null);
         Environment.SetEnvironmentVariable("MKAT_PASSWORD", null);
         _client.Dispose();
