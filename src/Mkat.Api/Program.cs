@@ -89,6 +89,10 @@ try
 
     var app = builder.Build();
 
+    // App is served at /mkat - must be FIRST before any routing
+    app.UsePathBase("/mkat");
+    app.UseRouting();
+
     using (var scope = app.Services.CreateScope())
     {
         var db = scope.ServiceProvider.GetRequiredService<MkatDbContext>();
@@ -109,9 +113,6 @@ try
             db.Database.EnsureCreated();
         }
     }
-
-    // App is served at /mkat - baked into frontend build
-    app.UsePathBase("/mkat");
 
     app.UseMiddleware<ExceptionHandlingMiddleware>();
     app.UseMiddleware<SecurityHeadersMiddleware>();
