@@ -1,3 +1,10 @@
+## [1.4.2](https://github.com/bsteinemann/mkat/compare/v1.4.1...v1.4.2) (2026-01-25)
+
+
+### Bug Fixes
+
+* include PathBase in generated webhook/heartbeat URLs ([3f8e548](https://github.com/bsteinemann/mkat/commit/3f8e548128f8b786d4a0695aa694818a418446dc))
+
 ## [1.4.1](https://github.com/bsteinemann/mkat/compare/v1.4.0...v1.4.1) (2026-01-25)
 
 
