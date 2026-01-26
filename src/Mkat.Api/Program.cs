@@ -2,7 +2,6 @@ using FluentValidation;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using Mkat.Api.Middleware;
-using Mkat.Application.DTOs;
 using Mkat.Application.Interfaces;
 using Mkat.Application.Services;
 using Mkat.Application.Validators;
@@ -48,18 +47,7 @@ try
     builder.Services.AddControllers();
     builder.Services.AddRouting(options => options.LowercaseUrls = true);
 
-    builder.Services.AddScoped<IValidator<CreateServiceRequest>, CreateServiceValidator>();
-    builder.Services.AddScoped<IValidator<UpdateServiceRequest>, UpdateServiceValidator>();
-    builder.Services.AddScoped<IValidator<AddMonitorRequest>, AddMonitorValidator>();
-    builder.Services.AddScoped<IValidator<UpdateMonitorRequest>, UpdateMonitorValidator>();
-    builder.Services.AddScoped<IValidator<CreateContactRequest>, CreateContactValidator>();
-    builder.Services.AddScoped<IValidator<UpdateContactRequest>, UpdateContactValidator>();
-    builder.Services.AddScoped<IValidator<AddChannelRequest>, AddChannelValidator>();
-    builder.Services.AddScoped<IValidator<UpdateChannelRequest>, UpdateChannelValidator>();
-    builder.Services.AddScoped<IValidator<SetServiceContactsRequest>, SetServiceContactsValidator>();
-    builder.Services.AddScoped<IValidator<PeerInitiateRequest>, PeerInitiateValidator>();
-    builder.Services.AddScoped<IValidator<PeerAcceptRequest>, PeerAcceptValidator>();
-    builder.Services.AddScoped<IValidator<PeerCompleteRequest>, PeerCompleteValidator>();
+    builder.Services.AddValidatorsFromAssemblyContaining<CreateServiceValidator>();
 
     builder.Services.Configure<TelegramOptions>(options =>
     {
