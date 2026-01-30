@@ -5,6 +5,7 @@ import { StateIndicator } from './StateIndicator';
 import { formatDistanceToNow } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 
 interface Props {
   service: Service;
@@ -12,26 +13,33 @@ interface Props {
   onResume?: () => void;
 }
 
-const severityColors = {
-  [Severity.Low]: 'border-green-200 dark:border-green-800',
-  [Severity.Medium]: 'border-yellow-200 dark:border-yellow-800',
-  [Severity.High]: 'border-orange-200 dark:border-orange-800',
-  [Severity.Critical]: 'border-red-200 dark:border-red-800',
+const severityBadge = {
+  [Severity.Low]: { label: 'Low', variant: 'outline' as const },
+  [Severity.Medium]: { label: 'Medium', variant: 'secondary' as const, className: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' },
+  [Severity.High]: { label: 'High', variant: 'secondary' as const, className: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200' },
+  [Severity.Critical]: { label: 'Critical', variant: 'destructive' as const },
 };
 
 export function ServiceCard({ service, onPause, onResume }: Props) {
+  const severity = severityBadge[service.severity];
+
   return (
-    <Card className={`border-l-4 ${severityColors[service.severity]} py-0`}>
+    <Card className="py-0">
       <CardContent className="p-4">
         <div className="flex items-start justify-between">
           <div>
-            <Link
-              to="/services/$serviceId"
-              params={{ serviceId: service.id }}
-              className="text-lg font-semibold text-foreground hover:text-blue-600 dark:hover:text-blue-400"
-            >
-              {service.name}
-            </Link>
+            <div className="flex items-center gap-2">
+              <Link
+                to="/services/$serviceId"
+                params={{ serviceId: service.id }}
+                className="text-lg font-semibold text-foreground hover:text-blue-600 dark:hover:text-blue-400"
+              >
+                {service.name}
+              </Link>
+              <Badge variant={severity.variant} className={severity.className}>
+                {severity.label}
+              </Badge>
+            </div>
             {service.description && (
               <p className="text-sm text-muted-foreground mt-1">{service.description}</p>
             )}
