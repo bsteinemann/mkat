@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -43,7 +44,19 @@ export function Contacts() {
     },
   });
 
-  if (isLoading) return <div>Loading...</div>;
+  if (isLoading) return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <Skeleton className="h-8 w-32" />
+        <Skeleton className="h-9 w-28 rounded-md" />
+      </div>
+      <div className="space-y-3">
+        <Skeleton className="h-20 w-full rounded-lg" />
+        <Skeleton className="h-20 w-full rounded-lg" />
+        <Skeleton className="h-20 w-full rounded-lg" />
+      </div>
+    </div>
+  );
 
   return (
     <div className="space-y-6">

@@ -9,6 +9,7 @@ import { AlertItem } from '../components/alerts/AlertItem';
 import { MonitorDescription } from '../components/monitors/MonitorDescription';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export function ServiceDetail() {
   const { serviceId } = useParams({ strict: false }) as { serviceId: string };
@@ -55,7 +56,23 @@ export function ServiceDetail() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['services'] }),
   });
 
-  if (isLoading || !service) return <div>Loading...</div>;
+  if (isLoading || !service) return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div className="space-y-2">
+          <Skeleton className="h-8 w-48" />
+          <Skeleton className="h-4 w-64" />
+        </div>
+        <div className="flex items-center gap-4">
+          <Skeleton className="h-8 w-16 rounded-full" />
+          <Skeleton className="h-9 w-20 rounded-md" />
+          <Skeleton className="h-9 w-16 rounded-md" />
+        </div>
+      </div>
+      <Skeleton className="h-48 w-full rounded-lg" />
+      <Skeleton className="h-36 w-full rounded-lg" />
+    </div>
+  );
 
   return (
     <div className="space-y-6">

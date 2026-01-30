@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { alertsApi } from '../api/alerts';
 import { AlertItem } from '../components/alerts/AlertItem';
 import { Pagination } from '../components/common/Pagination';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export function Alerts() {
   const [page, setPage] = useState(1);
@@ -19,7 +20,16 @@ export function Alerts() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['alerts'] }),
   });
 
-  if (isLoading) return <div>Loading...</div>;
+  if (isLoading) return (
+    <div className="space-y-6">
+      <Skeleton className="h-8 w-24" />
+      <div className="space-y-3">
+        <Skeleton className="h-16 w-full rounded-lg" />
+        <Skeleton className="h-16 w-full rounded-lg" />
+        <Skeleton className="h-16 w-full rounded-lg" />
+      </div>
+    </div>
+  );
 
   return (
     <div className="space-y-6">

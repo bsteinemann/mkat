@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -91,7 +92,13 @@ export function ServiceEdit() {
     },
   });
 
-  if (isLoading || !service) return <div>Loading...</div>;
+  if (isLoading || !service) return (
+    <div className="max-w-2xl space-y-6">
+      <Skeleton className="h-8 w-40" />
+      <Skeleton className="h-52 w-full rounded-lg" />
+      <Skeleton className="h-40 w-full rounded-lg" />
+    </div>
+  );
 
   const handleSubmit = (data: CreateServiceRequest) => {
     updateMutation.mutate({
@@ -491,7 +498,11 @@ function ContactsSection({ serviceId }: { serviceId: string }) {
           <CardTitle className="text-lg">Contacts</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-gray-500">Loading...</p>
+          <div className="space-y-3">
+            <Skeleton className="h-5 w-full rounded" />
+            <Skeleton className="h-5 w-full rounded" />
+            <Skeleton className="h-5 w-full rounded" />
+          </div>
         </CardContent>
       </Card>
     );

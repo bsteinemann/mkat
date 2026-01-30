@@ -5,6 +5,7 @@ import { servicesApi } from '../api/services';
 import { ServiceCard } from '../components/services/ServiceCard';
 import { Pagination } from '../components/common/Pagination';
 import { buttonVariants } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export function Services() {
   const [page, setPage] = useState(1);
@@ -25,7 +26,19 @@ export function Services() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['services'] }),
   });
 
-  if (isLoading) return <div>Loading...</div>;
+  if (isLoading) return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <Skeleton className="h-8 w-32" />
+        <Skeleton className="h-9 w-28 rounded-md" />
+      </div>
+      <div className="space-y-4">
+        <Skeleton className="h-24 w-full rounded-lg" />
+        <Skeleton className="h-24 w-full rounded-lg" />
+        <Skeleton className="h-24 w-full rounded-lg" />
+      </div>
+    </div>
+  );
 
   return (
     <div className="space-y-6">
