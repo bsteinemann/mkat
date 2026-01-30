@@ -12,6 +12,8 @@ public class Service
     public Severity Severity { get; set; } = Severity.Medium;
     public DateTime? PausedUntil { get; set; }
     public bool AutoResume { get; set; }
+    public bool IsSuppressed { get; set; }
+    public string? SuppressionReason { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
