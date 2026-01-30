@@ -1,6 +1,7 @@
 import type { Alert } from '../../api/types';
 import { AlertType, Severity } from '../../api/types';
 import { formatDistanceToNow } from 'date-fns';
+import { Button } from '@/components/ui/button';
 
 interface Props {
   alert: Alert;
@@ -47,12 +48,13 @@ export function AlertItem({ alert, onAcknowledge }: Props) {
         </p>
       </div>
       {onAcknowledge && !alert.acknowledgedAt && (
-        <button
+        <Button
+          variant="secondary"
+          size="xs"
           onClick={onAcknowledge}
-          className="text-xs px-2 py-1 bg-blue-50 text-blue-700 rounded hover:bg-blue-100"
         >
           Ack
-        </button>
+        </Button>
       )}
     </div>
   );

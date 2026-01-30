@@ -7,6 +7,7 @@ import { StateIndicator } from '../components/services/StateIndicator';
 import { CopyableUrl } from '../components/common/CopyableUrl';
 import { AlertItem } from '../components/alerts/AlertItem';
 import { MonitorDescription } from '../components/monitors/MonitorDescription';
+import { Button } from '@/components/ui/button';
 
 export function ServiceDetail() {
   const { serviceId } = useParams({ strict: false }) as { serviceId: string };
@@ -68,19 +69,21 @@ export function ServiceDetail() {
           <StateIndicator state={service.state} size="lg" />
           <div className="flex gap-2">
             {service.state !== 3 ? (
-              <button
+              <Button
+                variant="outline"
+                className="bg-yellow-100 text-yellow-800 hover:bg-yellow-200 border-yellow-200"
                 onClick={() => pauseMutation.mutate()}
-                className="px-4 py-2 bg-yellow-100 text-yellow-800 rounded hover:bg-yellow-200"
               >
                 Pause
-              </button>
+              </Button>
             ) : (
-              <button
+              <Button
+                variant="outline"
+                className="bg-green-100 text-green-800 hover:bg-green-200 border-green-200"
                 onClick={() => resumeMutation.mutate()}
-                className="px-4 py-2 bg-green-100 text-green-800 rounded hover:bg-green-200"
               >
                 Resume
-              </button>
+              </Button>
             )}
             <Link
               to="/services/$serviceId/edit"
@@ -117,20 +120,23 @@ export function ServiceDetail() {
                   <CopyableUrl label="Failure URL (HTTP POST)" url={monitor.webhookFailUrl} />
                   <CopyableUrl label="Recovery URL (HTTP POST)" url={monitor.webhookRecoverUrl} />
                   <div className="flex gap-2 mt-2">
-                    <button
+                    <Button
+                      variant="destructive"
+                      size="sm"
                       onClick={() => webhookFailMutation.mutate(monitor.webhookFailUrl)}
                       disabled={webhookFailMutation.isPending}
-                      className="px-3 py-1.5 text-sm bg-red-100 text-red-800 rounded hover:bg-red-200 disabled:opacity-50"
                     >
                       {webhookFailMutation.isPending ? 'Sending...' : 'Test Fail'}
-                    </button>
-                    <button
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="bg-green-100 text-green-800 hover:bg-green-200 border-green-200"
                       onClick={() => webhookRecoverMutation.mutate(monitor.webhookRecoverUrl)}
                       disabled={webhookRecoverMutation.isPending}
-                      className="px-3 py-1.5 text-sm bg-green-100 text-green-800 rounded hover:bg-green-200 disabled:opacity-50"
                     >
                       {webhookRecoverMutation.isPending ? 'Sending...' : 'Test Recover'}
-                    </button>
+                    </Button>
                   </div>
                 </div>
               )}

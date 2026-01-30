@@ -5,6 +5,7 @@ import { servicesApi, contactsApi } from '../api/services';
 import { ServiceForm } from '../components/services/ServiceForm';
 import { MonitorType, ThresholdStrategy } from '../api/types';
 import type { CreateServiceRequest, UpdateServiceRequest, CreateMonitorRequest, UpdateMonitorRequest, Monitor } from '../api/types';
+import { Button } from '@/components/ui/button';
 
 export function ServiceEdit() {
   const { serviceId } = useParams({ strict: false }) as { serviceId: string };
@@ -102,16 +103,16 @@ export function ServiceEdit() {
         <p className="text-sm text-gray-600 mb-4">
           Deleting a service removes all monitors and alert history.
         </p>
-        <button
+        <Button
+          variant="destructive"
           onClick={() => {
             if (confirm('Are you sure you want to delete this service?')) {
               deleteMutation.mutate();
             }
           }}
-          className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
         >
           Delete Service
-        </button>
+        </Button>
       </div>
     </div>
   );
@@ -192,13 +193,15 @@ function MonitorSection({
     <div className="mt-6 bg-white rounded-lg shadow p-6">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-semibold text-gray-900">Monitors</h2>
-        <button
+        <Button
           type="button"
+          variant="link"
+          size="sm"
+          className="p-0 h-auto"
           onClick={() => setShowAddForm(!showAddForm)}
-          className="text-sm text-blue-600 hover:text-blue-800"
         >
           {showAddForm ? 'Cancel' : '+ Add Monitor'}
-        </button>
+        </Button>
       </div>
 
       {showAddForm && (
@@ -366,14 +369,14 @@ function MonitorSection({
               </div>
             </div>
           )}
-          <button
+          <Button
             type="button"
+            size="sm"
             onClick={handleAdd}
             disabled={isAdding}
-            className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 disabled:opacity-50"
           >
             {isAdding ? 'Adding...' : 'Add'}
-          </button>
+          </Button>
           {addError && <p className="text-red-600 text-xs">{addError}</p>}
         </div>
       )}
@@ -476,19 +479,20 @@ function ContactsSection({ serviceId }: { serviceId: string }) {
 
       {dirty && (
         <div className="mt-4 flex items-center gap-2">
-          <button
+          <Button
+            size="sm"
             onClick={() => saveMutation.mutate(Array.from(selected))}
             disabled={saveMutation.isPending}
-            className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 disabled:opacity-50"
           >
             {saveMutation.isPending ? 'Saving...' : 'Save Contacts'}
-          </button>
-          <button
+          </Button>
+          <Button
+            variant="secondary"
+            size="sm"
             onClick={() => setLocalSelected(null)}
-            className="px-3 py-1 bg-gray-200 text-gray-700 text-sm rounded hover:bg-gray-300"
           >
             Cancel
-          </button>
+          </Button>
         </div>
       )}
 
@@ -578,24 +582,28 @@ function MonitorRow({
         <span className="text-sm font-medium text-gray-700">{typeLabels[monitor.type]}</span>
         <div className="flex gap-2">
           {!editing && (
-            <button
+            <Button
               type="button"
+              variant="link"
+              size="xs"
+              className="p-0 h-auto"
               onClick={() => setEditing(true)}
-              className="text-xs text-blue-600 hover:text-blue-800"
             >
               Edit
-            </button>
+            </Button>
           )}
-          <button
+          <Button
             type="button"
+            variant="ghost"
+            size="xs"
+            className="p-0 h-auto text-red-600 hover:text-red-800 hover:bg-transparent"
             onClick={() => {
               if (confirm('Remove this monitor?')) onDelete();
             }}
             disabled={!canDelete}
-            className="text-xs text-red-600 hover:text-red-800 disabled:opacity-30 disabled:cursor-not-allowed"
           >
             Remove
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -751,20 +759,21 @@ function MonitorRow({
             </div>
           )}
           <div className="flex gap-2">
-            <button
+            <Button
               type="button"
+              size="xs"
               onClick={handleSave}
-              className="px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700"
             >
               Save
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
+              variant="secondary"
+              size="xs"
               onClick={handleCancel}
-              className="px-2 py-1 bg-gray-200 text-gray-700 text-xs rounded hover:bg-gray-300"
             >
               Cancel
-            </button>
+            </Button>
           </div>
         </div>
       ) : (

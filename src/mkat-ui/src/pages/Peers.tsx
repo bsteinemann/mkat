@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
 import { peersApi } from '../api/services';
 import { StateIndicator } from '../components/services/StateIndicator';
+import { Button } from '@/components/ui/button';
 
 export function Peers() {
   const queryClient = useQueryClient();
@@ -24,12 +25,9 @@ export function Peers() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900">Peers</h1>
-        <button
-          onClick={() => setShowPairDialog(true)}
-          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-        >
+        <Button onClick={() => setShowPairDialog(true)}>
           Pair Instance
-        </button>
+        </Button>
       </div>
 
       {showPairDialog && (
@@ -65,16 +63,17 @@ export function Peers() {
                   >
                     View Service
                   </Link>
-                  <button
+                  <Button
+                    variant="destructive"
+                    size="sm"
                     onClick={() => {
                       if (confirm(`Unpair from ${peer.name}?`)) {
                         unpairMutation.mutate(peer.id);
                       }
                     }}
-                    className="px-3 py-1.5 text-sm bg-red-100 text-red-800 rounded hover:bg-red-200"
                   >
                     Unpair
-                  </button>
+                  </Button>
                 </div>
               </div>
             </div>
@@ -111,27 +110,33 @@ function PairDialog({ onClose }: { onClose: () => void }) {
     <div className="bg-white rounded-lg shadow p-6 border border-blue-200">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-semibold">Pair with Another Instance</h2>
-        <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+        <Button variant="ghost" size="sm" onClick={onClose}>
           Close
-        </button>
+        </Button>
       </div>
 
       {mode === 'choose' && (
         <div className="space-y-3">
-          <button
+          <Button
+            variant="outline"
+            className="block w-full text-left p-4 h-auto"
             onClick={() => setMode('generate')}
-            className="block w-full text-left p-4 border rounded hover:bg-gray-50"
           >
-            <div className="font-medium">Generate a pairing token</div>
-            <div className="text-sm text-gray-500">Share the token with the other instance</div>
-          </button>
-          <button
+            <div>
+              <div className="font-medium">Generate a pairing token</div>
+              <div className="text-sm text-gray-500">Share the token with the other instance</div>
+            </div>
+          </Button>
+          <Button
+            variant="outline"
+            className="block w-full text-left p-4 h-auto"
             onClick={() => setMode('enter')}
-            className="block w-full text-left p-4 border rounded hover:bg-gray-50"
           >
-            <div className="font-medium">Enter a pairing token</div>
-            <div className="text-sm text-gray-500">Paste a token from another instance</div>
-          </button>
+            <div>
+              <div className="font-medium">Enter a pairing token</div>
+              <div className="text-sm text-gray-500">Paste a token from another instance</div>
+            </div>
+          </Button>
         </div>
       )}
 
@@ -147,13 +152,12 @@ function PairDialog({ onClose }: { onClose: () => void }) {
               className="mt-1 block w-full rounded border-gray-300 shadow-sm px-3 py-2 border"
             />
           </div>
-          <button
+          <Button
             onClick={() => initiateMutation.mutate(instanceName)}
             disabled={!instanceName || initiateMutation.isPending}
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
           >
             {initiateMutation.isPending ? 'Generating...' : 'Generate Token'}
-          </button>
+          </Button>
           {initiateMutation.isError && (
             <p className="text-red-600 text-sm">{(initiateMutation.error as Error).message}</p>
           )}
@@ -172,12 +176,14 @@ function PairDialog({ onClose }: { onClose: () => void }) {
               className="block w-full rounded border-gray-300 shadow-sm px-3 py-2 border text-xs font-mono"
               rows={3}
             />
-            <button
+            <Button
+              variant="secondary"
+              size="xs"
+              className="absolute top-2 right-2"
               onClick={() => navigator.clipboard.writeText(generatedToken)}
-              className="absolute top-2 right-2 px-2 py-1 text-xs bg-gray-100 rounded hover:bg-gray-200"
             >
               Copy
-            </button>
+            </Button>
           </div>
         </div>
       )}
@@ -194,13 +200,12 @@ function PairDialog({ onClose }: { onClose: () => void }) {
               rows={3}
             />
           </div>
-          <button
+          <Button
             onClick={() => completeMutation.mutate(pasteToken.trim())}
             disabled={!pasteToken.trim() || completeMutation.isPending}
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
           >
             {completeMutation.isPending ? 'Pairing...' : 'Complete Pairing'}
-          </button>
+          </Button>
           {completeMutation.isError && (
             <p className="text-red-600 text-sm">{(completeMutation.error as Error).message}</p>
           )}

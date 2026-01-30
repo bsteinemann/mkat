@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { MonitorType, Severity, ThresholdStrategy } from '../../api/types';
 import type { CreateServiceRequest, CreateMonitorRequest } from '../../api/types';
 import { MonitorDescription } from '../monitors/MonitorDescription';
+import { Button } from '@/components/ui/button';
 
 interface Props {
   initialData?: {
@@ -107,13 +108,15 @@ export function ServiceForm({ initialData, onSubmit, isLoading, submitLabel = 'C
         <div>
           <div className="flex items-center justify-between mb-3">
             <label className="block text-sm font-medium text-gray-700">Monitors</label>
-            <button
+            <Button
               type="button"
+              variant="link"
+              size="sm"
+              className="p-0 h-auto"
               onClick={addMonitor}
-              className="text-sm text-blue-600 hover:text-blue-800"
             >
               + Add Monitor
-            </button>
+            </Button>
           </div>
 
           <div className="space-y-4">
@@ -131,13 +134,15 @@ export function ServiceForm({ initialData, onSubmit, isLoading, submitLabel = 'C
                     <option value={MonitorType.Metric}>Metric</option>
                   </select>
                   {monitors.length > 1 && (
-                    <button
+                    <Button
                       type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="p-0 h-auto text-red-600 hover:text-red-800 hover:bg-transparent"
                       onClick={() => removeMonitor(index)}
-                      className="text-sm text-red-600 hover:text-red-800"
                     >
                       Remove
-                    </button>
+                    </Button>
                   )}
                 </div>
 
@@ -301,13 +306,13 @@ export function ServiceForm({ initialData, onSubmit, isLoading, submitLabel = 'C
         </div>
       )}
 
-      <button
+      <Button
         type="submit"
         disabled={isLoading}
-        className="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 disabled:opacity-50"
+        className="w-full"
       >
         {isLoading ? 'Saving...' : submitLabel}
-      </button>
+      </Button>
     </form>
   );
 }

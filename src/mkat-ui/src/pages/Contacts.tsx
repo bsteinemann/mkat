@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { contactsApi } from '../api/services';
 import { ChannelType } from '../api/types';
 import type { Contact, ContactChannel } from '../api/types';
+import { Button } from '@/components/ui/button';
 
 export function Contacts() {
   const queryClient = useQueryClient();
@@ -25,12 +26,9 @@ export function Contacts() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900">Contacts</h1>
-        <button
-          onClick={() => setShowCreate(true)}
-          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-        >
+        <Button onClick={() => setShowCreate(true)}>
           Add Contact
-        </button>
+        </Button>
       </div>
 
       {showCreate && (
@@ -66,23 +64,25 @@ export function Contacts() {
                   </p>
                 </div>
                 <div className="flex gap-2">
-                  <button
+                  <Button
+                    variant="secondary"
+                    size="sm"
                     onClick={() => setEditingContact(contact)}
-                    className="px-3 py-1.5 text-sm bg-gray-100 text-gray-800 rounded hover:bg-gray-200"
                   >
                     Manage
-                  </button>
+                  </Button>
                   {!contact.isDefault && (
-                    <button
+                    <Button
+                      variant="destructive"
+                      size="sm"
                       onClick={() => {
                         if (confirm(`Delete contact "${contact.name}"?`)) {
                           deleteMutation.mutate(contact.id);
                         }
                       }}
-                      className="px-3 py-1.5 text-sm bg-red-100 text-red-800 rounded hover:bg-red-200"
                     >
                       Delete
-                    </button>
+                    </Button>
                   )}
                 </div>
               </div>
@@ -125,16 +125,15 @@ function ContactForm({ onClose, contact }: { onClose: () => void; contact?: Cont
           placeholder="Contact name"
           className="flex-1 rounded border-gray-300 shadow-sm px-3 py-2 border"
         />
-        <button
+        <Button
           onClick={() => contact ? updateMutation.mutate(name) : createMutation.mutate(name)}
           disabled={!name.trim()}
-          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
         >
           {contact ? 'Save' : 'Create'}
-        </button>
-        <button onClick={onClose} className="px-4 py-2 text-gray-600 hover:text-gray-800">
+        </Button>
+        <Button variant="ghost" onClick={onClose}>
           Cancel
-        </button>
+        </Button>
       </div>
     </div>
   );
@@ -188,38 +187,42 @@ function ContactDetail({ contact, onClose }: { contact: Contact; onClose: () => 
               onChange={e => setName(e.target.value)}
               className="rounded border-gray-300 shadow-sm px-3 py-1 border"
             />
-            <button
+            <Button
+              size="sm"
               onClick={() => updateNameMutation.mutate(name)}
-              className="px-3 py-1 text-sm bg-blue-600 text-white rounded"
             >
               Save
-            </button>
+            </Button>
           </div>
         ) : (
           <div className="flex items-center gap-2">
             <h2 className="text-lg font-semibold">{displayContact.name}</h2>
-            <button
+            <Button
+              variant="link"
+              size="sm"
+              className="p-0 h-auto"
               onClick={() => setEditingName(true)}
-              className="text-sm text-blue-600 hover:text-blue-800"
             >
               Edit
-            </button>
+            </Button>
           </div>
         )}
-        <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+        <Button variant="ghost" size="sm" onClick={onClose}>
           Close
-        </button>
+        </Button>
       </div>
 
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <h3 className="font-medium text-gray-700">Channels</h3>
-          <button
+          <Button
+            variant="link"
+            size="sm"
+            className="p-0 h-auto"
             onClick={() => setShowAddChannel(true)}
-            className="text-sm text-blue-600 hover:text-blue-800"
           >
             + Add Channel
-          </button>
+          </Button>
         </div>
 
         {showAddChannel && (
@@ -243,28 +246,31 @@ function ContactDetail({ contact, onClose }: { contact: Contact; onClose: () => 
                 </span>
               </div>
               <div className="flex gap-2">
-                <button
+                <Button
+                  variant="secondary"
+                  size="xs"
                   onClick={() => testChannelMutation.mutate(ch.id)}
-                  className="text-xs px-2 py-1 bg-blue-50 text-blue-700 rounded hover:bg-blue-100"
                 >
                   Test
-                </button>
-                <button
+                </Button>
+                <Button
+                  variant="outline"
+                  size="xs"
                   onClick={() => toggleChannelMutation.mutate(ch)}
-                  className="text-xs px-2 py-1 bg-gray-100 rounded hover:bg-gray-200"
                 >
                   {ch.isEnabled ? 'Disable' : 'Enable'}
-                </button>
-                <button
+                </Button>
+                <Button
+                  variant="destructive"
+                  size="xs"
                   onClick={() => {
                     if (confirm('Remove this channel?')) {
                       deleteChannelMutation.mutate(ch.id);
                     }
                   }}
-                  className="text-xs px-2 py-1 bg-red-50 text-red-700 rounded hover:bg-red-100"
                 >
                   Remove
-                </button>
+                </Button>
               </div>
             </div>
           ))
@@ -333,16 +339,16 @@ function AddChannelForm({ contactId, onClose }: { contactId: string; onClose: ()
       )}
 
       <div className="flex gap-2">
-        <button
+        <Button
+          size="sm"
           onClick={() => addMutation.mutate()}
           disabled={type === ChannelType.Telegram && (!botToken || !chatId)}
-          className="px-3 py-1.5 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
         >
           Add Channel
-        </button>
-        <button onClick={onClose} className="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-800">
+        </Button>
+        <Button variant="ghost" size="sm" onClick={onClose}>
           Cancel
-        </button>
+        </Button>
       </div>
     </div>
   );

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { getBasePath } from '../config';
+import { Button } from '@/components/ui/button';
 
 export function Login() {
   const navigate = useNavigate();
@@ -68,12 +69,9 @@ export function Login() {
             />
           </div>
 
-          <button
-            type="submit"
-            className="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
-          >
+          <Button type="submit" className="w-full">
             Login
-          </button>
+          </Button>
         </form>
       </div>
     </div>

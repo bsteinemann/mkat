@@ -3,6 +3,7 @@ import type { Service } from '../../api/types';
 import { ServiceState, Severity } from '../../api/types';
 import { StateIndicator } from './StateIndicator';
 import { formatDistanceToNow } from 'date-fns';
+import { Button } from '@/components/ui/button';
 
 interface Props {
   service: Service;
@@ -40,19 +41,23 @@ export function ServiceCard({ service, onPause, onResume }: Props) {
         <span>Updated {formatDistanceToNow(new Date(service.updatedAt))} ago</span>
         <div className="flex gap-2">
           {service.state !== ServiceState.Paused ? (
-            <button
+            <Button
+              variant="ghost"
+              size="sm"
+              className="p-0 h-auto text-yellow-600 hover:text-yellow-800 hover:bg-transparent"
               onClick={onPause}
-              className="text-yellow-600 hover:text-yellow-800"
             >
               Pause
-            </button>
+            </Button>
           ) : (
-            <button
+            <Button
+              variant="ghost"
+              size="sm"
+              className="p-0 h-auto text-green-600 hover:text-green-800 hover:bg-transparent"
               onClick={onResume}
-              className="text-green-600 hover:text-green-800"
             >
               Resume
-            </button>
+            </Button>
           )}
           <Link
             to="/services/$serviceId/edit"

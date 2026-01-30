@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { ClipboardIcon, CheckIcon } from '@heroicons/react/24/outline';
+import { Button } from '@/components/ui/button';
 
 interface Props {
   label: string;
@@ -22,9 +23,10 @@ export function CopyableUrl({ label, url }: Props) {
         <code className="flex-1 bg-gray-100 px-3 py-2 rounded text-sm font-mono truncate">
           {url}
         </code>
-        <button
+        <Button
+          variant="ghost"
+          size="icon"
           onClick={handleCopy}
-          className="p-2 text-gray-500 hover:text-gray-700 rounded hover:bg-gray-100"
           title={copied ? 'Copied!' : 'Copy to clipboard'}
         >
           {copied ? (
@@ -32,7 +34,7 @@ export function CopyableUrl({ label, url }: Props) {
           ) : (
             <ClipboardIcon className="h-5 w-5" />
           )}
-        </button>
+        </Button>
       </div>
     </div>
   );
