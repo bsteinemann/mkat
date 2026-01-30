@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Mkat.Application.Interfaces;
 using Mkat.Application.Services;
+using Mkat.Domain.Entities;
 using Mkat.Domain.Enums;
 
 namespace Mkat.Api.Controllers;
@@ -10,17 +11,20 @@ namespace Mkat.Api.Controllers;
 public class HeartbeatController : ControllerBase
 {
     private readonly IMonitorRepository _monitorRepo;
+    private readonly IMonitorEventRepository _eventRepo;
     private readonly IStateService _stateService;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<HeartbeatController> _logger;
 
     public HeartbeatController(
         IMonitorRepository monitorRepo,
+        IMonitorEventRepository eventRepo,
         IStateService stateService,
         IUnitOfWork unitOfWork,
         ILogger<HeartbeatController> logger)
     {
         _monitorRepo = monitorRepo;
+        _eventRepo = eventRepo;
         _stateService = stateService;
         _unitOfWork = unitOfWork;
         _logger = logger;
@@ -40,6 +44,17 @@ public class HeartbeatController : ControllerBase
         {
             return BadRequest(new { error = "Invalid monitor type for this endpoint" });
         }
+
+        var monitorEvent = new MonitorEvent
+        {
+            Id = Guid.NewGuid(),
+            MonitorId = monitor.Id,
+            ServiceId = monitor.ServiceId,
+            EventType = EventType.HeartbeatReceived,
+            Success = true,
+            CreatedAt = DateTime.UtcNow
+        };
+        await _eventRepo.AddAsync(monitorEvent, ct);
 
         monitor.LastCheckIn = DateTime.UtcNow;
         await _monitorRepo.UpdateAsync(monitor, ct);

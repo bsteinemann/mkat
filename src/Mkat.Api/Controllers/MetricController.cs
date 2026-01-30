@@ -12,6 +12,7 @@ public class MetricController : ControllerBase
 {
     private readonly IMonitorRepository _monitorRepo;
     private readonly IMetricReadingRepository _readingRepo;
+    private readonly IMonitorEventRepository _eventRepo;
     private readonly IMetricEvaluator _evaluator;
     private readonly IStateService _stateService;
     private readonly IUnitOfWork _unitOfWork;
@@ -20,6 +21,7 @@ public class MetricController : ControllerBase
     public MetricController(
         IMonitorRepository monitorRepo,
         IMetricReadingRepository readingRepo,
+        IMonitorEventRepository eventRepo,
         IMetricEvaluator evaluator,
         IStateService stateService,
         IUnitOfWork unitOfWork,
@@ -27,6 +29,7 @@ public class MetricController : ControllerBase
     {
         _monitorRepo = monitorRepo;
         _readingRepo = readingRepo;
+        _eventRepo = eventRepo;
         _evaluator = evaluator;
         _stateService = stateService;
         _unitOfWork = unitOfWork;
@@ -61,7 +64,7 @@ public class MetricController : ControllerBase
         var val = metricValue.Value;
         var isOutOfRange = MetricEvaluator.IsOutOfRange(val, monitor);
 
-        // Store the reading
+        // Store the reading (legacy, will be removed in Phase 10)
         var reading = new MetricReading
         {
             Id = Guid.NewGuid(),
@@ -71,6 +74,20 @@ public class MetricController : ControllerBase
             IsOutOfRange = isOutOfRange
         };
         await _readingRepo.AddAsync(reading, ct);
+
+        // Store as MonitorEvent
+        var monitorEvent = new MonitorEvent
+        {
+            Id = Guid.NewGuid(),
+            MonitorId = monitor.Id,
+            ServiceId = monitor.ServiceId,
+            EventType = EventType.MetricIngested,
+            Success = !isOutOfRange,
+            Value = val,
+            IsOutOfRange = isOutOfRange,
+            CreatedAt = reading.RecordedAt
+        };
+        await _eventRepo.AddAsync(monitorEvent, ct);
 
         // Update monitor's last metric info
         monitor.LastMetricValue = val;

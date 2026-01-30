@@ -44,6 +44,7 @@ public class HealthCheckWorkerTests
         services.AddSingleton(_stateServiceMock.Object);
         services.AddSingleton(_unitOfWorkMock.Object);
         services.AddSingleton(_httpFactoryMock.Object);
+        services.AddSingleton(new Mock<IMonitorEventRepository>().Object);
         return services.BuildServiceProvider();
     }
 
