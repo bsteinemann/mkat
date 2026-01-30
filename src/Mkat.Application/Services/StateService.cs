@@ -18,6 +18,7 @@ public class StateService : IStateService
     private readonly IServiceRepository _serviceRepo;
     private readonly IAlertRepository _alertRepo;
     private readonly IMuteWindowRepository _muteRepo;
+    private readonly IServiceDependencyRepository _depRepo;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<StateService> _logger;
 
@@ -25,12 +26,14 @@ public class StateService : IStateService
         IServiceRepository serviceRepo,
         IAlertRepository alertRepo,
         IMuteWindowRepository muteRepo,
+        IServiceDependencyRepository depRepo,
         IUnitOfWork unitOfWork,
         ILogger<StateService> logger)
     {
         _serviceRepo = serviceRepo;
         _alertRepo = alertRepo;
         _muteRepo = muteRepo;
+        _depRepo = depRepo;
         _unitOfWork = unitOfWork;
         _logger = logger;
     }
@@ -51,6 +54,38 @@ public class StateService : IStateService
         _logger.LogInformation(
             "Service {ServiceId} transitioned from {PreviousState} to UP: {Reason}",
             serviceId, previousState, reason);
+
+        // Re-evaluate suppression for transitive dependents
+        var dependentIds = await _depRepo.GetTransitiveDependentIdsAsync(serviceId, ct);
+        foreach (var depId in dependentIds)
+        {
+            var dependent = await _serviceRepo.GetByIdAsync(depId, ct);
+            if (dependent is { IsSuppressed: true })
+            {
+                var depDependencyIds = await _depRepo.GetTransitiveDependencyIdsAsync(depId, ct);
+                var anyStillDown = false;
+                foreach (var depDepId in depDependencyIds)
+                {
+                    var depDep = await _serviceRepo.GetByIdAsync(depDepId, ct);
+                    if (depDep is { State: ServiceState.Down })
+                    {
+                        anyStillDown = true;
+                        break;
+                    }
+                }
+
+                if (!anyStillDown)
+                {
+                    dependent.IsSuppressed = false;
+                    dependent.SuppressionReason = null;
+                    await _serviceRepo.UpdateAsync(dependent, ct);
+
+                    _logger.LogInformation(
+                        "Cleared suppression for service {DependentId} after dependency {ServiceId} recovered",
+                        depId, serviceId);
+                }
+            }
+        }
 
         if (previousState == ServiceState.Down)
         {
@@ -98,6 +133,30 @@ public class StateService : IStateService
         _logger.LogInformation(
             "Service {ServiceId} transitioned from {PreviousState} to DOWN: {Reason}",
             serviceId, previousState, reason);
+
+        // Suppress transitive dependents
+        var dependentIds = await _depRepo.GetTransitiveDependentIdsAsync(serviceId, ct);
+        foreach (var depId in dependentIds)
+        {
+            var dependent = await _serviceRepo.GetByIdAsync(depId, ct);
+            if (dependent != null)
+            {
+                dependent.IsSuppressed = true;
+                dependent.SuppressionReason = $"Dependency down: {service.Name}";
+                await _serviceRepo.UpdateAsync(dependent, ct);
+
+                _logger.LogInformation(
+                    "Suppressed service {DependentId} due to dependency {ServiceId} going DOWN",
+                    depId, serviceId);
+            }
+        }
+
+        // Skip alert creation if this service is suppressed
+        if (service.IsSuppressed)
+        {
+            await _unitOfWork.SaveChangesAsync(ct);
+            return null;
+        }
 
         var alert = new Alert
         {
