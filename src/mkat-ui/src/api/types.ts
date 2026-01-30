@@ -53,6 +53,12 @@ export interface Monitor {
   retentionDays: number | null;
   lastMetricValue: number | null;
   lastMetricAt: string | null;
+  // Health check monitor fields
+  healthCheckUrl: string | null;
+  httpMethod: string | null;
+  expectedStatusCodes: string | null;
+  timeoutSeconds: number | null;
+  bodyMatchRegex: string | null;
 }
 
 export interface Service {
@@ -103,6 +109,11 @@ export interface CreateMonitorRequest {
   windowSeconds?: number;
   windowSampleCount?: number;
   retentionDays?: number;
+  healthCheckUrl?: string;
+  httpMethod?: string;
+  expectedStatusCodes?: string;
+  timeoutSeconds?: number;
+  bodyMatchRegex?: string;
 }
 
 export interface UpdateServiceRequest {
@@ -122,6 +133,11 @@ export interface UpdateMonitorRequest {
   windowSeconds?: number;
   windowSampleCount?: number;
   retentionDays?: number;
+  healthCheckUrl?: string;
+  httpMethod?: string;
+  expectedStatusCodes?: string;
+  timeoutSeconds?: number;
+  bodyMatchRegex?: string;
 }
 
 export interface MetricReading {

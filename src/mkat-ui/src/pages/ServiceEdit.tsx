@@ -143,6 +143,11 @@ function MonitorSection({
   const [newThresholdStrategy, setNewThresholdStrategy] = useState<ThresholdStrategy>(ThresholdStrategy.Immediate);
   const [newThresholdCount, setNewThresholdCount] = useState(3);
   const [newRetentionDays, setNewRetentionDays] = useState(7);
+  const [newHealthCheckUrl, setNewHealthCheckUrl] = useState('');
+  const [newHttpMethod, setNewHttpMethod] = useState('GET');
+  const [newExpectedStatusCodes, setNewExpectedStatusCodes] = useState('200');
+  const [newTimeoutSeconds, setNewTimeoutSeconds] = useState(10);
+  const [newBodyMatchRegex, setNewBodyMatchRegex] = useState('');
 
   const handleAdd = () => {
     const data: CreateMonitorRequest = {
@@ -160,6 +165,13 @@ function MonitorSection({
       }
       data.retentionDays = newRetentionDays;
     }
+    if (newType === MonitorType.HealthCheck) {
+      data.healthCheckUrl = newHealthCheckUrl;
+      data.httpMethod = newHttpMethod;
+      data.expectedStatusCodes = newExpectedStatusCodes;
+      data.timeoutSeconds = newTimeoutSeconds;
+      data.bodyMatchRegex = newBodyMatchRegex || undefined;
+    }
     onAdd(data);
     setShowAddForm(false);
     setNewInterval(300);
@@ -169,6 +181,11 @@ function MonitorSection({
     setNewThresholdStrategy(ThresholdStrategy.Immediate);
     setNewThresholdCount(3);
     setNewRetentionDays(7);
+    setNewHealthCheckUrl('');
+    setNewHttpMethod('GET');
+    setNewExpectedStatusCodes('200');
+    setNewTimeoutSeconds(10);
+    setNewBodyMatchRegex('');
   };
 
   return (
@@ -286,6 +303,67 @@ function MonitorSection({
                   />
                 </div>
               )}
+            </div>
+          )}
+          {newType === MonitorType.HealthCheck && (
+            <div className="space-y-3 border-t pt-3">
+              <div>
+                <label className="block text-xs text-gray-600">URL</label>
+                <input
+                  type="url"
+                  value={newHealthCheckUrl}
+                  onChange={e => setNewHealthCheckUrl(e.target.value)}
+                  className="mt-1 block w-full rounded border-gray-300 shadow-sm text-sm px-2 py-1 border"
+                  placeholder="https://example.com/health"
+                  required
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs text-gray-600">HTTP Method</label>
+                  <select
+                    value={newHttpMethod}
+                    onChange={e => setNewHttpMethod(e.target.value)}
+                    className="mt-1 block w-full rounded border-gray-300 shadow-sm text-sm px-2 py-1 border"
+                  >
+                    <option value="GET">GET</option>
+                    <option value="HEAD">HEAD</option>
+                    <option value="POST">POST</option>
+                    <option value="PUT">PUT</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-600">Timeout (seconds)</label>
+                  <input
+                    type="number"
+                    value={newTimeoutSeconds}
+                    onChange={e => setNewTimeoutSeconds(Number(e.target.value))}
+                    className="mt-1 block w-full rounded border-gray-300 shadow-sm text-sm px-2 py-1 border"
+                    min={1}
+                    max={120}
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs text-gray-600">Expected Status Codes</label>
+                <input
+                  type="text"
+                  value={newExpectedStatusCodes}
+                  onChange={e => setNewExpectedStatusCodes(e.target.value)}
+                  className="mt-1 block w-full rounded border-gray-300 shadow-sm text-sm px-2 py-1 border"
+                  placeholder="200,201,204"
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-gray-600">Body Match Regex (optional)</label>
+                <input
+                  type="text"
+                  value={newBodyMatchRegex}
+                  onChange={e => setNewBodyMatchRegex(e.target.value)}
+                  className="mt-1 block w-full rounded border-gray-300 shadow-sm text-sm px-2 py-1 border"
+                  placeholder="ok|healthy"
+                />
+              </div>
             </div>
           )}
           <button
@@ -442,6 +520,11 @@ function MonitorRow({
   const [thresholdStrategy, setThresholdStrategy] = useState<ThresholdStrategy>(monitor.thresholdStrategy ?? ThresholdStrategy.Immediate);
   const [thresholdCount, setThresholdCount] = useState(monitor.thresholdCount ?? 3);
   const [retentionDays, setRetentionDays] = useState(monitor.retentionDays ?? 7);
+  const [healthCheckUrl, setHealthCheckUrl] = useState(monitor.healthCheckUrl ?? '');
+  const [httpMethod, setHttpMethod] = useState(monitor.httpMethod ?? 'GET');
+  const [expectedStatusCodes, setExpectedStatusCodes] = useState(monitor.expectedStatusCodes ?? '200');
+  const [timeoutSeconds, setTimeoutSeconds] = useState(monitor.timeoutSeconds ?? 10);
+  const [bodyMatchRegex, setBodyMatchRegex] = useState(monitor.bodyMatchRegex ?? '');
 
   const typeLabels: Record<MonitorType, string> = {
     [MonitorType.Webhook]: 'Webhook',
@@ -462,6 +545,13 @@ function MonitorRow({
       }
       data.retentionDays = retentionDays;
     }
+    if (monitor.type === MonitorType.HealthCheck) {
+      data.healthCheckUrl = healthCheckUrl;
+      data.httpMethod = httpMethod;
+      data.expectedStatusCodes = expectedStatusCodes;
+      data.timeoutSeconds = timeoutSeconds;
+      data.bodyMatchRegex = bodyMatchRegex || undefined;
+    }
     onUpdate(data);
     setEditing(false);
   };
@@ -474,6 +564,11 @@ function MonitorRow({
     setThresholdStrategy(monitor.thresholdStrategy ?? ThresholdStrategy.Immediate);
     setThresholdCount(monitor.thresholdCount ?? 3);
     setRetentionDays(monitor.retentionDays ?? 7);
+    setHealthCheckUrl(monitor.healthCheckUrl ?? '');
+    setHttpMethod(monitor.httpMethod ?? 'GET');
+    setExpectedStatusCodes(monitor.expectedStatusCodes ?? '200');
+    setTimeoutSeconds(monitor.timeoutSeconds ?? 10);
+    setBodyMatchRegex(monitor.bodyMatchRegex ?? '');
     setEditing(false);
   };
 
@@ -595,6 +690,66 @@ function MonitorRow({
               )}
             </div>
           )}
+          {monitor.type === MonitorType.HealthCheck && (
+            <div className="space-y-2 border-t pt-2 mt-2">
+              <div>
+                <label className="block text-xs text-gray-600">URL</label>
+                <input
+                  type="url"
+                  value={healthCheckUrl}
+                  onChange={e => setHealthCheckUrl(e.target.value)}
+                  className="mt-1 block w-full rounded border-gray-300 shadow-sm text-sm px-2 py-1 border"
+                  placeholder="https://example.com/health"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs text-gray-600">HTTP Method</label>
+                  <select
+                    value={httpMethod}
+                    onChange={e => setHttpMethod(e.target.value)}
+                    className="mt-1 block w-full rounded border-gray-300 shadow-sm text-sm px-2 py-1 border"
+                  >
+                    <option value="GET">GET</option>
+                    <option value="HEAD">HEAD</option>
+                    <option value="POST">POST</option>
+                    <option value="PUT">PUT</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-600">Timeout (seconds)</label>
+                  <input
+                    type="number"
+                    value={timeoutSeconds}
+                    onChange={e => setTimeoutSeconds(Number(e.target.value))}
+                    className="mt-1 block w-full rounded border-gray-300 shadow-sm text-sm px-2 py-1 border"
+                    min={1}
+                    max={120}
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs text-gray-600">Expected Status Codes</label>
+                <input
+                  type="text"
+                  value={expectedStatusCodes}
+                  onChange={e => setExpectedStatusCodes(e.target.value)}
+                  className="mt-1 block w-full rounded border-gray-300 shadow-sm text-sm px-2 py-1 border"
+                  placeholder="200,201,204"
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-gray-600">Body Match Regex (optional)</label>
+                <input
+                  type="text"
+                  value={bodyMatchRegex}
+                  onChange={e => setBodyMatchRegex(e.target.value)}
+                  className="mt-1 block w-full rounded border-gray-300 shadow-sm text-sm px-2 py-1 border"
+                  placeholder="ok|healthy"
+                />
+              </div>
+            </div>
+          )}
           <div className="flex gap-2">
             <button
               type="button"
@@ -620,6 +775,13 @@ function MonitorRow({
               {monitor.minValue != null && ` | Min: ${monitor.minValue}`}
               {monitor.maxValue != null && ` | Max: ${monitor.maxValue}`}
               {monitor.thresholdStrategy != null && ` | ${ThresholdStrategy[monitor.thresholdStrategy]}`}
+            </span>
+          )}
+          {monitor.type === MonitorType.HealthCheck && (
+            <span>
+              {` | URL: ${monitor.healthCheckUrl}`}
+              {` | ${monitor.httpMethod ?? 'GET'}`}
+              {` | ${monitor.expectedStatusCodes ?? '200'}`}
             </span>
           )}
         </div>

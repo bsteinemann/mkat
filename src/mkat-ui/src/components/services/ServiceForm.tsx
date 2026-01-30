@@ -41,7 +41,7 @@ export function ServiceForm({ initialData, onSubmit, isLoading, submitLabel = 'C
     setMonitors(monitors.filter((_, i) => i !== index));
   };
 
-  const updateMonitor = (index: number, field: keyof CreateMonitorRequest, value: number | undefined) => {
+  const updateMonitor = (index: number, field: keyof CreateMonitorRequest, value: string | number | undefined) => {
     const updated = monitors.map((m, i) => {
       if (i !== index) return m;
       const next = { ...m, [field]: value };
@@ -52,6 +52,14 @@ export function ServiceForm({ initialData, onSubmit, isLoading, submitLabel = 'C
         delete next.thresholdStrategy;
         delete next.thresholdCount;
         delete next.retentionDays;
+      }
+      // Reset health check fields when switching away from HealthCheck type
+      if (field === 'type' && value !== MonitorType.HealthCheck) {
+        delete next.healthCheckUrl;
+        delete next.httpMethod;
+        delete next.expectedStatusCodes;
+        delete next.timeoutSeconds;
+        delete next.bodyMatchRegex;
       }
       return next;
     });
@@ -223,6 +231,68 @@ export function ServiceForm({ initialData, onSubmit, isLoading, submitLabel = 'C
                         />
                       </div>
                     )}
+                  </div>
+                )}
+
+                {monitor.type === MonitorType.HealthCheck && (
+                  <div className="space-y-3 border-t pt-3 mt-3">
+                    <div>
+                      <label className="block text-xs text-gray-600">URL</label>
+                      <input
+                        type="url"
+                        value={monitor.healthCheckUrl ?? ''}
+                        onChange={e => updateMonitor(index, 'healthCheckUrl', e.target.value || undefined)}
+                        className="mt-1 block w-full rounded border-gray-300 shadow-sm text-sm px-2 py-1 border"
+                        placeholder="https://example.com/health"
+                        required
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs text-gray-600">HTTP Method</label>
+                        <select
+                          value={monitor.httpMethod ?? 'GET'}
+                          onChange={e => updateMonitor(index, 'httpMethod', e.target.value)}
+                          className="mt-1 block w-full rounded border-gray-300 shadow-sm text-sm px-2 py-1 border"
+                        >
+                          <option value="GET">GET</option>
+                          <option value="HEAD">HEAD</option>
+                          <option value="POST">POST</option>
+                          <option value="PUT">PUT</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-xs text-gray-600">Timeout (seconds)</label>
+                        <input
+                          type="number"
+                          value={monitor.timeoutSeconds ?? 10}
+                          onChange={e => updateMonitor(index, 'timeoutSeconds', Number(e.target.value))}
+                          className="mt-1 block w-full rounded border-gray-300 shadow-sm text-sm px-2 py-1 border"
+                          min={1}
+                          max={120}
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-600">Expected Status Codes</label>
+                      <input
+                        type="text"
+                        value={monitor.expectedStatusCodes ?? '200'}
+                        onChange={e => updateMonitor(index, 'expectedStatusCodes', e.target.value)}
+                        className="mt-1 block w-full rounded border-gray-300 shadow-sm text-sm px-2 py-1 border"
+                        placeholder="200,201,204"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-600">Body Match Regex (optional)</label>
+                      <input
+                        type="text"
+                        value={monitor.bodyMatchRegex ?? ''}
+                        onChange={e => updateMonitor(index, 'bodyMatchRegex', e.target.value || undefined)}
+                        className="mt-1 block w-full rounded border-gray-300 shadow-sm text-sm px-2 py-1 border"
+                        placeholder="ok|healthy"
+                      />
+                    </div>
                   </div>
                 )}
               </div>

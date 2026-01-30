@@ -167,6 +167,20 @@ export function ServiceDetail() {
                 </div>
               )}
 
+              {monitor.type === MonitorType.HealthCheck && (
+                <div className="space-y-3">
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm text-gray-600">
+                    <span>URL: {monitor.healthCheckUrl}</span>
+                    <span>Method: {monitor.httpMethod ?? 'GET'}</span>
+                    <span>Expected: {monitor.expectedStatusCodes ?? '200'}</span>
+                    <span>Timeout: {monitor.timeoutSeconds ?? 10}s</span>
+                    {monitor.bodyMatchRegex && (
+                      <span className="col-span-2">Body match: <code className="bg-gray-100 px-1 rounded">{monitor.bodyMatchRegex}</code></span>
+                    )}
+                  </div>
+                </div>
+              )}
+
               {monitor.lastCheckIn && (
                 <p className="text-sm text-gray-500 mt-2">
                   Last check-in: {new Date(monitor.lastCheckIn).toLocaleString()}

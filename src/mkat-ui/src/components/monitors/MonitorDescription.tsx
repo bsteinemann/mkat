@@ -15,9 +15,9 @@ const descriptions: Record<MonitorType, { label: string; summary: string; detail
   },
   [MonitorType.HealthCheck]: {
     label: 'Health Check',
-    summary: 'mkat actively polls an HTTP endpoint on a schedule.',
+    summary: 'mkat actively polls an HTTP endpoint on a schedule and alerts on failures.',
     detail:
-      'Health check monitors are not yet available. When implemented, mkat will periodically send HTTP requests to a URL you specify and check the response status code and optional body match.',
+      'Configure a URL, HTTP method, expected status codes, and optional response body regex. mkat sends the request at each interval. If the status code is unexpected, the body doesn\'t match, the request times out, or the connection fails, the service is marked as down. Recovery is automatic when the next check succeeds.',
   },
   [MonitorType.Metric]: {
     label: 'Metric',
