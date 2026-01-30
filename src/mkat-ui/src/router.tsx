@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react';
 import {
   createRouter,
   createRootRoute,
@@ -7,18 +8,23 @@ import {
 } from '@tanstack/react-router';
 import { getBasePath } from './config';
 import { Layout } from './components/layout/Layout';
-import { Dashboard } from './pages/Dashboard';
-import { Services } from './pages/Services';
-import { ServiceDetail } from './pages/ServiceDetail';
-import { ServiceCreate } from './pages/ServiceCreate';
-import { ServiceEdit } from './pages/ServiceEdit';
-import { Alerts } from './pages/Alerts';
-import { Peers } from './pages/Peers';
-import { Contacts } from './pages/Contacts';
-import { Login } from './pages/Login';
+
+const Dashboard = lazy(() => import('./pages/Dashboard').then(m => ({ default: m.Dashboard })));
+const Services = lazy(() => import('./pages/Services').then(m => ({ default: m.Services })));
+const ServiceDetail = lazy(() => import('./pages/ServiceDetail').then(m => ({ default: m.ServiceDetail })));
+const ServiceCreate = lazy(() => import('./pages/ServiceCreate').then(m => ({ default: m.ServiceCreate })));
+const ServiceEdit = lazy(() => import('./pages/ServiceEdit').then(m => ({ default: m.ServiceEdit })));
+const Alerts = lazy(() => import('./pages/Alerts').then(m => ({ default: m.Alerts })));
+const Peers = lazy(() => import('./pages/Peers').then(m => ({ default: m.Peers })));
+const Contacts = lazy(() => import('./pages/Contacts').then(m => ({ default: m.Contacts })));
+const Login = lazy(() => import('./pages/Login').then(m => ({ default: m.Login })));
 
 const rootRoute = createRootRoute({
-  component: () => <Outlet />,
+  component: () => (
+    <Suspense fallback={null}>
+      <Outlet />
+    </Suspense>
+  ),
 });
 
 const loginRoute = createRoute({
@@ -37,7 +43,9 @@ const authenticatedRoute = createRoute({
   },
   component: () => (
     <Layout>
-      <Outlet />
+      <Suspense fallback={<div className="p-6">Loading...</div>}>
+        <Outlet />
+      </Suspense>
     </Layout>
   ),
 });
