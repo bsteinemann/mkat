@@ -137,7 +137,7 @@ export function ServiceDetail() {
                   {service.suppressionReason}
                 </p>
               )}
-              {service.dependsOn.length > 0 && (
+              {service.dependsOn?.length > 0 && (
                 <div className="mt-2">
                   {service.dependsOn.map((dep) => (
                     <Link
@@ -287,7 +287,7 @@ export function ServiceDetail() {
         </CardContent>
       </Card>
 
-      {service.dependsOn.length > 0 && (
+      {service.dependsOn?.length > 0 && (
         <Card className="py-0">
           <CardHeader>
             <CardTitle className="text-lg">Depends On</CardTitle>
@@ -310,7 +310,7 @@ export function ServiceDetail() {
         </Card>
       )}
 
-      {service.dependedOnBy.length > 0 && (
+      {service.dependedOnBy?.length > 0 && (
         <Card className="py-0">
           <CardHeader>
             <CardTitle className="text-lg">Depended On By</CardTitle>
