@@ -1,11 +1,29 @@
 import { Link, useRouterState } from '@tanstack/react-router';
+import {
+  LayoutDashboard,
+  Server,
+  Bell,
+  Link2,
+  Users,
+} from 'lucide-react';
+import {
+  Sidebar as SidebarRoot,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupLabel,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarRail,
+} from '@/components/ui/sidebar';
 
 const navItems = [
-  { to: '/' as const, label: 'Dashboard' },
-  { to: '/services' as const, label: 'Services' },
-  { to: '/alerts' as const, label: 'Alerts' },
-  { to: '/peers' as const, label: 'Peers' },
-  { to: '/contacts' as const, label: 'Contacts' },
+  { to: '/' as const, label: 'Dashboard', icon: LayoutDashboard },
+  { to: '/services' as const, label: 'Services', icon: Server },
+  { to: '/alerts' as const, label: 'Alerts', icon: Bell },
+  { to: '/peers' as const, label: 'Peers', icon: Link2 },
+  { to: '/contacts' as const, label: 'Contacts', icon: Users },
 ];
 
 export function Sidebar() {
@@ -13,27 +31,34 @@ export function Sidebar() {
   const currentPath = routerState.location.pathname;
 
   return (
-    <aside className="w-56 bg-white border-r border-gray-200 min-h-full">
-      <nav className="p-4 space-y-1">
-        {navItems.map(item => {
-          const isActive = currentPath === item.to ||
-            (item.to !== '/' && currentPath.startsWith(item.to));
+    <SidebarRoot>
+      <SidebarHeader className="px-4 py-3">
+        <span className="text-xl font-bold">mkat</span>
+      </SidebarHeader>
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
+          <SidebarMenu>
+            {navItems.map(item => {
+              const isActive =
+                currentPath === item.to ||
+                (item.to !== '/' && currentPath.startsWith(item.to));
 
-          return (
-            <Link
-              key={item.to}
-              to={item.to}
-              className={`block px-3 py-2 rounded text-sm font-medium ${
-                isActive
-                  ? 'bg-blue-50 text-blue-700'
-                  : 'text-gray-700 hover:bg-gray-50'
-              }`}
-            >
-              {item.label}
-            </Link>
-          );
-        })}
-      </nav>
-    </aside>
+              return (
+                <SidebarMenuItem key={item.to}>
+                  <SidebarMenuButton asChild isActive={isActive} tooltip={item.label}>
+                    <Link to={item.to}>
+                      <item.icon />
+                      <span>{item.label}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              );
+            })}
+          </SidebarMenu>
+        </SidebarGroup>
+      </SidebarContent>
+      <SidebarRail />
+    </SidebarRoot>
   );
 }

@@ -2,6 +2,7 @@ import { type ReactNode, useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Header } from './Header';
 import { Sidebar } from './Sidebar';
+import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 import { initNotifications } from '../../notifications';
 import { connectSSE } from '../../sse';
 
@@ -34,14 +35,14 @@ export function Layout({ children }: Props) {
   }, [queryClient]);
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Header />
-      <div className="flex">
-        <Sidebar />
+    <SidebarProvider>
+      <Sidebar />
+      <SidebarInset>
+        <Header />
         <main className="flex-1 p-6">
           {children}
         </main>
-      </div>
-    </div>
+      </SidebarInset>
+    </SidebarProvider>
   );
 }
