@@ -57,9 +57,9 @@ export function ServiceCard({ service, onPause, onResume }: Props) {
           </span>
         </div>
 
-        {service.isSuppressed && service.suppressionReason && (
+        {service.isSuppressed && (
           <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
-            Suppressed — {service.suppressionReason}
+            Suppressed{service.suppressionReason ? ` — ${service.suppressionReason}` : ''}
           </p>
         )}
 

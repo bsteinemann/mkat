@@ -126,15 +126,17 @@ export function ServiceDetail() {
         </div>
       </div>
 
-      {service.isSuppressed && service.suppressionReason && (
+      {service.isSuppressed && (
         <div className="rounded-lg border border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-950 p-4">
           <div className="flex items-start gap-3">
             <span className="text-amber-600 dark:text-amber-400 text-lg">&#9888;</span>
             <div>
               <p className="font-medium text-amber-800 dark:text-amber-200">Alerts Suppressed</p>
-              <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">
-                {service.suppressionReason}
-              </p>
+              {service.suppressionReason && (
+                <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">
+                  {service.suppressionReason}
+                </p>
+              )}
               {service.dependsOn.length > 0 && (
                 <div className="mt-2">
                   {service.dependsOn.map((dep) => (
