@@ -16,11 +16,7 @@ interface HeartbeatHistoryChartProps {
   dataSource: 'events' | 'hourly' | 'daily';
 }
 
-export function HeartbeatHistoryChart({
-  events,
-  rollups,
-  dataSource,
-}: HeartbeatHistoryChartProps) {
+export function HeartbeatHistoryChart({ events, rollups, dataSource }: HeartbeatHistoryChartProps) {
   if (dataSource === 'events') {
     const data = (events ?? [])
       .map((e) => ({
@@ -65,10 +61,7 @@ export function HeartbeatHistoryChart({
           />
           <Bar dataKey="value" maxBarSize={8} radius={[2, 2, 0, 0]}>
             {data.map((entry, index) => (
-              <Cell
-                key={index}
-                fill={entry.success ? 'var(--chart-2)' : 'var(--destructive)'}
-              />
+              <Cell key={index} fill={entry.success ? 'var(--chart-2)' : 'var(--destructive)'} />
             ))}
           </Bar>
         </BarChart>
@@ -99,7 +92,9 @@ export function HeartbeatHistoryChart({
           dataKey="time"
           type="number"
           domain={['dataMin', 'dataMax']}
-          tickFormatter={(v) => new Date(v).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+          tickFormatter={(v) =>
+            new Date(v).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+          }
           tick={{ fontSize: 11 }}
         />
         <YAxis tick={{ fontSize: 11 }} />
@@ -112,8 +107,20 @@ export function HeartbeatHistoryChart({
             fontSize: '12px',
           }}
         />
-        <Bar dataKey="success" stackId="a" fill="var(--chart-2)" name="Received" radius={[0, 0, 0, 0]} />
-        <Bar dataKey="failure" stackId="a" fill="var(--destructive)" name="Missed" radius={[2, 2, 0, 0]} />
+        <Bar
+          dataKey="success"
+          stackId="a"
+          fill="var(--chart-2)"
+          name="Received"
+          radius={[0, 0, 0, 0]}
+        />
+        <Bar
+          dataKey="failure"
+          stackId="a"
+          fill="var(--destructive)"
+          name="Missed"
+          radius={[2, 2, 0, 0]}
+        />
       </BarChart>
     </ResponsiveContainer>
   );

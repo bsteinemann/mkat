@@ -26,8 +26,7 @@ export function MonitorHistory({ monitor }: MonitorHistoryProps) {
 
   const { data: events } = useQuery({
     queryKey: ['monitor-events', monitor.id, timeRange],
-    queryFn: () =>
-      monitorEventsApi.getByMonitor(monitor.id, { from, to, limit: 1000 }),
+    queryFn: () => monitorEventsApi.getByMonitor(monitor.id, { from, to, limit: 1000 }),
     enabled: dataSource === 'events',
   });
 
@@ -73,27 +72,15 @@ export function MonitorHistory({ monitor }: MonitorHistoryProps) {
       </div>
 
       {monitor.type === MonitorType.HealthCheck && (
-        <HealthCheckHistoryChart
-          events={events}
-          rollups={rollups}
-          dataSource={dataSource}
-        />
+        <HealthCheckHistoryChart events={events} rollups={rollups} dataSource={dataSource} />
       )}
 
       {monitor.type === MonitorType.Heartbeat && (
-        <HeartbeatHistoryChart
-          events={events}
-          rollups={rollups}
-          dataSource={dataSource}
-        />
+        <HeartbeatHistoryChart events={events} rollups={rollups} dataSource={dataSource} />
       )}
 
       {monitor.type === MonitorType.Webhook && (
-        <WebhookHistoryChart
-          events={events}
-          rollups={rollups}
-          dataSource={dataSource}
-        />
+        <WebhookHistoryChart events={events} rollups={rollups} dataSource={dataSource} />
       )}
 
       {monitor.type === MonitorType.Metric && (
@@ -105,9 +92,7 @@ export function MonitorHistory({ monitor }: MonitorHistoryProps) {
         />
       )}
 
-      {dataSource !== 'events' && latestRollup && (
-        <RollupStatsTable rollup={latestRollup} />
-      )}
+      {dataSource !== 'events' && latestRollup && <RollupStatsTable rollup={latestRollup} />}
     </div>
   );
 }

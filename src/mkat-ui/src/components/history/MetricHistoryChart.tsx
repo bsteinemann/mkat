@@ -65,7 +65,10 @@ export function MetricHistoryChart({
         <YAxis tick={{ fontSize: 11 }} />
         <Tooltip
           labelFormatter={(v) => new Date(v as number).toLocaleString()}
-          formatter={(value) => [(value as number).toFixed(2), dataSource === 'events' ? 'Value' : 'Mean']}
+          formatter={(value) => [
+            (value as number).toFixed(2),
+            dataSource === 'events' ? 'Value' : 'Mean',
+          ]}
           contentStyle={{
             backgroundColor: 'var(--popover)',
             border: '1px solid var(--border)',
@@ -89,13 +92,7 @@ export function MetricHistoryChart({
             label={{ value: 'Max', position: 'left', fontSize: 10, fill: 'var(--destructive)' }}
           />
         )}
-        <Line
-          type="monotone"
-          dataKey="value"
-          stroke="var(--chart-4)"
-          strokeWidth={2}
-          dot={false}
-        />
+        <Line type="monotone" dataKey="value" stroke="var(--chart-4)" strokeWidth={2} dot={false} />
       </LineChart>
     </ResponsiveContainer>
   );

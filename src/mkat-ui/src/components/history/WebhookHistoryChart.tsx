@@ -16,11 +16,7 @@ interface WebhookHistoryChartProps {
   dataSource: 'events' | 'hourly' | 'daily';
 }
 
-export function WebhookHistoryChart({
-  events,
-  rollups,
-  dataSource,
-}: WebhookHistoryChartProps) {
+export function WebhookHistoryChart({ events, rollups, dataSource }: WebhookHistoryChartProps) {
   if (dataSource === 'events') {
     const data = (events ?? [])
       .map((e) => ({
@@ -47,7 +43,9 @@ export function WebhookHistoryChart({
             dataKey="time"
             type="number"
             domain={['dataMin', 'dataMax']}
-            tickFormatter={(v) => new Date(v).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
+            tickFormatter={(v) =>
+              new Date(v).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })
+            }
             tick={{ fontSize: 11 }}
           />
           <YAxis
@@ -74,10 +72,7 @@ export function WebhookHistoryChart({
           />
           <Scatter data={data} dataKey="y">
             {data.map((entry, index) => (
-              <Cell
-                key={index}
-                fill={entry.success ? 'var(--chart-2)' : 'var(--destructive)'}
-              />
+              <Cell key={index} fill={entry.success ? 'var(--chart-2)' : 'var(--destructive)'} />
             ))}
           </Scatter>
         </ScatterChart>
@@ -108,7 +103,9 @@ export function WebhookHistoryChart({
           dataKey="time"
           type="number"
           domain={['dataMin', 'dataMax']}
-          tickFormatter={(v) => new Date(v).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+          tickFormatter={(v) =>
+            new Date(v).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+          }
           tick={{ fontSize: 11 }}
         />
         <YAxis tick={{ fontSize: 11 }} />
@@ -121,7 +118,12 @@ export function WebhookHistoryChart({
             fontSize: '12px',
           }}
         />
-        <Scatter data={data.map((d) => ({ ...d, y: d.success }))} dataKey="y" fill="var(--chart-2)" name="Recoveries" />
+        <Scatter
+          data={data.map((d) => ({ ...d, y: d.success }))}
+          dataKey="y"
+          fill="var(--chart-2)"
+          name="Recoveries"
+        />
       </ScatterChart>
     </ResponsiveContainer>
   );

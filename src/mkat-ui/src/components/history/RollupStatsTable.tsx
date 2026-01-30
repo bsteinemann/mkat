@@ -11,9 +11,7 @@ function formatValue(value: number | null | undefined): string {
 
 export function RollupStatsTable({ rollup }: RollupStatsTableProps) {
   if (!rollup) {
-    return (
-      <div className="text-sm text-muted-foreground">No rollup statistics available</div>
-    );
+    return <div className="text-sm text-muted-foreground">No rollup statistics available</div>;
   }
 
   const stats = [
