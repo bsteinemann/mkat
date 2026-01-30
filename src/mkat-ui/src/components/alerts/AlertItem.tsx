@@ -7,16 +7,18 @@ interface Props {
   onAcknowledge?: () => void;
 }
 
-const typeLabels = {
+const typeLabels: Record<AlertType, string> = {
   [AlertType.Failure]: 'Failure',
   [AlertType.Recovery]: 'Recovery',
   [AlertType.MissedHeartbeat]: 'Missed Heartbeat',
+  [AlertType.FailedHealthCheck]: 'Failed Health Check',
 };
 
-const typeColors = {
+const typeColors: Record<AlertType, string> = {
   [AlertType.Failure]: 'text-red-600',
   [AlertType.Recovery]: 'text-green-600',
   [AlertType.MissedHeartbeat]: 'text-orange-600',
+  [AlertType.FailedHealthCheck]: 'text-red-600',
 };
 
 const severityBadge = {
