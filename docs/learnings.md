@@ -116,3 +116,17 @@ Read this file FIRST before starting any new work -- it prevents repeating mista
 - Login page makes a direct `fetch()` call (not through the API client) — easy to miss when updating API base URLs
 **Pattern:** For runtime-configurable base path without rebuild: UsePathBase (server) + relative Vite assets + injected window variable (client) + router basepath option
 **Anti-pattern:** Don't use `MapFallbackToFile` if you need to inject runtime config into the HTML. Use a custom `MapFallback` handler instead.
+
+### 2026-01-30 - Code Quality Enforcement
+**Context:** Adding EditorConfig, Directory.Build.props (TreatWarningsAsErrors), Prettier, and CI enforcement
+**Went well:**
+- `Directory.Build.props` at repo root applies to all projects; `tests/Directory.Build.props` can import parent and add test-specific suppressions
+- `eslint-config-prettier` cleanly disables conflicting ESLint formatting rules — just add it last in the config array
+- Prettier `--check` mode is perfect for CI (no file changes, just exit code)
+**Tripped up:**
+- `AnalysisLevel=latest-recommended` surfaces many more warnings than expected — CA1305 (IFormatProvider), CA1310 (StringComparison), CA1816 (GC.SuppressFinalize), CA1822 (static), CA1859 (return type) all fired across the codebase
+- Test projects generate many noisy analyzer warnings (CA1816 Dispose, CA1822 static, CA1859 return types) — suppress these in a dedicated `tests/Directory.Build.props`
+- shadcn/ui components trigger `react-refresh/only-export-components` and `react-hooks/purity` — suppress via ESLint config override for `src/components/ui/`
+- EF Core auto-generated migrations trigger CA1861 (constant arrays) — suppress via migration-specific `.editorconfig`
+**Pattern:** Use layered `Directory.Build.props` (root for global, tests/ for test-specific) and layered `.editorconfig` (root for global, subdirectory for overrides) to manage analyzer strictness
+**Anti-pattern:** Don't suppress too many rules globally in the root props — keep suppressions scoped to where they're needed (tests, migrations, UI components)
