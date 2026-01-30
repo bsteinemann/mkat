@@ -1,4 +1,10 @@
-import { Button } from '@/components/ui/button';
+import {
+  Pagination as ShadcnPagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationNext,
+  PaginationPrevious,
+} from '@/components/ui/pagination';
 
 interface Props {
   page: number;
@@ -14,30 +20,38 @@ export function Pagination({ page, totalCount, pageSize, onPageChange }: Props) 
 
   return (
     <div className="flex items-center justify-between pt-4">
-      <span className="text-sm text-gray-600">
+      <span className="text-sm text-muted-foreground">
         {totalCount} total items
       </span>
-      <div className="flex gap-2">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => onPageChange(page - 1)}
-          disabled={page <= 1}
-        >
-          Previous
-        </Button>
-        <span className="px-3 py-1 text-sm">
-          Page {page} of {totalPages}
-        </span>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => onPageChange(page + 1)}
-          disabled={page >= totalPages}
-        >
-          Next
-        </Button>
-      </div>
+      <ShadcnPagination>
+        <PaginationContent>
+          <PaginationItem>
+            <PaginationPrevious
+              href="#"
+              onClick={(e) => {
+                e.preventDefault();
+                if (page > 1) onPageChange(page - 1);
+              }}
+              className={page <= 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+            />
+          </PaginationItem>
+          <PaginationItem>
+            <span className="px-3 py-1 text-sm">
+              Page {page} of {totalPages}
+            </span>
+          </PaginationItem>
+          <PaginationItem>
+            <PaginationNext
+              href="#"
+              onClick={(e) => {
+                e.preventDefault();
+                if (page < totalPages) onPageChange(page + 1);
+              }}
+              className={page >= totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+            />
+          </PaginationItem>
+        </PaginationContent>
+      </ShadcnPagination>
     </div>
   );
 }
