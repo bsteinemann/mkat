@@ -130,7 +130,7 @@ export function DependencyMap() {
 
   const onConnect = useCallback(
     (connection: Connection) => {
-      if (connection.source && connection.target) {
+      if (connection.source && connection.target && connection.source !== connection.target) {
         addDependency.mutate({ source: connection.source, target: connection.target });
       }
     },
