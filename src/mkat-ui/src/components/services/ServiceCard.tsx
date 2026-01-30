@@ -52,8 +52,16 @@ export function ServiceCard({ service, onPause, onResume }: Props) {
               <p className="text-sm text-muted-foreground mt-1">{service.description}</p>
             )}
           </div>
-          <StateIndicator state={service.state} />
+          <span className={service.isSuppressed ? 'opacity-50' : ''}>
+            <StateIndicator state={service.state} />
+          </span>
         </div>
+
+        {service.isSuppressed && (
+          <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
+            Suppressed{service.suppressionReason ? ` — ${service.suppressionReason}` : ''}
+          </p>
+        )}
 
         <div className="mt-4 flex items-center justify-between text-sm text-muted-foreground">
           <span>Updated {formatDistanceToNow(new Date(service.updatedAt))} ago</span>

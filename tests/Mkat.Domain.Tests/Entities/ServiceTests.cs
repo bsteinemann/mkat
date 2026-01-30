@@ -119,4 +119,26 @@ public class ServiceTests
         Assert.Equal(Severity.High, service.Severity);
         Assert.True(service.AutoResume);
     }
+
+    [Fact]
+    public void Service_IsSuppressed_DefaultsFalse()
+    {
+        var service = new Service { Id = Guid.NewGuid(), Name = "Test" };
+        Assert.False(service.IsSuppressed);
+        Assert.Null(service.SuppressionReason);
+    }
+
+    [Fact]
+    public void Service_CanSetSuppression()
+    {
+        var service = new Service
+        {
+            Id = Guid.NewGuid(),
+            Name = "Test",
+            IsSuppressed = true,
+            SuppressionReason = "Dependency down: Postgres"
+        };
+        Assert.True(service.IsSuppressed);
+        Assert.Equal("Dependency down: Postgres", service.SuppressionReason);
+    }
 }

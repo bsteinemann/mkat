@@ -14,6 +14,7 @@ public class StateServiceTests
     private readonly Mock<IAlertRepository> _alertRepoMock;
     private readonly Mock<IMuteWindowRepository> _muteRepoMock;
     private readonly Mock<IUnitOfWork> _unitOfWorkMock;
+    private readonly Mock<IServiceDependencyRepository> _depRepoMock;
     private readonly StateService _stateService;
 
     public StateServiceTests()
@@ -22,12 +23,18 @@ public class StateServiceTests
         _alertRepoMock = new Mock<IAlertRepository>();
         _muteRepoMock = new Mock<IMuteWindowRepository>();
         _unitOfWorkMock = new Mock<IUnitOfWork>();
+        _depRepoMock = new Mock<IServiceDependencyRepository>();
+        _depRepoMock.Setup(r => r.GetTransitiveDependentIdsAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<Guid>());
+        _depRepoMock.Setup(r => r.GetTransitiveDependencyIdsAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<Guid>());
         var loggerMock = new Mock<ILogger<StateService>>();
 
         _stateService = new StateService(
             _serviceRepoMock.Object,
             _alertRepoMock.Object,
             _muteRepoMock.Object,
+            _depRepoMock.Object,
             _unitOfWorkMock.Object,
             loggerMock.Object);
     }
@@ -286,6 +293,110 @@ public class StateServiceTests
         _unitOfWorkMock.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
+    // --- Suppression ---
+
+    [Fact]
+    public async Task TransitionToDown_SuppressesTransitiveDependents()
+    {
+        var root = CreateService(ServiceState.Up);
+        var dependentId = Guid.NewGuid();
+        var dependent = CreateService(ServiceState.Up, dependentId);
+
+        _serviceRepoMock.Setup(r => r.GetByIdAsync(root.Id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(root);
+        _serviceRepoMock.Setup(r => r.GetByIdAsync(dependentId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(dependent);
+        _muteRepoMock.Setup(r => r.IsServiceMutedAsync(root.Id, It.IsAny<DateTime>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(false);
+        _depRepoMock.Setup(r => r.GetTransitiveDependentIdsAsync(root.Id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<Guid> { dependentId });
+
+        await _stateService.TransitionToDownAsync(root.Id, AlertType.Failure, "root failed");
+
+        Assert.True(dependent.IsSuppressed);
+        Assert.NotNull(dependent.SuppressionReason);
+        Assert.Contains(root.Name, dependent.SuppressionReason, StringComparison.Ordinal);
+        _serviceRepoMock.Verify(r => r.UpdateAsync(dependent, It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task TransitionToDown_DoesNotAlertSuppressedService()
+    {
+        var service = CreateService(ServiceState.Up);
+        service.IsSuppressed = true;
+        service.SuppressionReason = "Dependency down: SomeRoot";
+
+        _serviceRepoMock.Setup(r => r.GetByIdAsync(service.Id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(service);
+        _depRepoMock.Setup(r => r.GetTransitiveDependentIdsAsync(service.Id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<Guid>());
+
+        var result = await _stateService.TransitionToDownAsync(service.Id, AlertType.Failure, "suppressed fail");
+
+        Assert.Null(result);
+        Assert.Equal(ServiceState.Down, service.State);
+        _alertRepoMock.Verify(r => r.AddAsync(It.IsAny<Alert>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task TransitionToUp_ClearsSuppression_WhenAllDependenciesUp()
+    {
+        var root = CreateService(ServiceState.Down);
+        var dependentId = Guid.NewGuid();
+        var dependent = CreateService(ServiceState.Down, dependentId);
+        dependent.IsSuppressed = true;
+        dependent.SuppressionReason = "Dependency down: Test Service";
+
+        _serviceRepoMock.Setup(r => r.GetByIdAsync(root.Id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(root);
+        _serviceRepoMock.Setup(r => r.GetByIdAsync(dependentId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(dependent);
+        _muteRepoMock.Setup(r => r.IsServiceMutedAsync(root.Id, It.IsAny<DateTime>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(false);
+        _depRepoMock.Setup(r => r.GetTransitiveDependentIdsAsync(root.Id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<Guid> { dependentId });
+        _depRepoMock.Setup(r => r.GetTransitiveDependencyIdsAsync(dependentId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<Guid> { root.Id });
+
+        await _stateService.TransitionToUpAsync(root.Id, "root recovered");
+
+        Assert.False(dependent.IsSuppressed);
+        Assert.Null(dependent.SuppressionReason);
+        _serviceRepoMock.Verify(r => r.UpdateAsync(dependent, It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task TransitionToUp_KeepsSuppression_WhenOtherDependencyStillDown()
+    {
+        var root = CreateService(ServiceState.Down);
+        var otherId = Guid.NewGuid();
+        var other = CreateService(ServiceState.Down, otherId);
+        other.Name = "Other Service";
+
+        var dependentId = Guid.NewGuid();
+        var dependent = CreateService(ServiceState.Up, dependentId);
+        dependent.IsSuppressed = true;
+        dependent.SuppressionReason = "Dependency down: Test Service";
+
+        _serviceRepoMock.Setup(r => r.GetByIdAsync(root.Id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(root);
+        _serviceRepoMock.Setup(r => r.GetByIdAsync(dependentId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(dependent);
+        _serviceRepoMock.Setup(r => r.GetByIdAsync(otherId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(other);
+        _muteRepoMock.Setup(r => r.IsServiceMutedAsync(root.Id, It.IsAny<DateTime>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(false);
+        _depRepoMock.Setup(r => r.GetTransitiveDependentIdsAsync(root.Id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<Guid> { dependentId });
+        _depRepoMock.Setup(r => r.GetTransitiveDependencyIdsAsync(dependentId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<Guid> { root.Id, otherId });
+
+        await _stateService.TransitionToUpAsync(root.Id, "root recovered");
+
+        Assert.True(dependent.IsSuppressed);
+        Assert.NotNull(dependent.SuppressionReason);
+    }
+
     // --- Helpers ---
 
     private static Service CreateService(ServiceState state)
@@ -293,6 +404,17 @@ public class StateServiceTests
         return new Service
         {
             Id = Guid.NewGuid(),
+            Name = "Test Service",
+            State = state,
+            Severity = Severity.Medium
+        };
+    }
+
+    private static Service CreateService(ServiceState state, Guid id)
+    {
+        return new Service
+        {
+            Id = id,
             Name = "Test Service",
             State = state,
             Severity = Severity.Medium

@@ -71,6 +71,10 @@ export interface Service {
   createdAt: string;
   updatedAt: string;
   monitors: Monitor[];
+  isSuppressed: boolean;
+  suppressionReason: string | null;
+  dependsOn: DependencyResponse[];
+  dependedOnBy: DependencyResponse[];
 }
 
 export interface Alert {
@@ -140,23 +144,61 @@ export interface UpdateMonitorRequest {
   bodyMatchRegex?: string;
 }
 
-export interface MetricReading {
+export enum EventType {
+  WebhookReceived = 'WebhookReceived',
+  HeartbeatReceived = 'HeartbeatReceived',
+  HealthCheckPerformed = 'HealthCheckPerformed',
+  MetricIngested = 'MetricIngested',
+  StateChanged = 'StateChanged',
+}
+
+export enum Granularity {
+  Hourly = 'Hourly',
+  Daily = 'Daily',
+  Weekly = 'Weekly',
+  Monthly = 'Monthly',
+}
+
+export interface MonitorEvent {
   id: string;
-  value: number;
-  recordedAt: string;
-  outOfRange: boolean;
+  monitorId: string;
+  serviceId: string;
+  eventType: EventType;
+  success: boolean;
+  value: number | null;
+  isOutOfRange: boolean;
+  message: string | null;
+  createdAt: string;
 }
 
-export interface MetricHistoryResponse {
+export interface MonitorRollup {
+  id: string;
   monitorId: string;
-  readings: MetricReading[];
+  serviceId: string;
+  granularity: Granularity;
+  periodStart: string;
+  count: number;
+  successCount: number;
+  failureCount: number;
+  min: number | null;
+  max: number | null;
+  mean: number | null;
+  median: number | null;
+  p80: number | null;
+  p90: number | null;
+  p95: number | null;
+  stdDev: number | null;
+  uptimePercent: number | null;
 }
 
-export interface MetricLatestResponse {
-  value: number;
-  recordedAt: string;
-  outOfRange: boolean;
-  monitorId: string;
+export interface ServiceUptime {
+  serviceId: string;
+  uptimePercent: number;
+  totalEvents: number;
+  successEvents: number;
+  failureEvents: number;
+  from: string;
+  to: string;
 }
 
 export interface Peer {
@@ -202,6 +244,29 @@ export interface ContactChannel {
   configuration: string;
   isEnabled: boolean;
   createdAt: string;
+}
+
+export interface DependencyResponse {
+  id: string;
+  name: string;
+}
+
+export interface DependencyGraphResponse {
+  nodes: DependencyGraphNode[];
+  edges: DependencyGraphEdge[];
+}
+
+export interface DependencyGraphNode {
+  id: string;
+  name: string;
+  state: string;
+  isSuppressed: boolean;
+  suppressionReason: string | null;
+}
+
+export interface DependencyGraphEdge {
+  dependentId: string;
+  dependencyId: string;
 }
 
 export interface Contact {

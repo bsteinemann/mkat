@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Mkat.Application.Interfaces;
 using Mkat.Domain.Entities;
+using Mkat.Domain.Enums;
 using Monitor = Mkat.Domain.Entities.Monitor;
 
 namespace Mkat.Infrastructure.Data;
@@ -16,12 +17,14 @@ public class MkatDbContext : DbContext, IUnitOfWork
     public DbSet<Alert> Alerts => Set<Alert>();
     public DbSet<NotificationChannel> NotificationChannels => Set<NotificationChannel>();
     public DbSet<MuteWindow> MuteWindows => Set<MuteWindow>();
-    public DbSet<MetricReading> MetricReadings => Set<MetricReading>();
     public DbSet<Peer> Peers => Set<Peer>();
     public DbSet<Contact> Contacts => Set<Contact>();
     public DbSet<ContactChannel> ContactChannels => Set<ContactChannel>();
     public DbSet<ServiceContact> ServiceContacts => Set<ServiceContact>();
     public DbSet<PushSubscription> PushSubscriptions => Set<PushSubscription>();
+    public DbSet<MonitorEvent> MonitorEvents => Set<MonitorEvent>();
+    public DbSet<MonitorRollup> MonitorRollups => Set<MonitorRollup>();
+    public DbSet<ServiceDependency> ServiceDependencies => Set<ServiceDependency>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -35,6 +38,7 @@ public class MkatDbContext : DbContext, IUnitOfWork
             entity.Property(e => e.State).HasConversion<string>().HasMaxLength(20);
             entity.Property(e => e.PreviousState).HasConversion<string>().HasMaxLength(20);
             entity.Property(e => e.Severity).HasConversion<string>().HasMaxLength(20);
+            entity.Property(e => e.SuppressionReason).HasMaxLength(500);
             entity.HasIndex(e => e.Name).IsUnique();
         });
 
@@ -53,16 +57,6 @@ public class MkatDbContext : DbContext, IUnitOfWork
             entity.HasOne(e => e.Service)
                 .WithMany(s => s.Monitors)
                 .HasForeignKey(e => e.ServiceId)
-                .OnDelete(DeleteBehavior.Cascade);
-        });
-
-        modelBuilder.Entity<MetricReading>(entity =>
-        {
-            entity.HasKey(e => e.Id);
-            entity.HasIndex(e => new { e.MonitorId, e.RecordedAt });
-            entity.HasOne(e => e.Monitor)
-                .WithMany()
-                .HasForeignKey(e => e.MonitorId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
 
@@ -149,6 +143,53 @@ public class MkatDbContext : DbContext, IUnitOfWork
             entity.Property(e => e.P256dhKey).IsRequired().HasMaxLength(500);
             entity.Property(e => e.AuthKey).IsRequired().HasMaxLength(500);
             entity.HasIndex(e => e.Endpoint).IsUnique();
+        });
+
+        modelBuilder.Entity<MonitorEvent>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.EventType).HasConversion<string>().HasMaxLength(30);
+            entity.Property(e => e.Message).HasMaxLength(2000);
+            entity.HasIndex(e => new { e.MonitorId, e.CreatedAt });
+            entity.HasIndex(e => new { e.ServiceId, e.CreatedAt });
+            entity.HasOne(e => e.Monitor)
+                .WithMany()
+                .HasForeignKey(e => e.MonitorId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(e => e.Service)
+                .WithMany()
+                .HasForeignKey(e => e.ServiceId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<MonitorRollup>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Granularity).HasConversion<string>().HasMaxLength(20);
+            entity.HasIndex(e => new { e.MonitorId, e.Granularity, e.PeriodStart }).IsUnique();
+            entity.HasIndex(e => new { e.ServiceId, e.Granularity, e.PeriodStart });
+            entity.HasOne(e => e.Monitor)
+                .WithMany()
+                .HasForeignKey(e => e.MonitorId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(e => e.Service)
+                .WithMany()
+                .HasForeignKey(e => e.ServiceId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<ServiceDependency>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => new { e.DependentServiceId, e.DependencyServiceId }).IsUnique();
+            entity.HasOne(e => e.DependentService)
+                .WithMany(s => s.DependsOn)
+                .HasForeignKey(e => e.DependentServiceId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(e => e.DependencyService)
+                .WithMany(s => s.DependedOnBy)
+                .HasForeignKey(e => e.DependencyServiceId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
     }
 }

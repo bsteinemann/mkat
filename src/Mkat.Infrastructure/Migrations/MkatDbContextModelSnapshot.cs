@@ -119,31 +119,6 @@ namespace Mkat.Infrastructure.Migrations
                     b.ToTable("ContactChannels");
                 });
 
-            modelBuilder.Entity("Mkat.Domain.Entities.MetricReading", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool>("IsOutOfRange")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<Guid>("MonitorId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("RecordedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<double>("Value")
-                        .HasColumnType("REAL");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("MonitorId", "RecordedAt");
-
-                    b.ToTable("MetricReadings");
-                });
-
             modelBuilder.Entity("Mkat.Domain.Entities.Monitor", b =>
                 {
                     b.Property<Guid>("Id")
@@ -238,6 +213,114 @@ namespace Mkat.Infrastructure.Migrations
                         .IsUnique();
 
                     b.ToTable("Monitors");
+                });
+
+            modelBuilder.Entity("Mkat.Domain.Entities.MonitorEvent", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("EventType")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsOutOfRange")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Message")
+                        .HasMaxLength(2000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("MonitorId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("ServiceId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("Success")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<double?>("Value")
+                        .HasColumnType("REAL");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MonitorId", "CreatedAt");
+
+                    b.HasIndex("ServiceId", "CreatedAt");
+
+                    b.ToTable("MonitorEvents");
+                });
+
+            modelBuilder.Entity("Mkat.Domain.Entities.MonitorRollup", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Count")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("FailureCount")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Granularity")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
+                    b.Property<double?>("Max")
+                        .HasColumnType("REAL");
+
+                    b.Property<double?>("Mean")
+                        .HasColumnType("REAL");
+
+                    b.Property<double?>("Median")
+                        .HasColumnType("REAL");
+
+                    b.Property<double?>("Min")
+                        .HasColumnType("REAL");
+
+                    b.Property<Guid>("MonitorId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<double?>("P80")
+                        .HasColumnType("REAL");
+
+                    b.Property<double?>("P90")
+                        .HasColumnType("REAL");
+
+                    b.Property<double?>("P95")
+                        .HasColumnType("REAL");
+
+                    b.Property<DateTime>("PeriodStart")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("ServiceId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<double?>("StdDev")
+                        .HasColumnType("REAL");
+
+                    b.Property<int>("SuccessCount")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<double?>("UptimePercent")
+                        .HasColumnType("REAL");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MonitorId", "Granularity", "PeriodStart")
+                        .IsUnique();
+
+                    b.HasIndex("ServiceId", "Granularity", "PeriodStart");
+
+                    b.ToTable("MonitorRollups");
                 });
 
             modelBuilder.Entity("Mkat.Domain.Entities.MuteWindow", b =>
@@ -389,6 +472,9 @@ namespace Mkat.Infrastructure.Migrations
                         .HasMaxLength(1000)
                         .HasColumnType("TEXT");
 
+                    b.Property<bool>("IsSuppressed")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(200)
@@ -409,6 +495,10 @@ namespace Mkat.Infrastructure.Migrations
                     b.Property<string>("State")
                         .IsRequired()
                         .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("SuppressionReason")
+                        .HasMaxLength(500)
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("UpdatedAt")
@@ -437,6 +527,31 @@ namespace Mkat.Infrastructure.Migrations
                     b.ToTable("ServiceContacts");
                 });
 
+            modelBuilder.Entity("Mkat.Domain.Entities.ServiceDependency", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("DependencyServiceId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("DependentServiceId")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DependencyServiceId");
+
+                    b.HasIndex("DependentServiceId", "DependencyServiceId")
+                        .IsUnique();
+
+                    b.ToTable("ServiceDependencies");
+                });
+
             modelBuilder.Entity("Mkat.Domain.Entities.Alert", b =>
                 {
                     b.HasOne("Mkat.Domain.Entities.Service", "Service")
@@ -459,17 +574,6 @@ namespace Mkat.Infrastructure.Migrations
                     b.Navigation("Contact");
                 });
 
-            modelBuilder.Entity("Mkat.Domain.Entities.MetricReading", b =>
-                {
-                    b.HasOne("Mkat.Domain.Entities.Monitor", "Monitor")
-                        .WithMany()
-                        .HasForeignKey("MonitorId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Monitor");
-                });
-
             modelBuilder.Entity("Mkat.Domain.Entities.Monitor", b =>
                 {
                     b.HasOne("Mkat.Domain.Entities.Service", "Service")
@@ -477,6 +581,44 @@ namespace Mkat.Infrastructure.Migrations
                         .HasForeignKey("ServiceId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Service");
+                });
+
+            modelBuilder.Entity("Mkat.Domain.Entities.MonitorEvent", b =>
+                {
+                    b.HasOne("Mkat.Domain.Entities.Monitor", "Monitor")
+                        .WithMany()
+                        .HasForeignKey("MonitorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Mkat.Domain.Entities.Service", "Service")
+                        .WithMany()
+                        .HasForeignKey("ServiceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Monitor");
+
+                    b.Navigation("Service");
+                });
+
+            modelBuilder.Entity("Mkat.Domain.Entities.MonitorRollup", b =>
+                {
+                    b.HasOne("Mkat.Domain.Entities.Monitor", "Monitor")
+                        .WithMany()
+                        .HasForeignKey("MonitorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Mkat.Domain.Entities.Service", "Service")
+                        .WithMany()
+                        .HasForeignKey("ServiceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Monitor");
 
                     b.Navigation("Service");
                 });
@@ -522,6 +664,25 @@ namespace Mkat.Infrastructure.Migrations
                     b.Navigation("Service");
                 });
 
+            modelBuilder.Entity("Mkat.Domain.Entities.ServiceDependency", b =>
+                {
+                    b.HasOne("Mkat.Domain.Entities.Service", "DependencyService")
+                        .WithMany("DependedOnBy")
+                        .HasForeignKey("DependencyServiceId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Mkat.Domain.Entities.Service", "DependentService")
+                        .WithMany("DependsOn")
+                        .HasForeignKey("DependentServiceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("DependencyService");
+
+                    b.Navigation("DependentService");
+                });
+
             modelBuilder.Entity("Mkat.Domain.Entities.Contact", b =>
                 {
                     b.Navigation("Channels");
@@ -532,6 +693,10 @@ namespace Mkat.Infrastructure.Migrations
             modelBuilder.Entity("Mkat.Domain.Entities.Service", b =>
                 {
                     b.Navigation("Alerts");
+
+                    b.Navigation("DependedOnBy");
+
+                    b.Navigation("DependsOn");
 
                     b.Navigation("Monitors");
 

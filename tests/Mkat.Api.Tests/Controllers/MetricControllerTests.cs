@@ -177,7 +177,7 @@ public class MetricControllerTests : IDisposable
     }
 
     [Fact]
-    public async Task Post_StoresReading()
+    public async Task Post_StoresMonitorEvent()
     {
         var (_, monitorId, token) = await SeedMetricMonitorAsync(maxValue: 100.0);
 
@@ -185,14 +185,14 @@ public class MetricControllerTests : IDisposable
 
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<MkatDbContext>();
-        var reading = await db.MetricReadings.FirstOrDefaultAsync(r => r.MonitorId == monitorId);
-        Assert.NotNull(reading);
-        Assert.Equal(42.5, reading.Value);
-        Assert.False(reading.IsOutOfRange);
+        var evt = await db.MonitorEvents.FirstOrDefaultAsync(e => e.MonitorId == monitorId);
+        Assert.NotNull(evt);
+        Assert.Equal(42.5, evt.Value);
+        Assert.False(evt.IsOutOfRange);
     }
 
     [Fact]
-    public async Task Post_OutOfRange_MarksReadingAsOutOfRange()
+    public async Task Post_OutOfRange_MarksEventAsOutOfRange()
     {
         var (_, monitorId, token) = await SeedMetricMonitorAsync(maxValue: 90.0);
 
@@ -200,9 +200,9 @@ public class MetricControllerTests : IDisposable
 
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<MkatDbContext>();
-        var reading = await db.MetricReadings.FirstOrDefaultAsync(r => r.MonitorId == monitorId);
-        Assert.NotNull(reading);
-        Assert.True(reading.IsOutOfRange);
+        var evt = await db.MonitorEvents.FirstOrDefaultAsync(e => e.MonitorId == monitorId);
+        Assert.NotNull(evt);
+        Assert.True(evt.IsOutOfRange);
     }
 
     [Fact]

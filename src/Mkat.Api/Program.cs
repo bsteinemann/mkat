@@ -33,10 +33,13 @@ try
     builder.Services.AddScoped<IMonitorRepository, MonitorRepository>();
     builder.Services.AddScoped<IAlertRepository, AlertRepository>();
     builder.Services.AddScoped<IMuteWindowRepository, MuteWindowRepository>();
-    builder.Services.AddScoped<IMetricReadingRepository, MetricReadingRepository>();
     builder.Services.AddScoped<IPeerRepository, PeerRepository>();
     builder.Services.AddScoped<IContactRepository, ContactRepository>();
     builder.Services.AddScoped<IPushSubscriptionRepository, PushSubscriptionRepository>();
+    builder.Services.AddScoped<IMonitorEventRepository, MonitorEventRepository>();
+    builder.Services.AddScoped<IMonitorRollupRepository, MonitorRollupRepository>();
+    builder.Services.AddScoped<IServiceDependencyRepository, ServiceDependencyRepository>();
+    builder.Services.AddScoped<IRollupCalculator, RollupCalculator>();
     builder.Services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<MkatDbContext>());
     builder.Services.AddScoped<IStateService, StateService>();
     builder.Services.AddScoped<IMetricEvaluator, MetricEvaluator>();
@@ -71,8 +74,9 @@ try
     builder.Services.AddHostedService<MaintenanceResumeWorker>();
     builder.Services.AddHostedService<AlertDispatchWorker>();
     builder.Services.AddHostedService<TelegramBotService>();
-    builder.Services.AddHostedService<MetricRetentionWorker>();
+    builder.Services.AddHostedService<EventRetentionWorker>();
     builder.Services.AddHostedService<HealthCheckWorker>();
+    builder.Services.AddHostedService<RollupAggregationWorker>();
     builder.Services.AddHttpClient();
     builder.Services.AddHostedService<PeerHeartbeatWorker>();
 

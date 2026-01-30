@@ -16,6 +16,7 @@ public class ServicesController : ControllerBase
     private readonly IServiceRepository _serviceRepo;
     private readonly IMuteWindowRepository _muteRepo;
     private readonly IContactRepository _contactRepo;
+    private readonly IServiceDependencyRepository _depRepo;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IStateService _stateService;
     private readonly IValidator<CreateServiceRequest> _createValidator;
@@ -26,6 +27,7 @@ public class ServicesController : ControllerBase
         IServiceRepository serviceRepo,
         IMuteWindowRepository muteRepo,
         IContactRepository contactRepo,
+        IServiceDependencyRepository depRepo,
         IUnitOfWork unitOfWork,
         IStateService stateService,
         IValidator<CreateServiceRequest> createValidator,
@@ -35,6 +37,7 @@ public class ServicesController : ControllerBase
         _serviceRepo = serviceRepo;
         _muteRepo = muteRepo;
         _contactRepo = contactRepo;
+        _depRepo = depRepo;
         _unitOfWork = unitOfWork;
         _stateService = stateService;
         _createValidator = createValidator;
@@ -55,9 +58,15 @@ public class ServicesController : ControllerBase
         var services = await _serviceRepo.GetAllAsync(skip, pageSize, ct);
         var totalCount = await _serviceRepo.GetCountAsync(ct);
 
+        var mappedItems = new List<ServiceResponse>(services.Count);
+        foreach (var service in services)
+        {
+            mappedItems.Add(await MapToResponseAsync(service, ct));
+        }
+
         var response = new PagedResponse<ServiceResponse>
         {
-            Items = services.Select(MapToResponse).ToList(),
+            Items = mappedItems,
             Page = page,
             PageSize = pageSize,
             TotalCount = totalCount
@@ -79,7 +88,7 @@ public class ServicesController : ControllerBase
             });
         }
 
-        return Ok(MapToResponse(service));
+        return Ok(await MapToResponseAsync(service, ct));
     }
 
     [HttpPost]
@@ -153,7 +162,7 @@ public class ServicesController : ControllerBase
         _logger.LogInformation("Created service {ServiceId} with name {ServiceName}",
             service.Id, service.Name);
 
-        return CreatedAtAction(nameof(GetById), new { id = service.Id }, MapToResponse(service));
+        return CreatedAtAction(nameof(GetById), new { id = service.Id }, await MapToResponseAsync(service, ct));
     }
 
     [HttpPut("{id:guid}")]
@@ -194,7 +203,7 @@ public class ServicesController : ControllerBase
 
         _logger.LogInformation("Updated service {ServiceId}", service.Id);
 
-        return Ok(MapToResponse(service));
+        return Ok(await MapToResponseAsync(service, ct));
     }
 
     [HttpDelete("{id:guid}")]
@@ -347,6 +356,233 @@ public class ServicesController : ControllerBase
         return Ok(responses);
     }
 
+    // --- Dependency Endpoints ---
+
+    [HttpPost("{id:guid}/dependencies")]
+    public async Task<IActionResult> AddDependency(
+        Guid id,
+        [FromBody] AddDependencyRequest request,
+        CancellationToken ct = default)
+    {
+        // Reject self-references
+        if (id == request.DependencyServiceId)
+        {
+            return BadRequest(new ErrorResponse
+            {
+                Error = "A service cannot depend on itself",
+                Code = "SELF_DEPENDENCY"
+            });
+        }
+
+        // Verify both services exist
+        var dependentService = await _serviceRepo.GetByIdAsync(id, ct);
+        if (dependentService == null)
+        {
+            return NotFound(new ErrorResponse
+            {
+                Error = "Service not found",
+                Code = "SERVICE_NOT_FOUND"
+            });
+        }
+
+        var dependencyService = await _serviceRepo.GetByIdAsync(request.DependencyServiceId, ct);
+        if (dependencyService == null)
+        {
+            return NotFound(new ErrorResponse
+            {
+                Error = "Dependency service not found",
+                Code = "SERVICE_NOT_FOUND"
+            });
+        }
+
+        // Check for existing dependency
+        var existing = await _depRepo.GetAsync(id, request.DependencyServiceId, ct);
+        if (existing != null)
+        {
+            return Conflict(new ErrorResponse
+            {
+                Error = "Dependency already exists",
+                Code = "DEPENDENCY_EXISTS"
+            });
+        }
+
+        // Check for cycles
+        var wouldCycle = await _depRepo.WouldCreateCycleAsync(id, request.DependencyServiceId, ct);
+        if (wouldCycle)
+        {
+            return BadRequest(new ErrorResponse
+            {
+                Error = "Adding this dependency would create a cycle",
+                Code = "DEPENDENCY_CYCLE"
+            });
+        }
+
+        var dependency = new ServiceDependency
+        {
+            Id = Guid.NewGuid(),
+            DependentServiceId = id,
+            DependencyServiceId = request.DependencyServiceId,
+            CreatedAt = DateTime.UtcNow
+        };
+
+        await _depRepo.AddAsync(dependency, ct);
+
+        // If the new dependency is DOWN, suppress the dependent and its transitive dependents
+        if (dependencyService.State == ServiceState.Down)
+        {
+            dependentService.IsSuppressed = true;
+            dependentService.SuppressionReason = $"Dependency down: {dependencyService.Name}";
+            await _serviceRepo.UpdateAsync(dependentService, ct);
+
+            var transitiveDependentIds = await _depRepo.GetTransitiveDependentIdsAsync(id, ct);
+            foreach (var transDepId in transitiveDependentIds)
+            {
+                var transDep = await _serviceRepo.GetByIdAsync(transDepId, ct);
+                if (transDep != null)
+                {
+                    transDep.IsSuppressed = true;
+                    transDep.SuppressionReason = $"Dependency down: {dependencyService.Name}";
+                    await _serviceRepo.UpdateAsync(transDep, ct);
+                }
+            }
+        }
+
+        await _unitOfWork.SaveChangesAsync(ct);
+
+        _logger.LogInformation("Added dependency: service {DependentId} depends on {DependencyId}",
+            id, request.DependencyServiceId);
+
+        var responseDto = new DependencyResponse
+        {
+            Id = dependencyService.Id,
+            Name = dependencyService.Name
+        };
+
+        return Created($"/api/v1/services/{id}/dependencies", responseDto);
+    }
+
+    [HttpDelete("{id:guid}/dependencies/{dependencyId:guid}")]
+    public async Task<IActionResult> RemoveDependency(Guid id, Guid dependencyId, CancellationToken ct = default)
+    {
+        var existing = await _depRepo.GetAsync(id, dependencyId, ct);
+        if (existing == null)
+        {
+            return NotFound(new ErrorResponse
+            {
+                Error = "Dependency not found",
+                Code = "DEPENDENCY_NOT_FOUND"
+            });
+        }
+
+        await _depRepo.DeleteAsync(existing, ct);
+
+        // Re-evaluate suppression for the dependent after removing the edge
+        var dependent = await _serviceRepo.GetByIdAsync(id, ct);
+        if (dependent is { IsSuppressed: true })
+        {
+            var remainingDepIds = await _depRepo.GetTransitiveDependencyIdsAsync(id, ct);
+            var anyStillDown = false;
+            foreach (var depId in remainingDepIds)
+            {
+                var dep = await _serviceRepo.GetByIdAsync(depId, ct);
+                if (dep is { State: ServiceState.Down })
+                {
+                    anyStillDown = true;
+                    break;
+                }
+            }
+
+            if (!anyStillDown)
+            {
+                dependent.IsSuppressed = false;
+                dependent.SuppressionReason = null;
+                await _serviceRepo.UpdateAsync(dependent, ct);
+            }
+        }
+
+        await _unitOfWork.SaveChangesAsync(ct);
+
+        _logger.LogInformation("Removed dependency: service {DependentId} no longer depends on {DependencyId}",
+            id, dependencyId);
+
+        return NoContent();
+    }
+
+    [HttpGet("{id:guid}/dependencies")]
+    public async Task<ActionResult<List<DependencyResponse>>> GetDependencies(Guid id, CancellationToken ct = default)
+    {
+        var service = await _serviceRepo.GetByIdAsync(id, ct);
+        if (service == null)
+        {
+            return NotFound(new ErrorResponse
+            {
+                Error = "Service not found",
+                Code = "SERVICE_NOT_FOUND"
+            });
+        }
+
+        var dependencies = await _depRepo.GetDependenciesAsync(id, ct);
+        var responses = dependencies.Select(d => new DependencyResponse
+        {
+            Id = d.DependencyService.Id,
+            Name = d.DependencyService.Name
+        }).ToList();
+
+        return Ok(responses);
+    }
+
+    [HttpGet("{id:guid}/dependents")]
+    public async Task<ActionResult<List<DependencyResponse>>> GetDependents(Guid id, CancellationToken ct = default)
+    {
+        var service = await _serviceRepo.GetByIdAsync(id, ct);
+        if (service == null)
+        {
+            return NotFound(new ErrorResponse
+            {
+                Error = "Service not found",
+                Code = "SERVICE_NOT_FOUND"
+            });
+        }
+
+        var dependents = await _depRepo.GetDependentsAsync(id, ct);
+        var responses = dependents.Select(d => new DependencyResponse
+        {
+            Id = d.DependentService.Id,
+            Name = d.DependentService.Name
+        }).ToList();
+
+        return Ok(responses);
+    }
+
+    [HttpGet("graph")]
+    public async Task<ActionResult<DependencyGraphResponse>> GetGraph(CancellationToken ct = default)
+    {
+        var totalCount = await _serviceRepo.GetCountAsync(ct);
+        var services = await _serviceRepo.GetAllAsync(0, Math.Max(totalCount, 1), ct);
+        var allDependencies = await _depRepo.GetAllAsync(ct);
+
+        var nodes = services.Select(s => new DependencyGraphNode
+        {
+            Id = s.Id,
+            Name = s.Name,
+            State = s.State.ToString(),
+            IsSuppressed = s.IsSuppressed,
+            SuppressionReason = s.SuppressionReason
+        }).ToList();
+
+        var edges = allDependencies.Select(d => new DependencyGraphEdge
+        {
+            DependentId = d.DependentServiceId,
+            DependencyId = d.DependencyServiceId
+        }).ToList();
+
+        return Ok(new DependencyGraphResponse
+        {
+            Nodes = nodes,
+            Edges = edges
+        });
+    }
+
     internal static MonitorResponse MapMonitorToResponse(Monitor monitor, string baseUrl)
     {
         return new MonitorResponse
@@ -378,9 +614,12 @@ public class ServicesController : ControllerBase
         };
     }
 
-    private ServiceResponse MapToResponse(Service service)
+    private async Task<ServiceResponse> MapToResponseAsync(Service service, CancellationToken ct)
     {
         var baseUrl = $"{Request.Scheme}://{Request.Host}{Request.PathBase}";
+
+        var dependencies = await _depRepo.GetDependenciesAsync(service.Id, ct);
+        var dependents = await _depRepo.GetDependentsAsync(service.Id, ct);
 
         return new ServiceResponse
         {
@@ -392,6 +631,18 @@ public class ServicesController : ControllerBase
             PausedUntil = service.PausedUntil,
             CreatedAt = service.CreatedAt,
             UpdatedAt = service.UpdatedAt,
+            IsSuppressed = service.IsSuppressed,
+            SuppressionReason = service.SuppressionReason,
+            DependsOn = dependencies.Select(d => new DependencyResponse
+            {
+                Id = d.DependencyService.Id,
+                Name = d.DependencyService.Name
+            }).ToList(),
+            DependedOnBy = dependents.Select(d => new DependencyResponse
+            {
+                Id = d.DependentService.Id,
+                Name = d.DependentService.Name
+            }).ToList(),
             Monitors = service.Monitors.Select(m => MapMonitorToResponse(m, baseUrl)).ToList()
         };
     }

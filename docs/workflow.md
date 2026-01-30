@@ -115,14 +115,16 @@ This gate exists because previous milestones claimed TDD but wrote implementatio
 ### Steps
 
 1. Run the full test suite (`dotnet test`) - all tests must pass
-2. Run `dotnet build` with no warnings
-3. Manual smoke test if it is a user-facing feature
-4. Verify no regressions from other milestones
+2. Run `dotnet build` - warnings are errors (`TreatWarningsAsErrors` is enabled), so a clean build means no warnings
+3. For frontend changes: run `npm run lint` and `npm run format:check` in `src/mkat-ui/`
+4. Manual smoke test if it is a user-facing feature
+5. Verify no regressions from other milestones
 
 ### DoD
 
 - [ ] Full test suite passes
-- [ ] No build warnings
+- [ ] Build succeeds (warnings = errors, so success means zero warnings)
+- [ ] Frontend lint and format checks pass (if frontend was modified)
 - [ ] Edge cases covered (nulls, empty inputs, invalid states)
 
 ---

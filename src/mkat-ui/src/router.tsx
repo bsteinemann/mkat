@@ -23,6 +23,9 @@ const ServiceEdit = lazy(() =>
 const Alerts = lazy(() => import('./pages/Alerts').then((m) => ({ default: m.Alerts })));
 const Peers = lazy(() => import('./pages/Peers').then((m) => ({ default: m.Peers })));
 const Contacts = lazy(() => import('./pages/Contacts').then((m) => ({ default: m.Contacts })));
+const DependencyMap = lazy(() =>
+  import('./pages/DependencyMap').then((m) => ({ default: m.DependencyMap })),
+);
 const Login = lazy(() => import('./pages/Login').then((m) => ({ default: m.Login })));
 
 const rootRoute = createRootRoute({
@@ -104,6 +107,12 @@ const contactsRoute = createRoute({
   component: Contacts,
 });
 
+const dependencyMapRoute = createRoute({
+  getParentRoute: () => authenticatedRoute,
+  path: '/dependencies',
+  component: DependencyMap,
+});
+
 const routeTree = rootRoute.addChildren([
   loginRoute,
   authenticatedRoute.addChildren([
@@ -115,6 +124,7 @@ const routeTree = rootRoute.addChildren([
     alertsRoute,
     peersRoute,
     contactsRoute,
+    dependencyMapRoute,
   ]),
 ]);
 

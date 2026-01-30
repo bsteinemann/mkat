@@ -1,9 +1,11 @@
+using System.Diagnostics;
 using System.Text.RegularExpressions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Mkat.Application.Interfaces;
 using Mkat.Application.Services;
+using Mkat.Domain.Entities;
 using Mkat.Domain.Enums;
 
 namespace Mkat.Infrastructure.Workers;
@@ -58,6 +60,7 @@ public class HealthCheckWorker : BackgroundService
 
         var now = DateTime.UtcNow;
         var monitors = await monitorRepo.GetHealthCheckMonitorsDueAsync(now, ct);
+        var eventRepo = scope.ServiceProvider.GetRequiredService<IMonitorEventRepository>();
 
         foreach (var monitor in monitors)
         {
@@ -65,7 +68,22 @@ public class HealthCheckWorker : BackgroundService
             if (service == null || service.State == ServiceState.Paused)
                 continue;
 
+            var stopwatch = Stopwatch.StartNew();
             var (success, reason) = await ExecuteHealthCheckAsync(monitor, httpFactory, ct);
+            stopwatch.Stop();
+
+            var monitorEvent = new MonitorEvent
+            {
+                Id = Guid.NewGuid(),
+                MonitorId = monitor.Id,
+                ServiceId = monitor.ServiceId,
+                EventType = EventType.HealthCheckPerformed,
+                Success = success,
+                Value = stopwatch.Elapsed.TotalMilliseconds,
+                Message = success ? null : reason,
+                CreatedAt = DateTime.UtcNow
+            };
+            await eventRepo.AddAsync(monitorEvent, ct);
 
             monitor.LastCheckIn = DateTime.UtcNow;
             await monitorRepo.UpdateAsync(monitor, ct);

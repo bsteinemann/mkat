@@ -62,6 +62,13 @@ public class MonitorRepository : IMonitorRepository
             .ToListAsync(ct);
     }
 
+    public async Task<IReadOnlyList<Monitor>> GetAllAsync(CancellationToken ct = default)
+    {
+        return await _context.Monitors
+            .Include(m => m.Service)
+            .ToListAsync(ct);
+    }
+
     public async Task AddAsync(Monitor monitor, CancellationToken ct = default)
     {
         monitor.CreatedAt = DateTime.UtcNow;
