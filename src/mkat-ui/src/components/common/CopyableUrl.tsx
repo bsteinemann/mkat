@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ClipboardIcon, CheckIcon } from '@heroicons/react/24/outline';
 import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
 
 interface Props {
   label: string;
@@ -18,7 +19,7 @@ export function CopyableUrl({ label, url }: Props) {
 
   return (
     <div className="flex flex-col gap-1">
-      <label className="text-sm font-medium text-gray-700">{label}</label>
+      <Label className="text-gray-700">{label}</Label>
       <div className="flex items-center gap-2">
         <code className="flex-1 bg-gray-100 px-3 py-2 rounded text-sm font-mono truncate">
           {url}

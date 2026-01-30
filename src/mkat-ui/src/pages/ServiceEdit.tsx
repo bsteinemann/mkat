@@ -7,6 +7,7 @@ import { ServiceForm } from '../components/services/ServiceForm';
 import { MonitorType, ThresholdStrategy } from '../api/types';
 import type { CreateServiceRequest, UpdateServiceRequest, CreateMonitorRequest, UpdateMonitorRequest, Monitor } from '../api/types';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -509,12 +510,10 @@ function ContactsSection({ serviceId }: { serviceId: string }) {
       ) : (
         <div className="space-y-2">
           {allContacts.map(contact => (
-            <label key={contact.id} className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
+            <Label key={contact.id} className="flex items-center gap-2 cursor-pointer">
+              <Checkbox
                 checked={selected.has(contact.id)}
-                onChange={() => toggle(contact.id)}
-                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                onCheckedChange={() => toggle(contact.id)}
               />
               <span className="text-sm text-gray-700">{contact.name}</span>
               {contact.isDefault && (
@@ -523,7 +522,7 @@ function ContactsSection({ serviceId }: { serviceId: string }) {
               {contact.channels.length === 0 && (
                 <span className="text-xs text-amber-600">(no channels)</span>
               )}
-            </label>
+            </Label>
           ))}
         </div>
       )}
