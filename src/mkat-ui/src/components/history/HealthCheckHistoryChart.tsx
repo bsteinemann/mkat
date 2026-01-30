@@ -68,7 +68,7 @@ export function HealthCheckHistoryChart({
         />
         <Tooltip
           labelFormatter={(v) => new Date(v as number).toLocaleString()}
-          formatter={(value: number) => [`${Math.round(value)}ms`, 'Response Time']}
+          formatter={(value) => [`${Math.round(value as number)}ms`, 'Response Time']}
           contentStyle={{
             backgroundColor: 'var(--popover)',
             border: '1px solid var(--border)',

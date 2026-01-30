@@ -65,7 +65,7 @@ export function MetricHistoryChart({
         <YAxis tick={{ fontSize: 11 }} />
         <Tooltip
           labelFormatter={(v) => new Date(v as number).toLocaleString()}
-          formatter={(value: number) => [value.toFixed(2), dataSource === 'events' ? 'Value' : 'Mean']}
+          formatter={(value) => [(value as number).toFixed(2), dataSource === 'events' ? 'Value' : 'Mean']}
           contentStyle={{
             backgroundColor: 'var(--popover)',
             border: '1px solid var(--border)',

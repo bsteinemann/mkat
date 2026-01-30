@@ -61,7 +61,7 @@ export function WebhookHistoryChart({
           />
           <Tooltip
             labelFormatter={(v) => new Date(v as number).toLocaleString()}
-            formatter={(_, name, props) => {
+            formatter={(_, _name, props) => {
               const p = props.payload as (typeof data)[0];
               return [p.success ? 'Recovery' : 'Failure', p.message ?? 'Webhook'];
             }}
