@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
+import { toast } from 'sonner';
 import { peersApi } from '../api/services';
 import { StateIndicator } from '../components/services/StateIndicator';
 import { Button } from '@/components/ui/button';
@@ -31,7 +32,13 @@ export function Peers() {
 
   const unpairMutation = useMutation({
     mutationFn: (id: string) => peersApi.unpair(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['peers'] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['peers'] });
+      toast.success('Peer unpaired');
+    },
+    onError: () => {
+      toast.error('Failed to unpair peer');
+    },
   });
 
   if (isLoading) return <div>Loading...</div>;
@@ -123,13 +130,20 @@ function PairDialog({ onClose }: { onClose: () => void }) {
     onSuccess: (data) => {
       setGeneratedToken(data.token);
     },
+    onError: () => {
+      toast.error('Failed to generate pairing token');
+    },
   });
 
   const completeMutation = useMutation({
     mutationFn: (token: string) => peersApi.complete(token),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['peers'] });
+      toast.success('Pairing complete');
       onClose();
+    },
+    onError: () => {
+      toast.error('Failed to complete pairing');
     },
   });
 
@@ -185,9 +199,6 @@ function PairDialog({ onClose }: { onClose: () => void }) {
           >
             {initiateMutation.isPending ? 'Generating...' : 'Generate Token'}
           </Button>
-          {initiateMutation.isError && (
-            <p className="text-red-600 text-sm">{(initiateMutation.error as Error).message}</p>
-          )}
         </div>
       )}
 
@@ -233,9 +244,6 @@ function PairDialog({ onClose }: { onClose: () => void }) {
           >
             {completeMutation.isPending ? 'Pairing...' : 'Complete Pairing'}
           </Button>
-          {completeMutation.isError && (
-            <p className="text-red-600 text-sm">{(completeMutation.error as Error).message}</p>
-          )}
         </div>
       )}
       </CardContent>

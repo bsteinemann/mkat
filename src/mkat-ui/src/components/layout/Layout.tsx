@@ -3,6 +3,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { Header } from './Header';
 import { Sidebar } from './Sidebar';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
+import { Toaster } from '@/components/ui/sonner';
 import { initNotifications } from '../../notifications';
 import { connectSSE } from '../../sse';
 
@@ -43,6 +44,7 @@ export function Layout({ children }: Props) {
           {children}
         </main>
       </SidebarInset>
+      <Toaster />
     </SidebarProvider>
   );
 }

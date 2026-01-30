@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import { contactsApi } from '../api/services';
 import { ChannelType } from '../api/types';
 import type { Contact, ContactChannel } from '../api/types';
@@ -33,7 +34,13 @@ export function Contacts() {
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => contactsApi.delete(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['contacts'] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['contacts'] });
+      toast.success('Contact deleted');
+    },
+    onError: () => {
+      toast.error('Failed to delete contact');
+    },
   });
 
   if (isLoading) return <div>Loading...</div>;
@@ -130,7 +137,11 @@ function ContactForm({ onClose, contact }: { onClose: () => void; contact?: Cont
     mutationFn: (name: string) => contactsApi.create(name),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['contacts'] });
+      toast.success('Contact created');
       onClose();
+    },
+    onError: () => {
+      toast.error('Failed to create contact');
     },
   });
 
@@ -138,7 +149,11 @@ function ContactForm({ onClose, contact }: { onClose: () => void; contact?: Cont
     mutationFn: (name: string) => contactsApi.update(contact!.id, name),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['contacts'] });
+      toast.success('Contact updated');
       onClose();
+    },
+    onError: () => {
+      toast.error('Failed to update contact');
     },
   });
 
@@ -187,21 +202,39 @@ function ContactDetail({ contact, onClose }: { contact: Contact; onClose: () => 
       queryClient.invalidateQueries({ queryKey: ['contacts'] });
       setEditingName(false);
     },
+    onError: () => {
+      toast.error('Failed to update contact name');
+    },
   });
 
   const deleteChannelMutation = useMutation({
     mutationFn: (channelId: string) => contactsApi.deleteChannel(contact.id, channelId),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['contacts'] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['contacts'] });
+      toast.success('Channel removed');
+    },
+    onError: () => {
+      toast.error('Failed to remove channel');
+    },
   });
 
   const toggleChannelMutation = useMutation({
     mutationFn: (ch: ContactChannel) =>
       contactsApi.updateChannel(contact.id, ch.id, ch.configuration, !ch.isEnabled),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['contacts'] }),
+    onError: () => {
+      toast.error('Failed to update channel');
+    },
   });
 
   const testChannelMutation = useMutation({
     mutationFn: (channelId: string) => contactsApi.testChannel(contact.id, channelId),
+    onSuccess: () => {
+      toast.success('Test notification sent');
+    },
+    onError: () => {
+      toast.error('Failed to send test notification');
+    },
   });
 
   const displayContact = freshContact ?? contact;
@@ -335,7 +368,11 @@ function AddChannelForm({ contactId, onClose }: { contactId: string; onClose: ()
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['contacts'] });
+      toast.success('Channel added');
       onClose();
+    },
+    onError: () => {
+      toast.error('Failed to add channel');
     },
   });
 

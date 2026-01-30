@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, useParams } from '@tanstack/react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import { servicesApi, contactsApi } from '../api/services';
 import { ServiceForm } from '../components/services/ServiceForm';
 import { MonitorType, ThresholdStrategy } from '../api/types';
@@ -36,6 +37,10 @@ export function ServiceEdit() {
     mutationFn: (data: UpdateServiceRequest) => servicesApi.update(serviceId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['services'] });
+      toast.success('Service updated');
+    },
+    onError: () => {
+      toast.error('Failed to update service');
     },
   });
 
@@ -43,7 +48,11 @@ export function ServiceEdit() {
     mutationFn: () => servicesApi.delete(serviceId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['services'] });
+      toast.success('Service deleted');
       navigate({ to: '/services' });
+    },
+    onError: () => {
+      toast.error('Failed to delete service');
     },
   });
 
@@ -51,6 +60,10 @@ export function ServiceEdit() {
     mutationFn: (data: CreateMonitorRequest) => servicesApi.addMonitor(serviceId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['services', serviceId] });
+      toast.success('Monitor added');
+    },
+    onError: () => {
+      toast.error('Failed to add monitor');
     },
   });
 
@@ -59,6 +72,10 @@ export function ServiceEdit() {
       servicesApi.updateMonitor(serviceId, monitorId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['services', serviceId] });
+      toast.success('Monitor updated');
+    },
+    onError: () => {
+      toast.error('Failed to update monitor');
     },
   });
 
@@ -66,6 +83,10 @@ export function ServiceEdit() {
     mutationFn: (monitorId: string) => servicesApi.deleteMonitor(serviceId, monitorId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['services', serviceId] });
+      toast.success('Monitor removed');
+    },
+    onError: () => {
+      toast.error('Failed to remove monitor');
     },
   });
 
@@ -95,11 +116,6 @@ export function ServiceEdit() {
             submitLabel="Update Service"
             showMonitors={false}
           />
-          {updateMutation.isError && (
-            <p className="text-red-600 text-sm mt-4">
-              {(updateMutation.error as Error).message}
-            </p>
-          )}
         </CardContent>
       </Card>
 
@@ -109,8 +125,6 @@ export function ServiceEdit() {
         onUpdate={(monitorId, data) => updateMonitorMutation.mutate({ monitorId, data })}
         onDelete={(monitorId) => deleteMonitorMutation.mutate(monitorId)}
         isAdding={addMonitorMutation.isPending}
-        addError={addMonitorMutation.isError ? (addMonitorMutation.error as Error).message : undefined}
-        deleteError={deleteMonitorMutation.isError ? (deleteMonitorMutation.error as Error).message : undefined}
       />
 
       <ContactsSection serviceId={serviceId} />
@@ -154,16 +168,12 @@ function MonitorSection({
   onUpdate,
   onDelete,
   isAdding,
-  addError,
-  deleteError,
 }: {
   monitors: Monitor[];
   onAdd: (data: CreateMonitorRequest) => void;
   onUpdate: (monitorId: string, data: UpdateMonitorRequest) => void;
   onDelete: (monitorId: string) => void;
   isAdding: boolean;
-  addError?: string;
-  deleteError?: string;
 }) {
   const [showAddForm, setShowAddForm] = useState(false);
   const [newType, setNewType] = useState<MonitorType>(MonitorType.Heartbeat);
@@ -411,11 +421,8 @@ function MonitorSection({
           >
             {isAdding ? 'Adding...' : 'Add'}
           </Button>
-          {addError && <p className="text-red-600 text-xs">{addError}</p>}
         </div>
       )}
-
-      {deleteError && <p className="text-red-600 text-xs mb-2">{deleteError}</p>}
 
       <div className="space-y-3">
         {monitors.map(monitor => (
@@ -458,6 +465,10 @@ function ContactsSection({ serviceId }: { serviceId: string }) {
       queryClient.invalidateQueries({ queryKey: ['services', serviceId, 'contacts'] });
       queryClient.invalidateQueries({ queryKey: ['contacts'] });
       setLocalSelected(null);
+      toast.success('Contacts updated');
+    },
+    onError: () => {
+      toast.error('Failed to update contacts');
     },
   });
 
@@ -536,11 +547,6 @@ function ContactsSection({ serviceId }: { serviceId: string }) {
         </div>
       )}
 
-      {saveMutation.isError && (
-        <p className="text-red-600 text-xs mt-2">
-          {(saveMutation.error as Error).message}
-        </p>
-      )}
       </CardContent>
     </Card>
   );

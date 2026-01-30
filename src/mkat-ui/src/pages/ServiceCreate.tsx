@@ -1,5 +1,6 @@
 import { useNavigate } from '@tanstack/react-router';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import { servicesApi } from '../api/services';
 import { ServiceForm } from '../components/services/ServiceForm';
 import type { CreateServiceRequest } from '../api/types';
@@ -14,6 +15,9 @@ export function ServiceCreate() {
       queryClient.invalidateQueries({ queryKey: ['services'] });
       navigate({ to: '/services' });
     },
+    onError: () => {
+      toast.error('Failed to create service');
+    },
   });
 
   return (
@@ -25,11 +29,6 @@ export function ServiceCreate() {
           isLoading={mutation.isPending}
           submitLabel="Create Service"
         />
-        {mutation.isError && (
-          <p className="text-red-600 text-sm mt-4">
-            {(mutation.error as Error).message}
-          </p>
-        )}
       </div>
     </div>
   );
