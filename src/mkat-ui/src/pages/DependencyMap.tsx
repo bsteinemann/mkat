@@ -129,7 +129,10 @@ function toFlowElements(
     source: e.dependentId,
     target: e.dependencyId,
     animated: true,
-    markerEnd: { type: MarkerType.ArrowClosed },
+    label: 'depends on',
+    labelStyle: { fontSize: 11, fill: '#6b7280' },
+    style: { strokeWidth: 2 },
+    markerEnd: { type: MarkerType.ArrowClosed, width: 20, height: 20 },
   }));
 
   const layoutedNodes = getLayoutedElements(nodes, edges);
@@ -231,9 +234,12 @@ export function DependencyMap() {
   return (
     <div className="p-6 flex flex-col h-full">
       <h1 className="text-2xl font-bold mb-4">Dependency Map</h1>
-      <p className="text-sm text-muted-foreground mb-4">
+      <p className="text-sm text-muted-foreground mb-2">
         Click a node to view the service. Drag from one handle to another to add a dependency.
         Select an edge and press Delete to remove it.
+      </p>
+      <p className="text-xs text-muted-foreground mb-4">
+        Arrow direction: A &rarr; B means &ldquo;A depends on B&rdquo;
       </p>
       <div className="flex-1 min-h-[600px] rounded-lg border bg-background">
         <ReactFlow
