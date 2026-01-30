@@ -1,5 +1,11 @@
 import { MonitorType } from '../../api/types';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 interface Props {
   value: MonitorType;
@@ -9,10 +15,7 @@ interface Props {
 
 export function MonitorTypeSelector({ value, onChange, triggerClassName }: Props) {
   return (
-    <Select
-      value={String(value)}
-      onValueChange={v => onChange(Number(v) as MonitorType)}
-    >
+    <Select value={String(value)} onValueChange={(v) => onChange(Number(v) as MonitorType)}>
       <SelectTrigger className={triggerClassName} size="sm">
         <SelectValue />
       </SelectTrigger>

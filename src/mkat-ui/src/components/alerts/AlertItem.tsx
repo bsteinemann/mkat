@@ -38,9 +38,7 @@ export function AlertItem({ alert, onAcknowledge }: Props) {
           <Badge variant="outline" className={typeColors[alert.type]}>
             {typeLabels[alert.type]}
           </Badge>
-          <Badge className={severityBadge[alert.severity]}>
-            {Severity[alert.severity]}
-          </Badge>
+          <Badge className={severityBadge[alert.severity]}>{Severity[alert.severity]}</Badge>
         </div>
         <p className="text-sm text-foreground mt-1">{alert.message}</p>
         <p className="text-xs text-muted-foreground mt-1">
@@ -49,11 +47,7 @@ export function AlertItem({ alert, onAcknowledge }: Props) {
         </p>
       </div>
       {onAcknowledge && !alert.acknowledgedAt && (
-        <Button
-          variant="secondary"
-          size="xs"
-          onClick={onAcknowledge}
-        >
+        <Button variant="secondary" size="xs" onClick={onAcknowledge}>
           Ack
         </Button>
       )}

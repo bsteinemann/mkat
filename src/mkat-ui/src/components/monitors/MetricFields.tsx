@@ -1,7 +1,13 @@
 import { ThresholdStrategy } from '../../api/types';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 export interface MetricValues {
   minValue: number | undefined;
@@ -26,7 +32,9 @@ export function MetricFields({ values, onChange }: Props) {
             type="number"
             step="any"
             value={values.minValue ?? ''}
-            onChange={e => onChange('minValue', e.target.value ? Number(e.target.value) : undefined)}
+            onChange={(e) =>
+              onChange('minValue', e.target.value ? Number(e.target.value) : undefined)
+            }
             className="h-8 text-sm"
             placeholder="Optional"
           />
@@ -37,7 +45,9 @@ export function MetricFields({ values, onChange }: Props) {
             type="number"
             step="any"
             value={values.maxValue ?? ''}
-            onChange={e => onChange('maxValue', e.target.value ? Number(e.target.value) : undefined)}
+            onChange={(e) =>
+              onChange('maxValue', e.target.value ? Number(e.target.value) : undefined)
+            }
             className="h-8 text-sm"
             placeholder="Optional"
           />
@@ -48,16 +58,22 @@ export function MetricFields({ values, onChange }: Props) {
           <Label className="text-xs text-muted-foreground">Threshold Strategy</Label>
           <Select
             value={String(values.thresholdStrategy)}
-            onValueChange={v => onChange('thresholdStrategy', Number(v))}
+            onValueChange={(v) => onChange('thresholdStrategy', Number(v))}
           >
             <SelectTrigger className="w-full h-8 text-sm" size="sm">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value={String(ThresholdStrategy.Immediate)}>Immediate</SelectItem>
-              <SelectItem value={String(ThresholdStrategy.ConsecutiveCount)}>Consecutive Count</SelectItem>
-              <SelectItem value={String(ThresholdStrategy.TimeDurationAverage)}>Time Window Average</SelectItem>
-              <SelectItem value={String(ThresholdStrategy.SampleCountAverage)}>Sample Count Average</SelectItem>
+              <SelectItem value={String(ThresholdStrategy.ConsecutiveCount)}>
+                Consecutive Count
+              </SelectItem>
+              <SelectItem value={String(ThresholdStrategy.TimeDurationAverage)}>
+                Time Window Average
+              </SelectItem>
+              <SelectItem value={String(ThresholdStrategy.SampleCountAverage)}>
+                Sample Count Average
+              </SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -66,7 +82,7 @@ export function MetricFields({ values, onChange }: Props) {
           <Input
             type="number"
             value={values.retentionDays}
-            onChange={e => onChange('retentionDays', Number(e.target.value))}
+            onChange={(e) => onChange('retentionDays', Number(e.target.value))}
             className="h-8 text-sm"
             min={1}
             max={365}
@@ -80,7 +96,7 @@ export function MetricFields({ values, onChange }: Props) {
           <Input
             type="number"
             value={values.thresholdCount}
-            onChange={e => onChange('thresholdCount', Number(e.target.value))}
+            onChange={(e) => onChange('thresholdCount', Number(e.target.value))}
             className="h-8 text-sm"
             min={2}
           />

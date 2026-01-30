@@ -1,6 +1,12 @@
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 export interface HealthCheckValues {
   healthCheckUrl: string;
@@ -24,7 +30,7 @@ export function HealthCheckFields({ values, onChange, urlRequired }: Props) {
         <Input
           type="url"
           value={values.healthCheckUrl}
-          onChange={e => onChange('healthCheckUrl', e.target.value || undefined)}
+          onChange={(e) => onChange('healthCheckUrl', e.target.value || undefined)}
           className="h-8 text-sm"
           placeholder="https://example.com/health"
           required={urlRequired}
@@ -33,7 +39,7 @@ export function HealthCheckFields({ values, onChange, urlRequired }: Props) {
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1">
           <Label className="text-xs text-muted-foreground">HTTP Method</Label>
-          <Select value={values.httpMethod} onValueChange={v => onChange('httpMethod', v)}>
+          <Select value={values.httpMethod} onValueChange={(v) => onChange('httpMethod', v)}>
             <SelectTrigger className="w-full h-8 text-sm" size="sm">
               <SelectValue />
             </SelectTrigger>
@@ -50,7 +56,7 @@ export function HealthCheckFields({ values, onChange, urlRequired }: Props) {
           <Input
             type="number"
             value={values.timeoutSeconds}
-            onChange={e => onChange('timeoutSeconds', Number(e.target.value))}
+            onChange={(e) => onChange('timeoutSeconds', Number(e.target.value))}
             className="h-8 text-sm"
             min={1}
             max={120}
@@ -62,7 +68,7 @@ export function HealthCheckFields({ values, onChange, urlRequired }: Props) {
         <Input
           type="text"
           value={values.expectedStatusCodes}
-          onChange={e => onChange('expectedStatusCodes', e.target.value)}
+          onChange={(e) => onChange('expectedStatusCodes', e.target.value)}
           className="h-8 text-sm"
           placeholder="200,201,204"
         />
@@ -72,7 +78,7 @@ export function HealthCheckFields({ values, onChange, urlRequired }: Props) {
         <Input
           type="text"
           value={values.bodyMatchRegex}
-          onChange={e => onChange('bodyMatchRegex', e.target.value || undefined)}
+          onChange={(e) => onChange('bodyMatchRegex', e.target.value || undefined)}
           className="h-8 text-sm"
           placeholder="ok|healthy"
         />

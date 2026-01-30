@@ -10,7 +10,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 interface Props {
   initialData?: {
@@ -24,12 +30,18 @@ interface Props {
   showMonitors?: boolean;
 }
 
-export function ServiceForm({ initialData, onSubmit, isLoading, submitLabel = 'Create', showMonitors = true }: Props) {
+export function ServiceForm({
+  initialData,
+  onSubmit,
+  isLoading,
+  submitLabel = 'Create',
+  showMonitors = true,
+}: Props) {
   const [name, setName] = useState(initialData?.name ?? '');
   const [description, setDescription] = useState(initialData?.description ?? '');
   const [severity, setSeverity] = useState<Severity>(initialData?.severity ?? Severity.Medium);
   const [monitors, setMonitors] = useState<CreateMonitorRequest[]>([
-    { type: MonitorType.Heartbeat, intervalSeconds: 60, gracePeriodSeconds: 60 }
+    { type: MonitorType.Heartbeat, intervalSeconds: 60, gracePeriodSeconds: 60 },
   ]);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -43,14 +55,21 @@ export function ServiceForm({ initialData, onSubmit, isLoading, submitLabel = 'C
   };
 
   const addMonitor = () => {
-    setMonitors([...monitors, { type: MonitorType.Heartbeat, intervalSeconds: 60, gracePeriodSeconds: 30 }]);
+    setMonitors([
+      ...monitors,
+      { type: MonitorType.Heartbeat, intervalSeconds: 60, gracePeriodSeconds: 30 },
+    ]);
   };
 
   const removeMonitor = (index: number) => {
     setMonitors(monitors.filter((_, i) => i !== index));
   };
 
-  const updateMonitor = (index: number, field: keyof CreateMonitorRequest, value: string | number | undefined) => {
+  const updateMonitor = (
+    index: number,
+    field: keyof CreateMonitorRequest,
+    value: string | number | undefined,
+  ) => {
     const updated = monitors.map((m, i) => {
       if (i !== index) return m;
       const next = { ...m, [field]: value };
@@ -79,26 +98,17 @@ export function ServiceForm({ initialData, onSubmit, isLoading, submitLabel = 'C
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="space-y-2">
         <Label>Name</Label>
-        <Input
-          type="text"
-          value={name}
-          onChange={e => setName(e.target.value)}
-          required
-        />
+        <Input type="text" value={name} onChange={(e) => setName(e.target.value)} required />
       </div>
 
       <div className="space-y-2">
         <Label>Description</Label>
-        <Textarea
-          value={description}
-          onChange={e => setDescription(e.target.value)}
-          rows={3}
-        />
+        <Textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3} />
       </div>
 
       <div className="space-y-2">
         <Label>Severity</Label>
-        <Select value={String(severity)} onValueChange={v => setSeverity(Number(v) as Severity)}>
+        <Select value={String(severity)} onValueChange={(v) => setSeverity(Number(v) as Severity)}>
           <SelectTrigger className="w-full">
             <SelectValue />
           </SelectTrigger>
@@ -132,7 +142,7 @@ export function ServiceForm({ initialData, onSubmit, isLoading, submitLabel = 'C
                 <div className="flex items-center justify-between">
                   <MonitorTypeSelector
                     value={monitor.type}
-                    onChange={v => updateMonitor(index, 'type', v)}
+                    onChange={(v) => updateMonitor(index, 'type', v)}
                   />
                   {monitors.length > 1 && (
                     <Button
@@ -152,8 +162,8 @@ export function ServiceForm({ initialData, onSubmit, isLoading, submitLabel = 'C
                 <IntervalGraceFields
                   intervalSeconds={monitor.intervalSeconds}
                   gracePeriodSeconds={monitor.gracePeriodSeconds ?? 60}
-                  onIntervalChange={v => updateMonitor(index, 'intervalSeconds', v)}
-                  onGracePeriodChange={v => updateMonitor(index, 'gracePeriodSeconds', v)}
+                  onIntervalChange={(v) => updateMonitor(index, 'intervalSeconds', v)}
+                  onGracePeriodChange={(v) => updateMonitor(index, 'gracePeriodSeconds', v)}
                   minInterval={10}
                 />
 
@@ -189,11 +199,7 @@ export function ServiceForm({ initialData, onSubmit, isLoading, submitLabel = 'C
         </div>
       )}
 
-      <Button
-        type="submit"
-        disabled={isLoading}
-        className="w-full"
-      >
+      <Button type="submit" disabled={isLoading} className="w-full">
         {isLoading ? 'Saving...' : submitLabel}
       </Button>
     </form>

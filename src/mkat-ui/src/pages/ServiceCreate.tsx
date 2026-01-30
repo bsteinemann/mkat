@@ -26,7 +26,7 @@ export function ServiceCreate() {
       <h1 className="text-2xl font-bold text-foreground mb-6">Create Service</h1>
       <div className="bg-card rounded-lg shadow p-6">
         <ServiceForm
-          onSubmit={data => mutation.mutate(data)}
+          onSubmit={(data) => mutation.mutate(data)}
           isLoading={mutation.isPending}
           submitLabel="Create Service"
         />

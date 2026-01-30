@@ -25,7 +25,9 @@ export function StateIndicator({ state, size = 'md' }: Props) {
     <span className="flex items-center gap-2">
       <span className={`relative inline-flex ${sizes[size]}`}>
         {config.pulse && (
-          <span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${config.color} opacity-75`} />
+          <span
+            className={`animate-ping absolute inline-flex h-full w-full rounded-full ${config.color} opacity-75`}
+          />
         )}
         <span className={`relative inline-flex rounded-full ${sizes[size]} ${config.color}`} />
       </span>

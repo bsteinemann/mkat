@@ -22,16 +22,17 @@ export function Alerts() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['alerts'] }),
   });
 
-  if (isLoading) return (
-    <div className="space-y-6">
-      <Skeleton className="h-8 w-24" />
-      <div className="space-y-3">
-        <Skeleton className="h-16 w-full rounded-lg" />
-        <Skeleton className="h-16 w-full rounded-lg" />
-        <Skeleton className="h-16 w-full rounded-lg" />
+  if (isLoading)
+    return (
+      <div className="space-y-6">
+        <Skeleton className="h-8 w-24" />
+        <div className="space-y-3">
+          <Skeleton className="h-16 w-full rounded-lg" />
+          <Skeleton className="h-16 w-full rounded-lg" />
+          <Skeleton className="h-16 w-full rounded-lg" />
+        </div>
       </div>
-    </div>
-  );
+    );
 
   return (
     <div className="space-y-6">
@@ -44,7 +45,7 @@ export function Alerts() {
         </Alert>
       ) : (
         <div className="space-y-3">
-          {data?.items.map(alert => (
+          {data?.items.map((alert) => (
             <AlertItem
               key={alert.id}
               alert={alert}
@@ -55,12 +56,7 @@ export function Alerts() {
       )}
 
       {data && (
-        <Pagination
-          page={page}
-          totalCount={data.totalCount}
-          pageSize={20}
-          onPageChange={setPage}
-        />
+        <Pagination page={page} totalCount={data.totalCount} pageSize={20} onPageChange={setPage} />
       )}
     </div>
   );

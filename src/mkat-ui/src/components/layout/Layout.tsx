@@ -25,7 +25,7 @@ export function Layout({ children }: Props) {
         const alertData = data as { message?: string };
         new Notification('mkat Alert', {
           body: alertData.message || 'New alert',
-          icon: './icons/icon-192.png'
+          icon: './icons/icon-192.png',
         });
       }
       queryClient.invalidateQueries({ queryKey: ['alerts'] });
@@ -40,9 +40,7 @@ export function Layout({ children }: Props) {
       <Sidebar />
       <SidebarInset>
         <Header />
-        <main className="flex-1 p-6">
-          {children}
-        </main>
+        <main className="flex-1 p-6">{children}</main>
       </SidebarInset>
       <Toaster />
     </SidebarProvider>

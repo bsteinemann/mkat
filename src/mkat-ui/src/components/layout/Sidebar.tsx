@@ -1,11 +1,5 @@
 import { Link, useRouterState } from '@tanstack/react-router';
-import {
-  LayoutDashboard,
-  Server,
-  Bell,
-  Link2,
-  Users,
-} from 'lucide-react';
+import { LayoutDashboard, Server, Bell, Link2, Users } from 'lucide-react';
 import {
   Sidebar as SidebarRoot,
   SidebarContent,
@@ -41,10 +35,9 @@ export function Sidebar() {
         <SidebarGroup>
           <SidebarGroupLabel>Navigation</SidebarGroupLabel>
           <SidebarMenu>
-            {navItems.map(item => {
+            {navItems.map((item) => {
               const isActive =
-                currentPath === item.to ||
-                (item.to !== '/' && currentPath.startsWith(item.to));
+                currentPath === item.to || (item.to !== '/' && currentPath.startsWith(item.to));
 
               return (
                 <SidebarMenuItem key={item.to}>

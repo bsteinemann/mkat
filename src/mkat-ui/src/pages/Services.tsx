@@ -28,28 +28,26 @@ export function Services() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['services'] }),
   });
 
-  if (isLoading) return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <Skeleton className="h-8 w-32" />
-        <Skeleton className="h-9 w-28 rounded-md" />
+  if (isLoading)
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <Skeleton className="h-8 w-32" />
+          <Skeleton className="h-9 w-28 rounded-md" />
+        </div>
+        <div className="space-y-4">
+          <Skeleton className="h-24 w-full rounded-lg" />
+          <Skeleton className="h-24 w-full rounded-lg" />
+          <Skeleton className="h-24 w-full rounded-lg" />
+        </div>
       </div>
-      <div className="space-y-4">
-        <Skeleton className="h-24 w-full rounded-lg" />
-        <Skeleton className="h-24 w-full rounded-lg" />
-        <Skeleton className="h-24 w-full rounded-lg" />
-      </div>
-    </div>
-  );
+    );
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-foreground">Services</h1>
-        <Link
-          to="/services/new"
-          className={buttonVariants()}
-        >
+        <Link to="/services/new" className={buttonVariants()}>
           Add Service
         </Link>
       </div>
@@ -59,14 +57,17 @@ export function Services() {
           <Info className="h-4 w-4" />
           <AlertDescription>
             No services configured yet.{' '}
-            <Link to="/services/new" className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 underline">
+            <Link
+              to="/services/new"
+              className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 underline"
+            >
               Create your first service
             </Link>
           </AlertDescription>
         </Alert>
       ) : (
         <div className="space-y-4">
-          {data?.items.map(service => (
+          {data?.items.map((service) => (
             <ServiceCard
               key={service.id}
               service={service}
@@ -78,12 +79,7 @@ export function Services() {
       )}
 
       {data && (
-        <Pagination
-          page={page}
-          totalCount={data.totalCount}
-          pageSize={20}
-          onPageChange={setPage}
-        />
+        <Pagination page={page} totalCount={data.totalCount} pageSize={20} onPageChange={setPage} />
       )}
     </div>
   );

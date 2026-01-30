@@ -14,10 +14,18 @@ interface Props {
 }
 
 const severityBadge = {
-  [Severity.Low]: { label: 'Low', variant: 'outline' as const },
-  [Severity.Medium]: { label: 'Medium', variant: 'secondary' as const, className: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' },
-  [Severity.High]: { label: 'High', variant: 'secondary' as const, className: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200' },
-  [Severity.Critical]: { label: 'Critical', variant: 'destructive' as const },
+  [Severity.Low]: { label: 'Low', variant: 'outline' as const, className: '' },
+  [Severity.Medium]: {
+    label: 'Medium',
+    variant: 'secondary' as const,
+    className: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
+  },
+  [Severity.High]: {
+    label: 'High',
+    variant: 'secondary' as const,
+    className: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200',
+  },
+  [Severity.Critical]: { label: 'Critical', variant: 'destructive' as const, className: '' },
 };
 
 export function ServiceCard({ service, onPause, onResume }: Props) {

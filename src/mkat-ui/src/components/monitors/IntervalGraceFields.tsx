@@ -23,7 +23,7 @@ export function IntervalGraceFields({
         <Input
           type="number"
           value={intervalSeconds}
-          onChange={e => onIntervalChange(Number(e.target.value))}
+          onChange={(e) => onIntervalChange(Number(e.target.value))}
           className="h-8 text-sm"
           min={minInterval}
         />
@@ -33,7 +33,7 @@ export function IntervalGraceFields({
         <Input
           type="number"
           value={gracePeriodSeconds}
-          onChange={e => onGracePeriodChange(Number(e.target.value))}
+          onChange={(e) => onGracePeriodChange(Number(e.target.value))}
           className="h-8 text-sm"
           min={0}
         />

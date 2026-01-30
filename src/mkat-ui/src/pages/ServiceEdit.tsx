@@ -10,7 +10,13 @@ import { IntervalGraceFields } from '../components/monitors/IntervalGraceFields'
 import { HealthCheckFields } from '../components/monitors/HealthCheckFields';
 import { MetricFields } from '../components/monitors/MetricFields';
 import { MonitorType, ThresholdStrategy } from '../api/types';
-import type { CreateServiceRequest, UpdateServiceRequest, CreateMonitorRequest, UpdateMonitorRequest, Monitor } from '../api/types';
+import type {
+  CreateServiceRequest,
+  UpdateServiceRequest,
+  CreateMonitorRequest,
+  UpdateMonitorRequest,
+  Monitor,
+} from '../api/types';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
@@ -95,13 +101,14 @@ export function ServiceEdit() {
     },
   });
 
-  if (isLoading || !service) return (
-    <div className="max-w-2xl space-y-6">
-      <Skeleton className="h-8 w-40" />
-      <Skeleton className="h-52 w-full rounded-lg" />
-      <Skeleton className="h-40 w-full rounded-lg" />
-    </div>
-  );
+  if (isLoading || !service)
+    return (
+      <div className="max-w-2xl space-y-6">
+        <Skeleton className="h-8 w-40" />
+        <Skeleton className="h-52 w-full rounded-lg" />
+        <Skeleton className="h-40 w-full rounded-lg" />
+      </div>
+    );
 
   const handleSubmit = (data: CreateServiceRequest) => {
     updateMutation.mutate({
@@ -192,7 +199,9 @@ function MonitorSection({
   const [newGrace, setNewGrace] = useState(60);
   const [newMinValue, setNewMinValue] = useState<number | undefined>(undefined);
   const [newMaxValue, setNewMaxValue] = useState<number | undefined>(undefined);
-  const [newThresholdStrategy, setNewThresholdStrategy] = useState<ThresholdStrategy>(ThresholdStrategy.Immediate);
+  const [newThresholdStrategy, setNewThresholdStrategy] = useState<ThresholdStrategy>(
+    ThresholdStrategy.Immediate,
+  );
   const [newThresholdCount, setNewThresholdCount] = useState(3);
   const [newRetentionDays, setNewRetentionDays] = useState(7);
   const [newHealthCheckUrl, setNewHealthCheckUrl] = useState('');
@@ -211,8 +220,10 @@ function MonitorSection({
       data.minValue = newMinValue;
       data.maxValue = newMaxValue;
       data.thresholdStrategy = newThresholdStrategy;
-      if (newThresholdStrategy === ThresholdStrategy.ConsecutiveCount ||
-          newThresholdStrategy === ThresholdStrategy.SampleCountAverage) {
+      if (
+        newThresholdStrategy === ThresholdStrategy.ConsecutiveCount ||
+        newThresholdStrategy === ThresholdStrategy.SampleCountAverage
+      ) {
         data.thresholdCount = newThresholdCount;
       }
       data.retentionDays = newRetentionDays;
@@ -243,100 +254,97 @@ function MonitorSection({
   return (
     <Card className="mt-6 py-0">
       <CardContent className="p-6">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold text-foreground">Monitors</h2>
-        <Button
-          type="button"
-          variant="link"
-          size="sm"
-          className="p-0 h-auto"
-          onClick={() => setShowAddForm(!showAddForm)}
-        >
-          {showAddForm ? 'Cancel' : '+ Add Monitor'}
-        </Button>
-      </div>
-
-      {showAddForm && (
-        <div className="border rounded p-4 mb-4 bg-muted space-y-3">
-          <div className="space-y-1">
-            <Label className="text-xs text-muted-foreground">Type</Label>
-            <MonitorTypeSelector
-              value={newType}
-              onChange={setNewType}
-              triggerClassName="w-full h-8 text-sm"
-            />
-          </div>
-          <IntervalGraceFields
-            intervalSeconds={newInterval}
-            gracePeriodSeconds={newGrace}
-            onIntervalChange={setNewInterval}
-            onGracePeriodChange={setNewGrace}
-          />
-          {newType === MonitorType.Metric && (
-            <MetricFields
-              values={{
-                minValue: newMinValue,
-                maxValue: newMaxValue,
-                thresholdStrategy: newThresholdStrategy,
-                thresholdCount: newThresholdCount,
-                retentionDays: newRetentionDays,
-              }}
-              onChange={(field, value) => {
-                const setters: Record<string, (v: any) => void> = {
-                  minValue: setNewMinValue,
-                  maxValue: setNewMaxValue,
-                  thresholdStrategy: setNewThresholdStrategy,
-                  thresholdCount: setNewThresholdCount,
-                  retentionDays: setNewRetentionDays,
-                };
-                setters[field]?.(value);
-              }}
-            />
-          )}
-          {newType === MonitorType.HealthCheck && (
-            <HealthCheckFields
-              values={{
-                healthCheckUrl: newHealthCheckUrl,
-                httpMethod: newHttpMethod,
-                expectedStatusCodes: newExpectedStatusCodes,
-                timeoutSeconds: newTimeoutSeconds,
-                bodyMatchRegex: newBodyMatchRegex,
-              }}
-              onChange={(field, value) => {
-                const setters: Record<string, (v: any) => void> = {
-                  healthCheckUrl: setNewHealthCheckUrl,
-                  httpMethod: setNewHttpMethod,
-                  expectedStatusCodes: setNewExpectedStatusCodes,
-                  timeoutSeconds: setNewTimeoutSeconds,
-                  bodyMatchRegex: setNewBodyMatchRegex,
-                };
-                setters[field]?.(value ?? '');
-              }}
-              urlRequired
-            />
-          )}
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold text-foreground">Monitors</h2>
           <Button
             type="button"
+            variant="link"
             size="sm"
-            onClick={handleAdd}
-            disabled={isAdding}
+            className="p-0 h-auto"
+            onClick={() => setShowAddForm(!showAddForm)}
           >
-            {isAdding ? 'Adding...' : 'Add'}
+            {showAddForm ? 'Cancel' : '+ Add Monitor'}
           </Button>
         </div>
-      )}
 
-      <div className="space-y-3">
-        {monitors.map(monitor => (
-          <MonitorRow
-            key={monitor.id}
-            monitor={monitor}
-            canDelete={monitors.length > 1}
-            onUpdate={(data) => onUpdate(monitor.id, data)}
-            onDelete={() => onDelete(monitor.id)}
-          />
-        ))}
-      </div>
+        {showAddForm && (
+          <div className="border rounded p-4 mb-4 bg-muted space-y-3">
+            <div className="space-y-1">
+              <Label className="text-xs text-muted-foreground">Type</Label>
+              <MonitorTypeSelector
+                value={newType}
+                onChange={setNewType}
+                triggerClassName="w-full h-8 text-sm"
+              />
+            </div>
+            <IntervalGraceFields
+              intervalSeconds={newInterval}
+              gracePeriodSeconds={newGrace}
+              onIntervalChange={setNewInterval}
+              onGracePeriodChange={setNewGrace}
+            />
+            {newType === MonitorType.Metric && (
+              <MetricFields
+                values={{
+                  minValue: newMinValue,
+                  maxValue: newMaxValue,
+                  thresholdStrategy: newThresholdStrategy,
+                  thresholdCount: newThresholdCount,
+                  retentionDays: newRetentionDays,
+                }}
+                onChange={(field, value) => {
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  const setters: Record<string, (v: any) => void> = {
+                    minValue: setNewMinValue,
+                    maxValue: setNewMaxValue,
+                    thresholdStrategy: setNewThresholdStrategy,
+                    thresholdCount: setNewThresholdCount,
+                    retentionDays: setNewRetentionDays,
+                  };
+                  setters[field]?.(value);
+                }}
+              />
+            )}
+            {newType === MonitorType.HealthCheck && (
+              <HealthCheckFields
+                values={{
+                  healthCheckUrl: newHealthCheckUrl,
+                  httpMethod: newHttpMethod,
+                  expectedStatusCodes: newExpectedStatusCodes,
+                  timeoutSeconds: newTimeoutSeconds,
+                  bodyMatchRegex: newBodyMatchRegex,
+                }}
+                onChange={(field, value) => {
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  const setters: Record<string, (v: any) => void> = {
+                    healthCheckUrl: setNewHealthCheckUrl,
+                    httpMethod: setNewHttpMethod,
+                    expectedStatusCodes: setNewExpectedStatusCodes,
+                    timeoutSeconds: setNewTimeoutSeconds,
+                    bodyMatchRegex: setNewBodyMatchRegex,
+                  };
+                  setters[field]?.(value ?? '');
+                }}
+                urlRequired
+              />
+            )}
+            <Button type="button" size="sm" onClick={handleAdd} disabled={isAdding}>
+              {isAdding ? 'Adding...' : 'Add'}
+            </Button>
+          </div>
+        )}
+
+        <div className="space-y-3">
+          {monitors.map((monitor) => (
+            <MonitorRow
+              key={monitor.id}
+              monitor={monitor}
+              canDelete={monitors.length > 1}
+              onUpdate={(data) => onUpdate(monitor.id, data)}
+              onDelete={() => onDelete(monitor.id)}
+            />
+          ))}
+        </div>
       </CardContent>
     </Card>
   );
@@ -357,7 +365,7 @@ function ContactsSection({ serviceId }: { serviceId: string }) {
 
   const [localSelected, setLocalSelected] = useState<Set<string> | null>(null);
 
-  const serverSet = new Set(assignedContacts?.map(c => c.id) ?? []);
+  const serverSet = new Set(assignedContacts?.map((c) => c.id) ?? []);
   const selected = localSelected ?? serverSet;
   const dirty = localSelected !== null;
 
@@ -405,52 +413,48 @@ function ContactsSection({ serviceId }: { serviceId: string }) {
   return (
     <Card className="mt-6 py-0">
       <CardContent className="p-6">
-      <h2 className="text-lg font-semibold text-foreground mb-2">Contacts</h2>
-      <p className="text-xs text-muted-foreground mb-4">
-        Select which contacts receive alerts for this service. If none are assigned, the default contact is used.
-      </p>
+        <h2 className="text-lg font-semibold text-foreground mb-2">Contacts</h2>
+        <p className="text-xs text-muted-foreground mb-4">
+          Select which contacts receive alerts for this service. If none are assigned, the default
+          contact is used.
+        </p>
 
-      {!allContacts || allContacts.length === 0 ? (
-        <p className="text-sm text-muted-foreground">No contacts configured yet.</p>
-      ) : (
-        <div className="space-y-2">
-          {allContacts.map(contact => (
-            <Label key={contact.id} className="flex items-center gap-2 cursor-pointer">
-              <Checkbox
-                checked={selected.has(contact.id)}
-                onCheckedChange={() => toggle(contact.id)}
-              />
-              <span className="text-sm text-foreground">{contact.name}</span>
-              {contact.isDefault && (
-                <span className="text-xs text-muted-foreground">(default)</span>
-              )}
-              {contact.channels.length === 0 && (
-                <span className="text-xs text-amber-600 dark:text-amber-400">(no channels)</span>
-              )}
-            </Label>
-          ))}
-        </div>
-      )}
+        {!allContacts || allContacts.length === 0 ? (
+          <p className="text-sm text-muted-foreground">No contacts configured yet.</p>
+        ) : (
+          <div className="space-y-2">
+            {allContacts.map((contact) => (
+              <Label key={contact.id} className="flex items-center gap-2 cursor-pointer">
+                <Checkbox
+                  checked={selected.has(contact.id)}
+                  onCheckedChange={() => toggle(contact.id)}
+                />
+                <span className="text-sm text-foreground">{contact.name}</span>
+                {contact.isDefault && (
+                  <span className="text-xs text-muted-foreground">(default)</span>
+                )}
+                {contact.channels.length === 0 && (
+                  <span className="text-xs text-amber-600 dark:text-amber-400">(no channels)</span>
+                )}
+              </Label>
+            ))}
+          </div>
+        )}
 
-      {dirty && (
-        <div className="mt-4 flex items-center gap-2">
-          <Button
-            size="sm"
-            onClick={() => saveMutation.mutate(Array.from(selected))}
-            disabled={saveMutation.isPending}
-          >
-            {saveMutation.isPending ? 'Saving...' : 'Save Contacts'}
-          </Button>
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={() => setLocalSelected(null)}
-          >
-            Cancel
-          </Button>
-        </div>
-      )}
-
+        {dirty && (
+          <div className="mt-4 flex items-center gap-2">
+            <Button
+              size="sm"
+              onClick={() => saveMutation.mutate(Array.from(selected))}
+              disabled={saveMutation.isPending}
+            >
+              {saveMutation.isPending ? 'Saving...' : 'Save Contacts'}
+            </Button>
+            <Button variant="secondary" size="sm" onClick={() => setLocalSelected(null)}>
+              Cancel
+            </Button>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
@@ -472,12 +476,16 @@ function MonitorRow({
   const [grace, setGrace] = useState(monitor.gracePeriodSeconds);
   const [minValue, setMinValue] = useState<number | undefined>(monitor.minValue ?? undefined);
   const [maxValue, setMaxValue] = useState<number | undefined>(monitor.maxValue ?? undefined);
-  const [thresholdStrategy, setThresholdStrategy] = useState<ThresholdStrategy>(monitor.thresholdStrategy ?? ThresholdStrategy.Immediate);
+  const [thresholdStrategy, setThresholdStrategy] = useState<ThresholdStrategy>(
+    monitor.thresholdStrategy ?? ThresholdStrategy.Immediate,
+  );
   const [thresholdCount, setThresholdCount] = useState(monitor.thresholdCount ?? 3);
   const [retentionDays, setRetentionDays] = useState(monitor.retentionDays ?? 7);
   const [healthCheckUrl, setHealthCheckUrl] = useState(monitor.healthCheckUrl ?? '');
   const [httpMethod, setHttpMethod] = useState(monitor.httpMethod ?? 'GET');
-  const [expectedStatusCodes, setExpectedStatusCodes] = useState(monitor.expectedStatusCodes ?? '200');
+  const [expectedStatusCodes, setExpectedStatusCodes] = useState(
+    monitor.expectedStatusCodes ?? '200',
+  );
   const [timeoutSeconds, setTimeoutSeconds] = useState(monitor.timeoutSeconds ?? 10);
   const [bodyMatchRegex, setBodyMatchRegex] = useState(monitor.bodyMatchRegex ?? '');
 
@@ -494,8 +502,10 @@ function MonitorRow({
       data.minValue = minValue;
       data.maxValue = maxValue;
       data.thresholdStrategy = thresholdStrategy;
-      if (thresholdStrategy === ThresholdStrategy.ConsecutiveCount ||
-          thresholdStrategy === ThresholdStrategy.SampleCountAverage) {
+      if (
+        thresholdStrategy === ThresholdStrategy.ConsecutiveCount ||
+        thresholdStrategy === ThresholdStrategy.SampleCountAverage
+      ) {
         data.thresholdCount = thresholdCount;
       }
       data.retentionDays = retentionDays;
@@ -564,9 +574,7 @@ function MonitorRow({
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={() => onDelete()}>
-                  Remove
-                </AlertDialogAction>
+                <AlertDialogAction onClick={() => onDelete()}>Remove</AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
@@ -591,6 +599,7 @@ function MonitorRow({
                 retentionDays,
               }}
               onChange={(field, value) => {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 const setters: Record<string, (v: any) => void> = {
                   minValue: setMinValue,
                   maxValue: setMaxValue,
@@ -612,6 +621,7 @@ function MonitorRow({
                 bodyMatchRegex,
               }}
               onChange={(field, value) => {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 const setters: Record<string, (v: any) => void> = {
                   healthCheckUrl: setHealthCheckUrl,
                   httpMethod: setHttpMethod,
@@ -624,19 +634,10 @@ function MonitorRow({
             />
           )}
           <div className="flex gap-2">
-            <Button
-              type="button"
-              size="xs"
-              onClick={handleSave}
-            >
+            <Button type="button" size="xs" onClick={handleSave}>
               Save
             </Button>
-            <Button
-              type="button"
-              variant="secondary"
-              size="xs"
-              onClick={handleCancel}
-            >
+            <Button type="button" variant="secondary" size="xs" onClick={handleCancel}>
               Cancel
             </Button>
           </div>
@@ -648,7 +649,8 @@ function MonitorRow({
             <span>
               {monitor.minValue != null && ` | Min: ${monitor.minValue}`}
               {monitor.maxValue != null && ` | Max: ${monitor.maxValue}`}
-              {monitor.thresholdStrategy != null && ` | ${ThresholdStrategy[monitor.thresholdStrategy]}`}
+              {monitor.thresholdStrategy != null &&
+                ` | ${ThresholdStrategy[monitor.thresholdStrategy]}`}
             </span>
           )}
           {monitor.type === MonitorType.HealthCheck && (

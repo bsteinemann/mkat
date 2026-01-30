@@ -23,10 +23,10 @@ export function Dashboard() {
   const alerts = alertsData?.items ?? [];
 
   const counts = {
-    up: services.filter(s => s.state === ServiceState.Up).length,
-    down: services.filter(s => s.state === ServiceState.Down).length,
-    paused: services.filter(s => s.state === ServiceState.Paused).length,
-    unknown: services.filter(s => s.state === ServiceState.Unknown).length,
+    up: services.filter((s) => s.state === ServiceState.Up).length,
+    down: services.filter((s) => s.state === ServiceState.Down).length,
+    paused: services.filter((s) => s.state === ServiceState.Paused).length,
+    unknown: services.filter((s) => s.state === ServiceState.Unknown).length,
   };
 
   return (
@@ -49,7 +49,7 @@ export function Dashboard() {
             <p className="text-muted-foreground">No recent alerts</p>
           ) : (
             <div className="space-y-3">
-              {alerts.map(alert => (
+              {alerts.map((alert) => (
                 <AlertItem key={alert.id} alert={alert} />
               ))}
             </div>
@@ -67,8 +67,8 @@ export function Dashboard() {
           <CardContent>
             <div className="space-y-2">
               {services
-                .filter(s => s.state === ServiceState.Down)
-                .map(s => (
+                .filter((s) => s.state === ServiceState.Down)
+                .map((s) => (
                   <div key={s.id} className="flex items-center justify-between">
                     <span className="font-medium">{s.name}</span>
                     <StateIndicator state={s.state} size="sm" />

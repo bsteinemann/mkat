@@ -24,8 +24,7 @@ export const servicesApi = {
 
   create: (data: CreateServiceRequest) => api.post<Service>('/services', data),
 
-  update: (id: string, data: UpdateServiceRequest) =>
-    api.put<Service>(`/services/${id}`, data),
+  update: (id: string, data: UpdateServiceRequest) => api.put<Service>(`/services/${id}`, data),
 
   delete: (id: string) => api.delete<void>(`/services/${id}`),
 
@@ -50,11 +49,9 @@ export const servicesApi = {
 export const peersApi = {
   list: () => api.get<Peer[]>('/peers'),
 
-  initiate: (name: string) =>
-    api.post<PeerInitiateResponse>('/peers/pair/initiate', { name }),
+  initiate: (name: string) => api.post<PeerInitiateResponse>('/peers/pair/initiate', { name }),
 
-  complete: (token: string) =>
-    api.post<PeerResponse>('/peers/pair/complete', { token }),
+  complete: (token: string) => api.post<PeerResponse>('/peers/pair/complete', { token }),
 
   unpair: (id: string) => api.delete<void>(`/peers/${id}`),
 };
@@ -73,8 +70,16 @@ export const contactsApi = {
   addChannel: (contactId: string, type: number, configuration: string) =>
     api.post<ContactChannel>(`/contacts/${contactId}/channels`, { type, configuration }),
 
-  updateChannel: (contactId: string, channelId: string, configuration: string, isEnabled: boolean) =>
-    api.put<ContactChannel>(`/contacts/${contactId}/channels/${channelId}`, { configuration, isEnabled }),
+  updateChannel: (
+    contactId: string,
+    channelId: string,
+    configuration: string,
+    isEnabled: boolean,
+  ) =>
+    api.put<ContactChannel>(`/contacts/${contactId}/channels/${channelId}`, {
+      configuration,
+      isEnabled,
+    }),
 
   deleteChannel: (contactId: string, channelId: string) =>
     api.delete<void>(`/contacts/${contactId}/channels/${channelId}`),
@@ -82,8 +87,7 @@ export const contactsApi = {
   testChannel: (contactId: string, channelId: string) =>
     api.post<{ success: boolean }>(`/contacts/${contactId}/channels/${channelId}/test`),
 
-  getServiceContacts: (serviceId: string) =>
-    api.get<Contact[]>(`/services/${serviceId}/contacts`),
+  getServiceContacts: (serviceId: string) => api.get<Contact[]>(`/services/${serviceId}/contacts`),
 
   setServiceContacts: (serviceId: string, contactIds: string[]) =>
     api.put<{ assigned: number }>(`/services/${serviceId}/contacts`, { contactIds }),

@@ -29,16 +29,12 @@ function getAuthHeader(): string {
   return `Basic ${credentials}`;
 }
 
-export async function apiRequest<T>(
-  method: string,
-  path: string,
-  body?: unknown
-): Promise<T> {
+export async function apiRequest<T>(method: string, path: string, body?: unknown): Promise<T> {
   const response = await fetch(`${getApiBase()}${path}`, {
     method,
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': getAuthHeader(),
+      Authorization: getAuthHeader(),
     },
     body: body ? JSON.stringify(body) : undefined,
   });

@@ -41,38 +41,41 @@ export function ServiceDetail() {
   });
 
   const webhookFailMutation = useMutation({
-    mutationFn: (url: string) => fetch(url, { method: 'POST' }).then(r => {
-      if (!r.ok) throw new Error(`HTTP ${r.status}`);
-      return r.json();
-    }),
+    mutationFn: (url: string) =>
+      fetch(url, { method: 'POST' }).then((r) => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
+      }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['services'] }),
   });
 
   const webhookRecoverMutation = useMutation({
-    mutationFn: (url: string) => fetch(url, { method: 'POST' }).then(r => {
-      if (!r.ok) throw new Error(`HTTP ${r.status}`);
-      return r.json();
-    }),
+    mutationFn: (url: string) =>
+      fetch(url, { method: 'POST' }).then((r) => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
+      }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['services'] }),
   });
 
-  if (isLoading || !service) return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="space-y-2">
-          <Skeleton className="h-8 w-48" />
-          <Skeleton className="h-4 w-64" />
+  if (isLoading || !service)
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div className="space-y-2">
+            <Skeleton className="h-8 w-48" />
+            <Skeleton className="h-4 w-64" />
+          </div>
+          <div className="flex items-center gap-4">
+            <Skeleton className="h-8 w-16 rounded-full" />
+            <Skeleton className="h-9 w-20 rounded-md" />
+            <Skeleton className="h-9 w-16 rounded-md" />
+          </div>
         </div>
-        <div className="flex items-center gap-4">
-          <Skeleton className="h-8 w-16 rounded-full" />
-          <Skeleton className="h-9 w-20 rounded-md" />
-          <Skeleton className="h-9 w-16 rounded-md" />
-        </div>
+        <Skeleton className="h-48 w-full rounded-lg" />
+        <Skeleton className="h-36 w-full rounded-lg" />
       </div>
-      <Skeleton className="h-48 w-full rounded-lg" />
-      <Skeleton className="h-36 w-full rounded-lg" />
-    </div>
-  );
+    );
 
   return (
     <div className="space-y-6">
@@ -119,103 +122,106 @@ export function ServiceDetail() {
           <CardTitle className="text-lg">Monitors</CardTitle>
         </CardHeader>
         <CardContent>
-        <div className="space-y-6">
-          {service.monitors.map(monitor => (
-            <div key={monitor.id} className="border-b pb-4 last:border-0">
-              <div className="flex items-center gap-2 mb-3">
-                <span className="font-medium">
-                  {monitor.type === MonitorType.Webhook && 'Webhook'}
-                  {monitor.type === MonitorType.Heartbeat && 'Heartbeat'}
-                  {monitor.type === MonitorType.HealthCheck && 'Health Check'}
-                  {monitor.type === MonitorType.Metric && 'Metric'}
-                </span>
-                <span className="text-sm text-muted-foreground">
-                  ({monitor.intervalSeconds}s interval)
-                </span>
+          <div className="space-y-6">
+            {service.monitors.map((monitor) => (
+              <div key={monitor.id} className="border-b pb-4 last:border-0">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="font-medium">
+                    {monitor.type === MonitorType.Webhook && 'Webhook'}
+                    {monitor.type === MonitorType.Heartbeat && 'Heartbeat'}
+                    {monitor.type === MonitorType.HealthCheck && 'Health Check'}
+                    {monitor.type === MonitorType.Metric && 'Metric'}
+                  </span>
+                  <span className="text-sm text-muted-foreground">
+                    ({monitor.intervalSeconds}s interval)
+                  </span>
+                </div>
+
+                <MonitorDescription type={monitor.type} variant="full" />
+
+                {monitor.type === MonitorType.Webhook && (
+                  <div className="space-y-3">
+                    <CopyableUrl label="Failure URL (HTTP POST)" url={monitor.webhookFailUrl} />
+                    <CopyableUrl label="Recovery URL (HTTP POST)" url={monitor.webhookRecoverUrl} />
+                    <div className="flex gap-2 mt-2">
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => webhookFailMutation.mutate(monitor.webhookFailUrl)}
+                        disabled={webhookFailMutation.isPending}
+                      >
+                        {webhookFailMutation.isPending ? 'Sending...' : 'Test Fail'}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 hover:bg-green-200 dark:hover:bg-green-800 border-green-200 dark:border-green-700"
+                        onClick={() => webhookRecoverMutation.mutate(monitor.webhookRecoverUrl)}
+                        disabled={webhookRecoverMutation.isPending}
+                      >
+                        {webhookRecoverMutation.isPending ? 'Sending...' : 'Test Recover'}
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
+                {monitor.type === MonitorType.Heartbeat && (
+                  <CopyableUrl label="Heartbeat URL" url={monitor.heartbeatUrl} />
+                )}
+
+                {monitor.type === MonitorType.Metric && (
+                  <div className="space-y-3">
+                    <CopyableUrl
+                      label="Metric Push URL (POST with value)"
+                      url={monitor.metricUrl}
+                    />
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm text-muted-foreground mt-2">
+                      {monitor.minValue != null && <span>Min: {monitor.minValue}</span>}
+                      {monitor.maxValue != null && <span>Max: {monitor.maxValue}</span>}
+                      {monitor.thresholdStrategy != null && (
+                        <span>Strategy: {ThresholdStrategy[monitor.thresholdStrategy]}</span>
+                      )}
+                      {monitor.thresholdCount != null && (
+                        <span>Count: {monitor.thresholdCount}</span>
+                      )}
+                      {monitor.retentionDays != null && (
+                        <span>Retention: {monitor.retentionDays}d</span>
+                      )}
+                    </div>
+                    {monitor.lastMetricValue != null && monitor.lastMetricAt && (
+                      <p className="text-sm text-muted-foreground mt-2">
+                        Latest: {monitor.lastMetricValue} at{' '}
+                        {new Date(monitor.lastMetricAt).toLocaleString()}
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                {monitor.type === MonitorType.HealthCheck && (
+                  <div className="space-y-3">
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm text-muted-foreground">
+                      <span>URL: {monitor.healthCheckUrl}</span>
+                      <span>Method: {monitor.httpMethod ?? 'GET'}</span>
+                      <span>Expected: {monitor.expectedStatusCodes ?? '200'}</span>
+                      <span>Timeout: {monitor.timeoutSeconds ?? 10}s</span>
+                      {monitor.bodyMatchRegex && (
+                        <span className="col-span-2">
+                          Body match:{' '}
+                          <code className="bg-muted px-1 rounded">{monitor.bodyMatchRegex}</code>
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {monitor.lastCheckIn && (
+                  <p className="text-sm text-muted-foreground mt-2">
+                    Last check-in: {new Date(monitor.lastCheckIn).toLocaleString()}
+                  </p>
+                )}
               </div>
-
-              <MonitorDescription type={monitor.type} variant="full" />
-
-              {monitor.type === MonitorType.Webhook && (
-                <div className="space-y-3">
-                  <CopyableUrl label="Failure URL (HTTP POST)" url={monitor.webhookFailUrl} />
-                  <CopyableUrl label="Recovery URL (HTTP POST)" url={monitor.webhookRecoverUrl} />
-                  <div className="flex gap-2 mt-2">
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => webhookFailMutation.mutate(monitor.webhookFailUrl)}
-                      disabled={webhookFailMutation.isPending}
-                    >
-                      {webhookFailMutation.isPending ? 'Sending...' : 'Test Fail'}
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 hover:bg-green-200 dark:hover:bg-green-800 border-green-200 dark:border-green-700"
-                      onClick={() => webhookRecoverMutation.mutate(monitor.webhookRecoverUrl)}
-                      disabled={webhookRecoverMutation.isPending}
-                    >
-                      {webhookRecoverMutation.isPending ? 'Sending...' : 'Test Recover'}
-                    </Button>
-                  </div>
-                </div>
-              )}
-
-              {monitor.type === MonitorType.Heartbeat && (
-                <CopyableUrl label="Heartbeat URL" url={monitor.heartbeatUrl} />
-              )}
-
-              {monitor.type === MonitorType.Metric && (
-                <div className="space-y-3">
-                  <CopyableUrl label="Metric Push URL (POST with value)" url={monitor.metricUrl} />
-                  <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm text-muted-foreground mt-2">
-                    {monitor.minValue != null && (
-                      <span>Min: {monitor.minValue}</span>
-                    )}
-                    {monitor.maxValue != null && (
-                      <span>Max: {monitor.maxValue}</span>
-                    )}
-                    {monitor.thresholdStrategy != null && (
-                      <span>Strategy: {ThresholdStrategy[monitor.thresholdStrategy]}</span>
-                    )}
-                    {monitor.thresholdCount != null && (
-                      <span>Count: {monitor.thresholdCount}</span>
-                    )}
-                    {monitor.retentionDays != null && (
-                      <span>Retention: {monitor.retentionDays}d</span>
-                    )}
-                  </div>
-                  {monitor.lastMetricValue != null && monitor.lastMetricAt && (
-                    <p className="text-sm text-muted-foreground mt-2">
-                      Latest: {monitor.lastMetricValue} at {new Date(monitor.lastMetricAt).toLocaleString()}
-                    </p>
-                  )}
-                </div>
-              )}
-
-              {monitor.type === MonitorType.HealthCheck && (
-                <div className="space-y-3">
-                  <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm text-muted-foreground">
-                    <span>URL: {monitor.healthCheckUrl}</span>
-                    <span>Method: {monitor.httpMethod ?? 'GET'}</span>
-                    <span>Expected: {monitor.expectedStatusCodes ?? '200'}</span>
-                    <span>Timeout: {monitor.timeoutSeconds ?? 10}s</span>
-                    {monitor.bodyMatchRegex && (
-                      <span className="col-span-2">Body match: <code className="bg-muted px-1 rounded">{monitor.bodyMatchRegex}</code></span>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {monitor.lastCheckIn && (
-                <p className="text-sm text-muted-foreground mt-2">
-                  Last check-in: {new Date(monitor.lastCheckIn).toLocaleString()}
-                </p>
-              )}
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
         </CardContent>
       </Card>
 
@@ -228,7 +234,7 @@ export function ServiceDetail() {
             <p className="text-muted-foreground">No alerts for this service</p>
           ) : (
             <div className="space-y-3">
-              {alertsData?.items.map(alert => (
+              {alertsData?.items.map((alert) => (
                 <AlertItem
                   key={alert.id}
                   alert={alert}

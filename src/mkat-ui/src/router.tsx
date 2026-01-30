@@ -9,15 +9,21 @@ import {
 import { getBasePath } from './config';
 import { Layout } from './components/layout/Layout';
 
-const Dashboard = lazy(() => import('./pages/Dashboard').then(m => ({ default: m.Dashboard })));
-const Services = lazy(() => import('./pages/Services').then(m => ({ default: m.Services })));
-const ServiceDetail = lazy(() => import('./pages/ServiceDetail').then(m => ({ default: m.ServiceDetail })));
-const ServiceCreate = lazy(() => import('./pages/ServiceCreate').then(m => ({ default: m.ServiceCreate })));
-const ServiceEdit = lazy(() => import('./pages/ServiceEdit').then(m => ({ default: m.ServiceEdit })));
-const Alerts = lazy(() => import('./pages/Alerts').then(m => ({ default: m.Alerts })));
-const Peers = lazy(() => import('./pages/Peers').then(m => ({ default: m.Peers })));
-const Contacts = lazy(() => import('./pages/Contacts').then(m => ({ default: m.Contacts })));
-const Login = lazy(() => import('./pages/Login').then(m => ({ default: m.Login })));
+const Dashboard = lazy(() => import('./pages/Dashboard').then((m) => ({ default: m.Dashboard })));
+const Services = lazy(() => import('./pages/Services').then((m) => ({ default: m.Services })));
+const ServiceDetail = lazy(() =>
+  import('./pages/ServiceDetail').then((m) => ({ default: m.ServiceDetail })),
+);
+const ServiceCreate = lazy(() =>
+  import('./pages/ServiceCreate').then((m) => ({ default: m.ServiceCreate })),
+);
+const ServiceEdit = lazy(() =>
+  import('./pages/ServiceEdit').then((m) => ({ default: m.ServiceEdit })),
+);
+const Alerts = lazy(() => import('./pages/Alerts').then((m) => ({ default: m.Alerts })));
+const Peers = lazy(() => import('./pages/Peers').then((m) => ({ default: m.Peers })));
+const Contacts = lazy(() => import('./pages/Contacts').then((m) => ({ default: m.Contacts })));
+const Login = lazy(() => import('./pages/Login').then((m) => ({ default: m.Login })));
 
 const rootRoute = createRootRoute({
   component: () => (

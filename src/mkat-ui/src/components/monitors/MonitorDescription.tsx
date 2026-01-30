@@ -17,7 +17,7 @@ const descriptions: Record<MonitorType, { label: string; summary: string; detail
     label: 'Health Check',
     summary: 'mkat actively polls an HTTP endpoint on a schedule and alerts on failures.',
     detail:
-      'Configure a URL, HTTP method, expected status codes, and optional response body regex. mkat sends the request at each interval. If the status code is unexpected, the body doesn\'t match, the request times out, or the connection fails, the service is marked as down. Recovery is automatic when the next check succeeds.',
+      "Configure a URL, HTTP method, expected status codes, and optional response body regex. mkat sends the request at each interval. If the status code is unexpected, the body doesn't match, the request times out, or the connection fails, the service is marked as down. Recovery is automatic when the next check succeeds.",
   },
   [MonitorType.Metric]: {
     label: 'Metric',
@@ -39,9 +39,7 @@ export function MonitorDescription({ type, variant = 'compact' }: Props) {
   return (
     <div className="text-sm text-muted-foreground">
       <p>{desc.summary}</p>
-      {variant === 'full' && (
-        <p className="mt-1 text-muted-foreground/70">{desc.detail}</p>
-      )}
+      {variant === 'full' && <p className="mt-1 text-muted-foreground/70">{desc.detail}</p>}
     </div>
   );
 }

@@ -37,7 +37,7 @@ async function subscribeToPush(registration: ServiceWorkerRegistration): Promise
   if (!authHeader) return;
 
   const keyResponse = await fetch(`${getApiBase()}/push/vapid-public-key`, {
-    headers: { 'Authorization': authHeader }
+    headers: { Authorization: authHeader },
   });
   if (!keyResponse.ok) return;
 
@@ -49,8 +49,7 @@ async function subscribeToPush(registration: ServiceWorkerRegistration): Promise
   if (!subscription) {
     subscription = await registration.pushManager.subscribe({
       userVisibleOnly: true,
-      applicationServerKey: urlBase64ToUint8Array(publicKey)
-        .buffer.slice(0) as ArrayBuffer
+      applicationServerKey: urlBase64ToUint8Array(publicKey).buffer.slice(0) as ArrayBuffer,
     });
   }
 
@@ -59,15 +58,15 @@ async function subscribeToPush(registration: ServiceWorkerRegistration): Promise
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': authHeader
+      Authorization: authHeader,
     },
     body: JSON.stringify({
       endpoint: sub.endpoint,
       keys: {
         p256dh: sub.keys?.p256dh || '',
-        auth: sub.keys?.auth || ''
-      }
-    })
+        auth: sub.keys?.auth || '',
+      },
+    }),
   });
 }
 

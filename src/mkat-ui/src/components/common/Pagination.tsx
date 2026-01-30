@@ -20,9 +20,7 @@ export function Pagination({ page, totalCount, pageSize, onPageChange }: Props) 
 
   return (
     <div className="flex items-center justify-between pt-4">
-      <span className="text-sm text-muted-foreground">
-        {totalCount} total items
-      </span>
+      <span className="text-sm text-muted-foreground">{totalCount} total items</span>
       <ShadcnPagination>
         <PaginationContent>
           <PaginationItem>

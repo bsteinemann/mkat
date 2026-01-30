@@ -19,8 +19,8 @@ export function connectSSE(onEvent: (type: string, data: unknown) => void): () =
   (async () => {
     try {
       const response = await fetch(`${getApiBase()}/events/stream`, {
-        headers: { 'Authorization': authHeader },
-        signal: controller.signal
+        headers: { Authorization: authHeader },
+        signal: controller.signal,
       });
 
       if (!response.ok || !response.body) return;
