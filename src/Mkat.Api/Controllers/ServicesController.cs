@@ -135,6 +135,15 @@ public class ServicesController : ControllerBase
                 monitor.RetentionDays = monitorReq.RetentionDays;
             }
 
+            if (monitorReq.Type == MonitorType.HealthCheck)
+            {
+                monitor.HealthCheckUrl = monitorReq.HealthCheckUrl;
+                monitor.HttpMethod = monitorReq.HttpMethod ?? "GET";
+                monitor.ExpectedStatusCodes = monitorReq.ExpectedStatusCodes ?? "200";
+                monitor.TimeoutSeconds = monitorReq.TimeoutSeconds ?? 10;
+                monitor.BodyMatchRegex = monitorReq.BodyMatchRegex;
+            }
+
             service.Monitors.Add(monitor);
         }
 
@@ -360,7 +369,12 @@ public class ServicesController : ControllerBase
             WindowSampleCount = monitor.WindowSampleCount,
             RetentionDays = monitor.Type == MonitorType.Metric ? monitor.RetentionDays : null,
             LastMetricValue = monitor.LastMetricValue,
-            LastMetricAt = monitor.LastMetricAt
+            LastMetricAt = monitor.LastMetricAt,
+            HealthCheckUrl = monitor.HealthCheckUrl,
+            HttpMethod = monitor.HttpMethod,
+            ExpectedStatusCodes = monitor.ExpectedStatusCodes,
+            TimeoutSeconds = monitor.TimeoutSeconds,
+            BodyMatchRegex = monitor.BodyMatchRegex
         };
     }
 

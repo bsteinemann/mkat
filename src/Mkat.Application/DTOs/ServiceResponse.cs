@@ -38,4 +38,11 @@ public record MonitorResponse
     public int? RetentionDays { get; init; }
     public double? LastMetricValue { get; init; }
     public DateTime? LastMetricAt { get; init; }
+
+    // Health check monitor fields
+    public string? HealthCheckUrl { get; init; }
+    public string? HttpMethod { get; init; }
+    public string? ExpectedStatusCodes { get; init; }
+    public int? TimeoutSeconds { get; init; }
+    public string? BodyMatchRegex { get; init; }
 }

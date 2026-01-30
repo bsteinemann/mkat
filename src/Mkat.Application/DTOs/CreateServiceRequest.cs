@@ -24,4 +24,11 @@ public record CreateMonitorRequest
     public int? WindowSeconds { get; init; }
     public int? WindowSampleCount { get; init; }
     public int RetentionDays { get; init; } = 7;
+
+    // Health check monitor fields
+    public string? HealthCheckUrl { get; init; }
+    public string? HttpMethod { get; init; }
+    public string? ExpectedStatusCodes { get; init; }
+    public int? TimeoutSeconds { get; init; }
+    public string? BodyMatchRegex { get; init; }
 }

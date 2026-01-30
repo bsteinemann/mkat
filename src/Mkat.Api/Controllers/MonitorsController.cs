@@ -87,6 +87,15 @@ public class MonitorsController : ControllerBase
             monitor.RetentionDays = request.RetentionDays;
         }
 
+        if (request.Type == Domain.Enums.MonitorType.HealthCheck)
+        {
+            monitor.HealthCheckUrl = request.HealthCheckUrl;
+            monitor.HttpMethod = request.HttpMethod ?? "GET";
+            monitor.ExpectedStatusCodes = request.ExpectedStatusCodes ?? "200";
+            monitor.TimeoutSeconds = request.TimeoutSeconds ?? 10;
+            monitor.BodyMatchRegex = request.BodyMatchRegex;
+        }
+
         await _monitorRepo.AddAsync(monitor, ct);
         await _unitOfWork.SaveChangesAsync(ct);
 
@@ -152,6 +161,15 @@ public class MonitorsController : ControllerBase
             monitor.WindowSampleCount = request.WindowSampleCount;
             if (request.RetentionDays.HasValue)
                 monitor.RetentionDays = request.RetentionDays.Value;
+        }
+
+        if (monitor.Type == Domain.Enums.MonitorType.HealthCheck)
+        {
+            monitor.HealthCheckUrl = request.HealthCheckUrl;
+            monitor.HttpMethod = request.HttpMethod ?? "GET";
+            monitor.ExpectedStatusCodes = request.ExpectedStatusCodes ?? "200";
+            monitor.TimeoutSeconds = request.TimeoutSeconds ?? 10;
+            monitor.BodyMatchRegex = request.BodyMatchRegex;
         }
 
         await _monitorRepo.UpdateAsync(monitor, ct);
