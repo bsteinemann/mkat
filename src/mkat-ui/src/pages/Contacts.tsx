@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Switch } from '@/components/ui/switch';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -314,13 +315,19 @@ function ContactDetail({ contact, onClose }: { contact: Contact; onClose: () => 
         ) : (
           displayContact.channels.map(ch => (
             <div key={ch.id} className="flex items-center justify-between p-3 bg-gray-50 rounded">
-              <div>
+              <div className="flex items-center gap-3">
                 <span className="text-sm font-medium">
                   {ch.type === ChannelType.Telegram ? 'Telegram' : 'Email'}
                 </span>
-                <Badge variant="outline" className={`ml-2 ${ch.isEnabled ? 'text-green-600' : 'text-gray-400'}`}>
-                  {ch.isEnabled ? 'Enabled' : 'Disabled'}
-                </Badge>
+                <div className="flex items-center gap-2">
+                  <Switch
+                    checked={ch.isEnabled}
+                    onCheckedChange={() => toggleChannelMutation.mutate(ch)}
+                  />
+                  <span className={`text-xs ${ch.isEnabled ? 'text-green-600' : 'text-gray-400'}`}>
+                    {ch.isEnabled ? 'Enabled' : 'Disabled'}
+                  </span>
+                </div>
               </div>
               <div className="flex gap-2">
                 <Button
@@ -329,13 +336,6 @@ function ContactDetail({ contact, onClose }: { contact: Contact; onClose: () => 
                   onClick={() => testChannelMutation.mutate(ch.id)}
                 >
                   Test
-                </Button>
-                <Button
-                  variant="outline"
-                  size="xs"
-                  onClick={() => toggleChannelMutation.mutate(ch)}
-                >
-                  {ch.isEnabled ? 'Disable' : 'Enable'}
                 </Button>
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
