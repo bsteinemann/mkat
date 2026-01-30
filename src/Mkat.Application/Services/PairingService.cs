@@ -56,7 +56,7 @@ public class PairingService : IPairingService
                 Url = root.GetProperty("url").GetString() ?? string.Empty,
                 Name = root.GetProperty("name").GetString() ?? string.Empty,
                 Secret = root.GetProperty("secret").GetString() ?? string.Empty,
-                ExpiresAt = DateTime.Parse(root.GetProperty("expiresAt").GetString() ?? "")
+                ExpiresAt = DateTime.Parse(root.GetProperty("expiresAt").GetString() ?? "", System.Globalization.CultureInfo.InvariantCulture)
             };
         }
         catch

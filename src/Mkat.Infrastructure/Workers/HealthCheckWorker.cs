@@ -90,7 +90,7 @@ public class HealthCheckWorker : BackgroundService
         }
     }
 
-    private async Task<(bool Success, string Reason)> ExecuteHealthCheckAsync(
+    private static async Task<(bool Success, string Reason)> ExecuteHealthCheckAsync(
         Domain.Entities.Monitor monitor,
         IHttpClientFactory httpFactory,
         CancellationToken ct)

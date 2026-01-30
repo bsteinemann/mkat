@@ -89,10 +89,10 @@ public class EventsControllerTests : IDisposable
             var line = await reader.ReadLineAsync(cts.Token);
             if (line == null) break;
             lines.Add(line);
-            if (line.StartsWith("data:")) break;
+            if (line.StartsWith("data:", StringComparison.Ordinal)) break;
         }
 
-        Assert.Contains(lines, l => l.StartsWith("event: alert_created"));
+        Assert.Contains(lines, l => l.StartsWith("event: alert_created", StringComparison.Ordinal));
         Assert.Contains(lines, l => l.Contains("\"id\":\"123\""));
     }
 

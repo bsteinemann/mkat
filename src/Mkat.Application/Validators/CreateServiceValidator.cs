@@ -27,6 +27,8 @@ public class CreateServiceValidator : AbstractValidator<CreateServiceRequest>
 
 public class CreateMonitorValidator : AbstractValidator<CreateMonitorRequest>
 {
+    private static readonly string[] ValidHttpMethods = ["GET", "HEAD", "POST", "PUT"];
+
     public CreateMonitorValidator()
     {
         RuleFor(x => x.Type)
@@ -53,7 +55,7 @@ public class CreateMonitorValidator : AbstractValidator<CreateMonitorRequest>
                 .WithMessage("HealthCheckUrl must be a valid HTTP or HTTPS URL");
 
             RuleFor(x => x.HttpMethod)
-                .Must(m => new[] { "GET", "HEAD", "POST", "PUT" }.Contains(m, StringComparer.OrdinalIgnoreCase))
+                .Must(m => ValidHttpMethods.Contains(m, StringComparer.OrdinalIgnoreCase))
                 .When(x => !string.IsNullOrEmpty(x.HttpMethod))
                 .WithMessage("HttpMethod must be one of: GET, HEAD, POST, PUT");
 

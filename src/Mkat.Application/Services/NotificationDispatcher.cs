@@ -45,7 +45,7 @@ public class NotificationDispatcher : INotificationDispatcher
         var contacts = await _contactRepo.GetByServiceIdAsync(alert.ServiceId, ct);
 
         // Fall back to default contact if none assigned
-        if (!contacts.Any())
+        if (contacts.Count == 0)
         {
             var defaultContact = await _contactRepo.GetDefaultAsync(ct);
             if (defaultContact != null)
@@ -62,7 +62,7 @@ public class NotificationDispatcher : INotificationDispatcher
 
         bool allSucceeded;
 
-        if (enabledChannels.Any())
+        if (enabledChannels.Count > 0)
         {
             // Route via contact channels
             allSucceeded = true;
@@ -92,7 +92,7 @@ public class NotificationDispatcher : INotificationDispatcher
         {
             // Fall back to DI-registered channels (backward compatibility)
             var diChannels = _fallbackChannels.Where(c => c.IsEnabled).ToList();
-            if (!diChannels.Any())
+            if (diChannels.Count == 0)
             {
                 _logger.LogWarning("No notification channels available for alert {AlertId}", alert.Id);
                 return;

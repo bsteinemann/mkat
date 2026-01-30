@@ -22,7 +22,7 @@ public class MetricReadingRepository : IMetricReadingRepository
             .FirstOrDefaultAsync(ct);
     }
 
-    public async Task<IReadOnlyList<MetricReading>> GetByMonitorIdAsync(Guid monitorId, DateTime? from, DateTime? to, int limit = 100, CancellationToken ct = default)
+    public async Task<IReadOnlyList<MetricReading>> GetByMonitorIdAsync(Guid monitorId, DateTime? from, DateTime? until, int limit = 100, CancellationToken ct = default)
     {
         var query = _context.MetricReadings
             .Where(r => r.MonitorId == monitorId);
@@ -30,8 +30,8 @@ public class MetricReadingRepository : IMetricReadingRepository
         if (from.HasValue)
             query = query.Where(r => r.RecordedAt >= from.Value);
 
-        if (to.HasValue)
-            query = query.Where(r => r.RecordedAt <= to.Value);
+        if (until.HasValue)
+            query = query.Where(r => r.RecordedAt <= until.Value);
 
         return await query
             .OrderByDescending(r => r.RecordedAt)

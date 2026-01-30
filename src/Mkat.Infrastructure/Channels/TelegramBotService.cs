@@ -1,3 +1,4 @@
+using System.Globalization;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -102,21 +103,21 @@ public class TelegramBotService : BackgroundService
     private async Task HandleCommandAsync(Message message, CancellationToken ct)
     {
         var text = message.Text ?? "";
-        var chatId = message.Chat.Id.ToString();
+        var chatId = message.Chat.Id.ToString(CultureInfo.InvariantCulture);
 
         if (chatId != _options.ChatId) return;
 
         using var scope = _serviceProvider.CreateScope();
 
-        if (text.StartsWith("/status"))
+        if (text.StartsWith("/status", StringComparison.Ordinal))
         {
             await HandleStatusCommandAsync(message.Chat.Id, scope, ct);
         }
-        else if (text.StartsWith("/list"))
+        else if (text.StartsWith("/list", StringComparison.Ordinal))
         {
             await HandleListCommandAsync(message.Chat.Id, scope, ct);
         }
-        else if (text.StartsWith("/mute"))
+        else if (text.StartsWith("/mute", StringComparison.Ordinal))
         {
             await HandleMuteCommandAsync(message.Chat.Id, text, scope, ct);
         }
@@ -226,16 +227,16 @@ public class TelegramBotService : BackgroundService
         var data = callback.Data ?? "";
         using var scope = _serviceProvider.CreateScope();
 
-        if (data.StartsWith("ack:"))
+        if (data.StartsWith("ack:", StringComparison.Ordinal))
         {
             var alertId = Guid.Parse(data["ack:".Length..]);
             await HandleAcknowledgeAsync(callback, alertId, scope, ct);
         }
-        else if (data.StartsWith("mute:"))
+        else if (data.StartsWith("mute:", StringComparison.Ordinal))
         {
             var parts = data["mute:".Length..].Split(':');
             var serviceId = Guid.Parse(parts[0]);
-            var minutes = int.Parse(parts[1]);
+            var minutes = int.Parse(parts[1], CultureInfo.InvariantCulture);
             await HandleMuteCallbackAsync(callback, serviceId, minutes, scope, ct);
         }
 
@@ -312,11 +313,11 @@ public class TelegramBotService : BackgroundService
     {
         duration = duration.ToLowerInvariant().Trim();
 
-        if (duration.EndsWith("m") && int.TryParse(duration[..^1], out var minutes) && minutes > 0)
+        if (duration.EndsWith('m') && int.TryParse(duration[..^1], out var minutes) && minutes > 0)
             return minutes;
-        if (duration.EndsWith("h") && int.TryParse(duration[..^1], out var hours) && hours > 0)
+        if (duration.EndsWith('h') && int.TryParse(duration[..^1], out var hours) && hours > 0)
             return hours * 60;
-        if (duration.EndsWith("d") && int.TryParse(duration[..^1], out var days) && days > 0)
+        if (duration.EndsWith('d') && int.TryParse(duration[..^1], out var days) && days > 0)
             return days * 24 * 60;
 
         return -1;

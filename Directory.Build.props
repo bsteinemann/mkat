@@ -1,0 +1,10 @@
+<Project>
+  <PropertyGroup>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <AnalysisLevel>latest-recommended</AnalysisLevel>
+    <!-- CA1707: Test methods use underscores by convention -->
+    <!-- CA1848: LoggerMessage delegates are overkill for this project -->
+    <NoWarn>CA1707;CA1848</NoWarn>
+  </PropertyGroup>
+</Project>

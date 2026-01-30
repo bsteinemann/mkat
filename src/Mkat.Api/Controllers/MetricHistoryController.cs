@@ -26,7 +26,7 @@ public class MetricHistoryController : ControllerBase
     public async Task<IActionResult> GetHistory(
         Guid monitorId,
         [FromQuery] DateTime? from,
-        [FromQuery] DateTime? to,
+        [FromQuery] DateTime? until,
         [FromQuery] int limit = 100,
         CancellationToken ct = default)
     {
@@ -41,7 +41,7 @@ public class MetricHistoryController : ControllerBase
             return BadRequest(new { error = "Monitor is not a metric monitor", code = "INVALID_MONITOR_TYPE" });
         }
 
-        var readings = await _readingRepo.GetByMonitorIdAsync(monitorId, from, to, limit, ct);
+        var readings = await _readingRepo.GetByMonitorIdAsync(monitorId, from, until, limit, ct);
 
         return Ok(new
         {

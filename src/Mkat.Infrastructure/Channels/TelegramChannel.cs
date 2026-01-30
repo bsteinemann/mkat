@@ -1,3 +1,4 @@
+using System.Globalization;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Mkat.Application.Interfaces;
@@ -93,7 +94,7 @@ public class TelegramChannel : INotificationChannel
         }
     }
 
-    private string FormatAlertMessage(Alert alert, Service service)
+    private static string FormatAlertMessage(Alert alert, Service service)
     {
         var emoji = alert.Type switch
         {
@@ -115,7 +116,7 @@ public class TelegramChannel : INotificationChannel
         var stateText = alert.Type == AlertType.Recovery ? "RECOVERED" : "DOWN";
         var name = EscapeMarkdown(service.Name);
         var msg = EscapeMarkdown(alert.Message);
-        var time = EscapeMarkdown(alert.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss") + " UTC");
+        var time = EscapeMarkdown(alert.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture) + " UTC");
 
         return $"{emoji} *{stateText}*: {name}\n\n{severityText}\n{msg}\n\n_{time}_";
     }

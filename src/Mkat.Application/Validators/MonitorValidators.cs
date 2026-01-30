@@ -6,6 +6,8 @@ namespace Mkat.Application.Validators;
 
 public class AddMonitorValidator : AbstractValidator<AddMonitorRequest>
 {
+    private static readonly string[] ValidHttpMethods = ["GET", "HEAD", "POST", "PUT"];
+
     public AddMonitorValidator()
     {
         RuleFor(x => x.Type)
@@ -64,7 +66,7 @@ public class AddMonitorValidator : AbstractValidator<AddMonitorRequest>
                 .WithMessage("HealthCheckUrl must be a valid HTTP or HTTPS URL");
 
             RuleFor(x => x.HttpMethod)
-                .Must(m => new[] { "GET", "HEAD", "POST", "PUT" }.Contains(m, StringComparer.OrdinalIgnoreCase))
+                .Must(m => ValidHttpMethods.Contains(m, StringComparer.OrdinalIgnoreCase))
                 .When(x => !string.IsNullOrEmpty(x.HttpMethod))
                 .WithMessage("HttpMethod must be one of: GET, HEAD, POST, PUT");
 
@@ -96,6 +98,8 @@ public class AddMonitorValidator : AbstractValidator<AddMonitorRequest>
 
 public class UpdateMonitorValidator : AbstractValidator<UpdateMonitorRequest>
 {
+    private static readonly string[] ValidHttpMethods = ["GET", "HEAD", "POST", "PUT"];
+
     public UpdateMonitorValidator()
     {
         RuleFor(x => x.IntervalSeconds)
@@ -152,7 +156,7 @@ public class UpdateMonitorValidator : AbstractValidator<UpdateMonitorRequest>
                 .WithMessage("HealthCheckUrl must be a valid HTTP or HTTPS URL");
 
             RuleFor(x => x.HttpMethod)
-                .Must(m => new[] { "GET", "HEAD", "POST", "PUT" }.Contains(m, StringComparer.OrdinalIgnoreCase))
+                .Must(m => ValidHttpMethods.Contains(m, StringComparer.OrdinalIgnoreCase))
                 .When(x => !string.IsNullOrEmpty(x.HttpMethod))
                 .WithMessage("HttpMethod must be one of: GET, HEAD, POST, PUT");
 

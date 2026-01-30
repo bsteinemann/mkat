@@ -46,7 +46,7 @@ public class PairingServiceTests
         Assert.True(doc.RootElement.TryGetProperty("secret", out var secret));
         Assert.NotEmpty(secret.GetString()!);
         Assert.True(doc.RootElement.TryGetProperty("expiresAt", out var expires));
-        var expiresAt = DateTime.Parse(expires.GetString()!);
+        var expiresAt = DateTime.Parse(expires.GetString()!, System.Globalization.CultureInfo.InvariantCulture);
         Assert.True(expiresAt > DateTime.UtcNow);
         Assert.True(expiresAt <= DateTime.UtcNow.AddMinutes(11)); // within 11 min
     }

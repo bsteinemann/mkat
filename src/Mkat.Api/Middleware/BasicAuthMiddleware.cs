@@ -16,7 +16,7 @@ public class BasicAuthMiddleware
     public async Task InvokeAsync(HttpContext context)
     {
         var path = context.Request.Path.Value ?? "";
-        if (!path.StartsWith("/api/"))
+        if (!path.StartsWith("/api/", StringComparison.Ordinal))
         {
             await _next(context);
             return;

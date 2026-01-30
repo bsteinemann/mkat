@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using Mkat.Application.Interfaces;
@@ -74,12 +75,12 @@ public class ContactChannelSender : IContactChannelSender
         var stateText = alert.Type == AlertType.Recovery ? "RECOVERED" : "DOWN";
         var name = TelegramChannel.EscapeMarkdown(service.Name);
         var msg = TelegramChannel.EscapeMarkdown(alert.Message);
-        var time = alert.CreatedAt.ToString("yyyy\\-MM\\-dd HH:mm:ss UTC");
+        var time = alert.CreatedAt.ToString("yyyy\\-MM\\-dd HH:mm:ss UTC", CultureInfo.InvariantCulture);
 
         return $"*{stateText}*: {name}\n{msg}\n_{time}_";
     }
 
-    private record TelegramConfig
+    private sealed record TelegramConfig
     {
         public string BotToken { get; init; } = string.Empty;
         public string ChatId { get; init; } = string.Empty;

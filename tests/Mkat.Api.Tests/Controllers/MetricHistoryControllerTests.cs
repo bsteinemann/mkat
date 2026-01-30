@@ -182,8 +182,8 @@ public class MetricHistoryControllerTests : IDisposable
         var body = await response.Content.ReadFromJsonAsync<JsonElement>(JsonOptions);
 
         var readings = body.GetProperty("readings");
-        var first = DateTime.Parse(readings[0].GetProperty("recordedAt").GetString()!);
-        var last = DateTime.Parse(readings[readings.GetArrayLength() - 1].GetProperty("recordedAt").GetString()!);
+        var first = DateTime.Parse(readings[0].GetProperty("recordedAt").GetString()!, System.Globalization.CultureInfo.InvariantCulture);
+        var last = DateTime.Parse(readings[readings.GetArrayLength() - 1].GetProperty("recordedAt").GetString()!, System.Globalization.CultureInfo.InvariantCulture);
         Assert.True(first >= last);
     }
 

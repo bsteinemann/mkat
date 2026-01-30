@@ -1,0 +1,11 @@
+<Project>
+  <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
+  <PropertyGroup>
+    <!-- CA1816: Dispose pattern overkill for test classes -->
+    <!-- CA1001: IDisposable on types owning disposable fields - test fixtures handle cleanup differently -->
+    <!-- CA1822: Static members - test helpers are often non-static for readability -->
+    <!-- CA1859: Return type specificity - tests return interfaces intentionally -->
+    <!-- CA2201: Do not raise reserved exception types - acceptable in test assertions -->
+    <NoWarn>$(NoWarn);CA1816;CA1001;CA1822;CA1859;CA2201</NoWarn>
+  </PropertyGroup>
+</Project>
