@@ -114,7 +114,7 @@ public class AddMonitorValidatorTests
     }
 
     [Fact]
-    public async Task HealthCheckType_Fails()
+    public async Task HealthCheckType_WithoutUrl_Fails()
     {
         var request = new AddMonitorRequest
         {
@@ -125,7 +125,89 @@ public class AddMonitorValidatorTests
         var result = await _validator.ValidateAsync(request);
 
         Assert.False(result.IsValid);
-        Assert.Contains(result.Errors, e => e.PropertyName == "Type");
+        Assert.Contains(result.Errors, e => e.PropertyName == "HealthCheckUrl");
+    }
+
+    [Fact]
+    public async Task HealthCheck_WithValidUrl_Passes()
+    {
+        var request = new AddMonitorRequest
+        {
+            Type = MonitorType.HealthCheck,
+            IntervalSeconds = 60,
+            HealthCheckUrl = "https://example.com/health"
+        };
+        var result = await _validator.ValidateAsync(request);
+        Assert.True(result.IsValid);
+    }
+
+    [Fact]
+    public async Task HealthCheck_WithInvalidUrl_Fails()
+    {
+        var request = new AddMonitorRequest
+        {
+            Type = MonitorType.HealthCheck,
+            IntervalSeconds = 60,
+            HealthCheckUrl = "not-a-url"
+        };
+        var result = await _validator.ValidateAsync(request);
+        Assert.False(result.IsValid);
+    }
+
+    [Fact]
+    public async Task HealthCheck_WithInvalidHttpMethod_Fails()
+    {
+        var request = new AddMonitorRequest
+        {
+            Type = MonitorType.HealthCheck,
+            IntervalSeconds = 60,
+            HealthCheckUrl = "https://example.com/health",
+            HttpMethod = "DELETE"
+        };
+        var result = await _validator.ValidateAsync(request);
+        Assert.False(result.IsValid);
+    }
+
+    [Fact]
+    public async Task HealthCheck_WithInvalidTimeout_Fails()
+    {
+        var request = new AddMonitorRequest
+        {
+            Type = MonitorType.HealthCheck,
+            IntervalSeconds = 60,
+            HealthCheckUrl = "https://example.com/health",
+            TimeoutSeconds = 0
+        };
+        var result = await _validator.ValidateAsync(request);
+        Assert.False(result.IsValid);
+    }
+
+    [Fact]
+    public async Task HealthCheck_WithInvalidRegex_Fails()
+    {
+        var request = new AddMonitorRequest
+        {
+            Type = MonitorType.HealthCheck,
+            IntervalSeconds = 60,
+            HealthCheckUrl = "https://example.com/health",
+            BodyMatchRegex = "[invalid"
+        };
+        var result = await _validator.ValidateAsync(request);
+        Assert.False(result.IsValid);
+    }
+
+    [Fact]
+    public async Task HealthCheck_WithInvalidStatusCodes_Fails()
+    {
+        var request = new AddMonitorRequest
+        {
+            Type = MonitorType.HealthCheck,
+            IntervalSeconds = 60,
+            HealthCheckUrl = "https://example.com/health",
+            ExpectedStatusCodes = "abc,def"
+        };
+        var result = await _validator.ValidateAsync(request);
+        Assert.False(result.IsValid);
     }
 
     [Fact]

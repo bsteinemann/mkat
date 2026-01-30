@@ -135,7 +135,7 @@ public class CreateServiceValidatorTests
     }
 
     [Fact]
-    public async Task HealthCheckMonitorType_Fails()
+    public async Task HealthCheckMonitorType_WithoutUrl_Fails()
     {
         var request = new CreateServiceRequest
         {
@@ -149,7 +149,7 @@ public class CreateServiceValidatorTests
         var result = await _validator.ValidateAsync(request);
 
         Assert.False(result.IsValid);
-        Assert.Contains(result.Errors, e => e.PropertyName.Contains("Type"));
+        Assert.Contains(result.Errors, e => e.PropertyName.Contains("HealthCheckUrl"));
     }
 
     [Fact]

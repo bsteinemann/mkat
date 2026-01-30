@@ -9,9 +9,7 @@ public class AddMonitorValidator : AbstractValidator<AddMonitorRequest>
     public AddMonitorValidator()
     {
         RuleFor(x => x.Type)
-            .IsInEnum().WithMessage("Invalid monitor type")
-            .Must(t => t != MonitorType.HealthCheck)
-            .WithMessage("Health check monitors are not supported yet");
+            .IsInEnum().WithMessage("Invalid monitor type");
 
         RuleFor(x => x.IntervalSeconds)
             .GreaterThanOrEqualTo(30).WithMessage("Interval must be at least 30 seconds")
@@ -51,6 +49,47 @@ public class AddMonitorValidator : AbstractValidator<AddMonitorRequest>
             RuleFor(x => x.RetentionDays)
                 .InclusiveBetween(1, 365)
                 .WithMessage("RetentionDays must be between 1 and 365");
+        });
+
+        // Health check monitor validation rules
+        When(x => x.Type == MonitorType.HealthCheck, () =>
+        {
+            RuleFor(x => x.HealthCheckUrl)
+                .NotEmpty().WithMessage("HealthCheckUrl is required for health check monitors");
+
+            RuleFor(x => x.HealthCheckUrl)
+                .Must(url => Uri.TryCreate(url, UriKind.Absolute, out var uri)
+                    && (uri.Scheme == "http" || uri.Scheme == "https"))
+                .When(x => !string.IsNullOrEmpty(x.HealthCheckUrl))
+                .WithMessage("HealthCheckUrl must be a valid HTTP or HTTPS URL");
+
+            RuleFor(x => x.HttpMethod)
+                .Must(m => new[] { "GET", "HEAD", "POST", "PUT" }.Contains(m, StringComparer.OrdinalIgnoreCase))
+                .When(x => !string.IsNullOrEmpty(x.HttpMethod))
+                .WithMessage("HttpMethod must be one of: GET, HEAD, POST, PUT");
+
+            RuleFor(x => x.ExpectedStatusCodes)
+                .Must(codes =>
+                {
+                    if (string.IsNullOrEmpty(codes)) return true;
+                    return codes.Split(',').All(c =>
+                        int.TryParse(c.Trim(), out var code) && code >= 100 && code <= 599);
+                })
+                .WithMessage("ExpectedStatusCodes must be comma-separated integers between 100 and 599");
+
+            RuleFor(x => x.TimeoutSeconds)
+                .InclusiveBetween(1, 120)
+                .When(x => x.TimeoutSeconds.HasValue)
+                .WithMessage("TimeoutSeconds must be between 1 and 120");
+
+            RuleFor(x => x.BodyMatchRegex)
+                .Must(pattern =>
+                {
+                    try { _ = new System.Text.RegularExpressions.Regex(pattern!); return true; }
+                    catch { return false; }
+                })
+                .When(x => !string.IsNullOrEmpty(x.BodyMatchRegex))
+                .WithMessage("BodyMatchRegex must be a valid regular expression");
         });
     }
 }
@@ -98,6 +137,47 @@ public class UpdateMonitorValidator : AbstractValidator<UpdateMonitorRequest>
                 .InclusiveBetween(1, 365)
                 .When(x => x.RetentionDays.HasValue)
                 .WithMessage("RetentionDays must be between 1 and 365");
+        });
+
+        // Health check monitor validation rules
+        When(x => x.Type == MonitorType.HealthCheck, () =>
+        {
+            RuleFor(x => x.HealthCheckUrl)
+                .NotEmpty().WithMessage("HealthCheckUrl is required for health check monitors");
+
+            RuleFor(x => x.HealthCheckUrl)
+                .Must(url => Uri.TryCreate(url, UriKind.Absolute, out var uri)
+                    && (uri.Scheme == "http" || uri.Scheme == "https"))
+                .When(x => !string.IsNullOrEmpty(x.HealthCheckUrl))
+                .WithMessage("HealthCheckUrl must be a valid HTTP or HTTPS URL");
+
+            RuleFor(x => x.HttpMethod)
+                .Must(m => new[] { "GET", "HEAD", "POST", "PUT" }.Contains(m, StringComparer.OrdinalIgnoreCase))
+                .When(x => !string.IsNullOrEmpty(x.HttpMethod))
+                .WithMessage("HttpMethod must be one of: GET, HEAD, POST, PUT");
+
+            RuleFor(x => x.ExpectedStatusCodes)
+                .Must(codes =>
+                {
+                    if (string.IsNullOrEmpty(codes)) return true;
+                    return codes.Split(',').All(c =>
+                        int.TryParse(c.Trim(), out var code) && code >= 100 && code <= 599);
+                })
+                .WithMessage("ExpectedStatusCodes must be comma-separated integers between 100 and 599");
+
+            RuleFor(x => x.TimeoutSeconds)
+                .InclusiveBetween(1, 120)
+                .When(x => x.TimeoutSeconds.HasValue)
+                .WithMessage("TimeoutSeconds must be between 1 and 120");
+
+            RuleFor(x => x.BodyMatchRegex)
+                .Must(pattern =>
+                {
+                    try { _ = new System.Text.RegularExpressions.Regex(pattern!); return true; }
+                    catch { return false; }
+                })
+                .When(x => !string.IsNullOrEmpty(x.BodyMatchRegex))
+                .WithMessage("BodyMatchRegex must be a valid regular expression");
         });
     }
 }
