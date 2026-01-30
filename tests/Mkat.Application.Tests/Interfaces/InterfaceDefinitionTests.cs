@@ -134,4 +134,11 @@ public class InterfaceDefinitionTests
         Assert.Equal("{}", evt.Payload);
         Assert.True(evt.Timestamp <= DateTime.UtcNow);
     }
+
+    [Fact]
+    public void IServiceDependencyRepository_Exists()
+    {
+        var type = typeof(IServiceDependencyRepository);
+        Assert.True(type.IsInterface);
+    }
 }
