@@ -37,10 +37,10 @@ export function MonitorDescription({ type, variant = 'compact' }: Props) {
   if (!desc) return null;
 
   return (
-    <div className="text-sm text-gray-500">
+    <div className="text-sm text-muted-foreground">
       <p>{desc.summary}</p>
       {variant === 'full' && (
-        <p className="mt-1 text-gray-400">{desc.detail}</p>
+        <p className="mt-1 text-muted-foreground/70">{desc.detail}</p>
       )}
     </div>
   );

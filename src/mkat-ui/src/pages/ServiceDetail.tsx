@@ -78,9 +78,9 @@ export function ServiceDetail() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">{service.name}</h1>
+          <h1 className="text-2xl font-bold text-foreground">{service.name}</h1>
           {service.description && (
-            <p className="text-gray-500 mt-1">{service.description}</p>
+            <p className="text-muted-foreground mt-1">{service.description}</p>
           )}
         </div>
         <div className="flex items-center gap-4">
@@ -89,7 +89,7 @@ export function ServiceDetail() {
             {service.state !== 3 ? (
               <Button
                 variant="outline"
-                className="bg-yellow-100 text-yellow-800 hover:bg-yellow-200 border-yellow-200"
+                className="bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 hover:bg-yellow-200 dark:hover:bg-yellow-800 border-yellow-200 dark:border-yellow-700"
                 onClick={() => pauseMutation.mutate()}
               >
                 Pause
@@ -97,7 +97,7 @@ export function ServiceDetail() {
             ) : (
               <Button
                 variant="outline"
-                className="bg-green-100 text-green-800 hover:bg-green-200 border-green-200"
+                className="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 hover:bg-green-200 dark:hover:bg-green-800 border-green-200 dark:border-green-700"
                 onClick={() => resumeMutation.mutate()}
               >
                 Resume
@@ -106,7 +106,7 @@ export function ServiceDetail() {
             <Link
               to="/services/$serviceId/edit"
               params={{ serviceId }}
-              className="px-4 py-2 bg-blue-100 text-blue-800 rounded hover:bg-blue-200"
+              className="px-4 py-2 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded hover:bg-blue-200 dark:hover:bg-blue-800"
             >
               Edit
             </Link>
@@ -129,7 +129,7 @@ export function ServiceDetail() {
                   {monitor.type === MonitorType.HealthCheck && 'Health Check'}
                   {monitor.type === MonitorType.Metric && 'Metric'}
                 </span>
-                <span className="text-sm text-gray-500">
+                <span className="text-sm text-muted-foreground">
                   ({monitor.intervalSeconds}s interval)
                 </span>
               </div>
@@ -152,7 +152,7 @@ export function ServiceDetail() {
                     <Button
                       variant="outline"
                       size="sm"
-                      className="bg-green-100 text-green-800 hover:bg-green-200 border-green-200"
+                      className="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 hover:bg-green-200 dark:hover:bg-green-800 border-green-200 dark:border-green-700"
                       onClick={() => webhookRecoverMutation.mutate(monitor.webhookRecoverUrl)}
                       disabled={webhookRecoverMutation.isPending}
                     >
@@ -169,7 +169,7 @@ export function ServiceDetail() {
               {monitor.type === MonitorType.Metric && (
                 <div className="space-y-3">
                   <CopyableUrl label="Metric Push URL (POST with value)" url={monitor.metricUrl} />
-                  <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm text-gray-600 mt-2">
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm text-muted-foreground mt-2">
                     {monitor.minValue != null && (
                       <span>Min: {monitor.minValue}</span>
                     )}
@@ -187,7 +187,7 @@ export function ServiceDetail() {
                     )}
                   </div>
                   {monitor.lastMetricValue != null && monitor.lastMetricAt && (
-                    <p className="text-sm text-gray-500 mt-2">
+                    <p className="text-sm text-muted-foreground mt-2">
                       Latest: {monitor.lastMetricValue} at {new Date(monitor.lastMetricAt).toLocaleString()}
                     </p>
                   )}
@@ -196,20 +196,20 @@ export function ServiceDetail() {
 
               {monitor.type === MonitorType.HealthCheck && (
                 <div className="space-y-3">
-                  <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm text-gray-600">
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm text-muted-foreground">
                     <span>URL: {monitor.healthCheckUrl}</span>
                     <span>Method: {monitor.httpMethod ?? 'GET'}</span>
                     <span>Expected: {monitor.expectedStatusCodes ?? '200'}</span>
                     <span>Timeout: {monitor.timeoutSeconds ?? 10}s</span>
                     {monitor.bodyMatchRegex && (
-                      <span className="col-span-2">Body match: <code className="bg-gray-100 px-1 rounded">{monitor.bodyMatchRegex}</code></span>
+                      <span className="col-span-2">Body match: <code className="bg-muted px-1 rounded">{monitor.bodyMatchRegex}</code></span>
                     )}
                   </div>
                 </div>
               )}
 
               {monitor.lastCheckIn && (
-                <p className="text-sm text-gray-500 mt-2">
+                <p className="text-sm text-muted-foreground mt-2">
                   Last check-in: {new Date(monitor.lastCheckIn).toLocaleString()}
                 </p>
               )}
@@ -225,7 +225,7 @@ export function ServiceDetail() {
         </CardHeader>
         <CardContent>
           {alertsData?.items.length === 0 ? (
-            <p className="text-gray-500">No alerts for this service</p>
+            <p className="text-muted-foreground">No alerts for this service</p>
           ) : (
             <div className="space-y-3">
               {alertsData?.items.map(alert => (

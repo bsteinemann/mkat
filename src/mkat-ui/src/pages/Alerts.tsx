@@ -35,7 +35,7 @@ export function Alerts() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-gray-900">Alerts</h1>
+      <h1 className="text-2xl font-bold text-foreground">Alerts</h1>
 
       {data?.items.length === 0 ? (
         <Alert>

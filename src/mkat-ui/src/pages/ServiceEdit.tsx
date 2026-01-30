@@ -2,15 +2,18 @@ import { useState } from 'react';
 import { useNavigate, useParams } from '@tanstack/react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import { getErrorMessage } from '../api/client';
 import { servicesApi, contactsApi } from '../api/services';
 import { ServiceForm } from '../components/services/ServiceForm';
+import { MonitorTypeSelector } from '../components/monitors/MonitorTypeSelector';
+import { IntervalGraceFields } from '../components/monitors/IntervalGraceFields';
+import { HealthCheckFields } from '../components/monitors/HealthCheckFields';
+import { MetricFields } from '../components/monitors/MetricFields';
 import { MonitorType, ThresholdStrategy } from '../api/types';
 import type { CreateServiceRequest, UpdateServiceRequest, CreateMonitorRequest, UpdateMonitorRequest, Monitor } from '../api/types';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
@@ -41,8 +44,8 @@ export function ServiceEdit() {
       queryClient.invalidateQueries({ queryKey: ['services'] });
       toast.success('Service updated');
     },
-    onError: () => {
-      toast.error('Failed to update service');
+    onError: (error) => {
+      toast.error(getErrorMessage(error, 'Failed to update service'));
     },
   });
 
@@ -53,8 +56,8 @@ export function ServiceEdit() {
       toast.success('Service deleted');
       navigate({ to: '/services' });
     },
-    onError: () => {
-      toast.error('Failed to delete service');
+    onError: (error) => {
+      toast.error(getErrorMessage(error, 'Failed to delete service'));
     },
   });
 
@@ -64,8 +67,8 @@ export function ServiceEdit() {
       queryClient.invalidateQueries({ queryKey: ['services', serviceId] });
       toast.success('Monitor added');
     },
-    onError: () => {
-      toast.error('Failed to add monitor');
+    onError: (error) => {
+      toast.error(getErrorMessage(error, 'Failed to add monitor'));
     },
   });
 
@@ -76,8 +79,8 @@ export function ServiceEdit() {
       queryClient.invalidateQueries({ queryKey: ['services', serviceId] });
       toast.success('Monitor updated');
     },
-    onError: () => {
-      toast.error('Failed to update monitor');
+    onError: (error) => {
+      toast.error(getErrorMessage(error, 'Failed to update monitor'));
     },
   });
 
@@ -87,8 +90,8 @@ export function ServiceEdit() {
       queryClient.invalidateQueries({ queryKey: ['services', serviceId] });
       toast.success('Monitor removed');
     },
-    onError: () => {
-      toast.error('Failed to remove monitor');
+    onError: (error) => {
+      toast.error(getErrorMessage(error, 'Failed to remove monitor'));
     },
   });
 
@@ -110,7 +113,7 @@ export function ServiceEdit() {
 
   return (
     <div className="max-w-2xl">
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">Edit Service</h1>
+      <h1 className="text-2xl font-bold text-foreground mb-6">Edit Service</h1>
       <Card className="py-0">
         <CardContent className="p-6">
           <ServiceForm
@@ -137,12 +140,12 @@ export function ServiceEdit() {
 
       <ContactsSection serviceId={serviceId} />
 
-      <Card className="mt-6 border-red-200 py-0">
+      <Card className="mt-6 border-red-200 dark:border-red-800 py-0">
         <CardHeader>
-          <CardTitle className="text-lg text-red-800">Danger Zone</CardTitle>
+          <CardTitle className="text-lg text-red-800 dark:text-red-200">Danger Zone</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-gray-600 mb-4">
+          <p className="text-sm text-muted-foreground mb-4">
             Deleting a service removes all monitors and alert history.
           </p>
           <AlertDialog>
@@ -241,7 +244,7 @@ function MonitorSection({
     <Card className="mt-6 py-0">
       <CardContent className="p-6">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold text-gray-900">Monitors</h2>
+        <h2 className="text-lg font-semibold text-foreground">Monitors</h2>
         <Button
           type="button"
           variant="link"
@@ -254,172 +257,63 @@ function MonitorSection({
       </div>
 
       {showAddForm && (
-        <div className="border rounded p-4 mb-4 bg-gray-50 space-y-3">
+        <div className="border rounded p-4 mb-4 bg-muted space-y-3">
           <div className="space-y-1">
             <Label className="text-xs text-muted-foreground">Type</Label>
-            <Select value={String(newType)} onValueChange={v => setNewType(Number(v) as MonitorType)}>
-              <SelectTrigger className="w-full h-8 text-sm" size="sm">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value={String(MonitorType.Webhook)}>Webhook</SelectItem>
-                <SelectItem value={String(MonitorType.Heartbeat)}>Heartbeat</SelectItem>
-                <SelectItem value={String(MonitorType.HealthCheck)}>Health Check</SelectItem>
-                <SelectItem value={String(MonitorType.Metric)}>Metric</SelectItem>
-              </SelectContent>
-            </Select>
+            <MonitorTypeSelector
+              value={newType}
+              onChange={setNewType}
+              triggerClassName="w-full h-8 text-sm"
+            />
           </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1">
-              <Label className="text-xs text-muted-foreground">Interval (seconds)</Label>
-              <Input
-                type="number"
-                value={newInterval}
-                onChange={e => setNewInterval(Number(e.target.value))}
-                className="h-8 text-sm"
-                min={30}
-              />
-            </div>
-            <div className="space-y-1">
-              <Label className="text-xs text-muted-foreground">Grace period (seconds)</Label>
-              <Input
-                type="number"
-                value={newGrace}
-                onChange={e => setNewGrace(Number(e.target.value))}
-                className="h-8 text-sm"
-                min={60}
-              />
-            </div>
-          </div>
+          <IntervalGraceFields
+            intervalSeconds={newInterval}
+            gracePeriodSeconds={newGrace}
+            onIntervalChange={setNewInterval}
+            onGracePeriodChange={setNewGrace}
+          />
           {newType === MonitorType.Metric && (
-            <div className="space-y-3 border-t pt-3">
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <Label className="text-xs text-muted-foreground">Min Value</Label>
-                  <Input
-                    type="number"
-                    step="any"
-                    value={newMinValue ?? ''}
-                    onChange={e => setNewMinValue(e.target.value ? Number(e.target.value) : undefined)}
-                    className="h-8 text-sm"
-                    placeholder="Optional"
-                  />
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-xs text-muted-foreground">Max Value</Label>
-                  <Input
-                    type="number"
-                    step="any"
-                    value={newMaxValue ?? ''}
-                    onChange={e => setNewMaxValue(e.target.value ? Number(e.target.value) : undefined)}
-                    className="h-8 text-sm"
-                    placeholder="Optional"
-                  />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <Label className="text-xs text-muted-foreground">Threshold Strategy</Label>
-                  <Select value={String(newThresholdStrategy)} onValueChange={v => setNewThresholdStrategy(Number(v) as ThresholdStrategy)}>
-                    <SelectTrigger className="w-full h-8 text-sm" size="sm">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value={String(ThresholdStrategy.Immediate)}>Immediate</SelectItem>
-                      <SelectItem value={String(ThresholdStrategy.ConsecutiveCount)}>Consecutive Count</SelectItem>
-                      <SelectItem value={String(ThresholdStrategy.TimeDurationAverage)}>Time Window Average</SelectItem>
-                      <SelectItem value={String(ThresholdStrategy.SampleCountAverage)}>Sample Count Average</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-xs text-muted-foreground">Retention (days)</Label>
-                  <Input
-                    type="number"
-                    value={newRetentionDays}
-                    onChange={e => setNewRetentionDays(Number(e.target.value))}
-                    className="h-8 text-sm"
-                    min={1}
-                    max={365}
-                  />
-                </div>
-              </div>
-              {(newThresholdStrategy === ThresholdStrategy.ConsecutiveCount ||
-                newThresholdStrategy === ThresholdStrategy.SampleCountAverage) && (
-                <div className="space-y-1">
-                  <Label className="text-xs text-muted-foreground">Threshold Count</Label>
-                  <Input
-                    type="number"
-                    value={newThresholdCount}
-                    onChange={e => setNewThresholdCount(Number(e.target.value))}
-                    className="h-8 text-sm"
-                    min={2}
-                  />
-                </div>
-              )}
-            </div>
+            <MetricFields
+              values={{
+                minValue: newMinValue,
+                maxValue: newMaxValue,
+                thresholdStrategy: newThresholdStrategy,
+                thresholdCount: newThresholdCount,
+                retentionDays: newRetentionDays,
+              }}
+              onChange={(field, value) => {
+                const setters: Record<string, (v: any) => void> = {
+                  minValue: setNewMinValue,
+                  maxValue: setNewMaxValue,
+                  thresholdStrategy: setNewThresholdStrategy,
+                  thresholdCount: setNewThresholdCount,
+                  retentionDays: setNewRetentionDays,
+                };
+                setters[field]?.(value);
+              }}
+            />
           )}
           {newType === MonitorType.HealthCheck && (
-            <div className="space-y-3 border-t pt-3">
-              <div className="space-y-1">
-                <Label className="text-xs text-muted-foreground">URL</Label>
-                <Input
-                  type="url"
-                  value={newHealthCheckUrl}
-                  onChange={e => setNewHealthCheckUrl(e.target.value)}
-                  className="h-8 text-sm"
-                  placeholder="https://example.com/health"
-                  required
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <Label className="text-xs text-muted-foreground">HTTP Method</Label>
-                  <Select value={newHttpMethod} onValueChange={v => setNewHttpMethod(v)}>
-                    <SelectTrigger className="w-full h-8 text-sm" size="sm">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="GET">GET</SelectItem>
-                      <SelectItem value="HEAD">HEAD</SelectItem>
-                      <SelectItem value="POST">POST</SelectItem>
-                      <SelectItem value="PUT">PUT</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-xs text-muted-foreground">Timeout (seconds)</Label>
-                  <Input
-                    type="number"
-                    value={newTimeoutSeconds}
-                    onChange={e => setNewTimeoutSeconds(Number(e.target.value))}
-                    className="h-8 text-sm"
-                    min={1}
-                    max={120}
-                  />
-                </div>
-              </div>
-              <div className="space-y-1">
-                <Label className="text-xs text-muted-foreground">Expected Status Codes</Label>
-                <Input
-                  type="text"
-                  value={newExpectedStatusCodes}
-                  onChange={e => setNewExpectedStatusCodes(e.target.value)}
-                  className="h-8 text-sm"
-                  placeholder="200,201,204"
-                />
-              </div>
-              <div className="space-y-1">
-                <Label className="text-xs text-muted-foreground">Body Match Regex (optional)</Label>
-                <Input
-                  type="text"
-                  value={newBodyMatchRegex}
-                  onChange={e => setNewBodyMatchRegex(e.target.value)}
-                  className="h-8 text-sm"
-                  placeholder="ok|healthy"
-                />
-              </div>
-            </div>
+            <HealthCheckFields
+              values={{
+                healthCheckUrl: newHealthCheckUrl,
+                httpMethod: newHttpMethod,
+                expectedStatusCodes: newExpectedStatusCodes,
+                timeoutSeconds: newTimeoutSeconds,
+                bodyMatchRegex: newBodyMatchRegex,
+              }}
+              onChange={(field, value) => {
+                const setters: Record<string, (v: any) => void> = {
+                  healthCheckUrl: setNewHealthCheckUrl,
+                  httpMethod: setNewHttpMethod,
+                  expectedStatusCodes: setNewExpectedStatusCodes,
+                  timeoutSeconds: setNewTimeoutSeconds,
+                  bodyMatchRegex: setNewBodyMatchRegex,
+                };
+                setters[field]?.(value ?? '');
+              }}
+              urlRequired
+            />
           )}
           <Button
             type="button"
@@ -475,8 +369,8 @@ function ContactsSection({ serviceId }: { serviceId: string }) {
       setLocalSelected(null);
       toast.success('Contacts updated');
     },
-    onError: () => {
-      toast.error('Failed to update contacts');
+    onError: (error) => {
+      toast.error(getErrorMessage(error, 'Failed to update contacts'));
     },
   });
 
@@ -511,13 +405,13 @@ function ContactsSection({ serviceId }: { serviceId: string }) {
   return (
     <Card className="mt-6 py-0">
       <CardContent className="p-6">
-      <h2 className="text-lg font-semibold text-gray-900 mb-2">Contacts</h2>
-      <p className="text-xs text-gray-500 mb-4">
+      <h2 className="text-lg font-semibold text-foreground mb-2">Contacts</h2>
+      <p className="text-xs text-muted-foreground mb-4">
         Select which contacts receive alerts for this service. If none are assigned, the default contact is used.
       </p>
 
       {!allContacts || allContacts.length === 0 ? (
-        <p className="text-sm text-gray-500">No contacts configured yet.</p>
+        <p className="text-sm text-muted-foreground">No contacts configured yet.</p>
       ) : (
         <div className="space-y-2">
           {allContacts.map(contact => (
@@ -526,12 +420,12 @@ function ContactsSection({ serviceId }: { serviceId: string }) {
                 checked={selected.has(contact.id)}
                 onCheckedChange={() => toggle(contact.id)}
               />
-              <span className="text-sm text-gray-700">{contact.name}</span>
+              <span className="text-sm text-foreground">{contact.name}</span>
               {contact.isDefault && (
-                <span className="text-xs text-gray-400">(default)</span>
+                <span className="text-xs text-muted-foreground">(default)</span>
               )}
               {contact.channels.length === 0 && (
-                <span className="text-xs text-amber-600">(no channels)</span>
+                <span className="text-xs text-amber-600 dark:text-amber-400">(no channels)</span>
               )}
             </Label>
           ))}
@@ -636,7 +530,7 @@ function MonitorRow({
   return (
     <div className="border rounded p-3">
       <div className="flex items-center justify-between mb-2">
-        <span className="text-sm font-medium text-gray-700">{typeLabels[monitor.type]}</span>
+        <span className="text-sm font-medium text-foreground">{typeLabels[monitor.type]}</span>
         <div className="flex gap-2">
           {!editing && (
             <Button
@@ -655,7 +549,7 @@ function MonitorRow({
                 type="button"
                 variant="ghost"
                 size="xs"
-                className="p-0 h-auto text-red-600 hover:text-red-800 hover:bg-transparent"
+                className="p-0 h-auto text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 hover:bg-transparent"
                 disabled={!canDelete}
               >
                 Remove
@@ -681,156 +575,53 @@ function MonitorRow({
 
       {editing ? (
         <div className="space-y-2">
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1">
-              <Label className="text-xs text-muted-foreground">Interval (seconds)</Label>
-              <Input
-                type="number"
-                value={interval}
-                onChange={e => setInterval(Number(e.target.value))}
-                className="h-8 text-sm"
-                min={30}
-              />
-            </div>
-            <div className="space-y-1">
-              <Label className="text-xs text-muted-foreground">Grace period (seconds)</Label>
-              <Input
-                type="number"
-                value={grace}
-                onChange={e => setGrace(Number(e.target.value))}
-                className="h-8 text-sm"
-                min={60}
-              />
-            </div>
-          </div>
+          <IntervalGraceFields
+            intervalSeconds={interval}
+            gracePeriodSeconds={grace}
+            onIntervalChange={setInterval}
+            onGracePeriodChange={setGrace}
+          />
           {monitor.type === MonitorType.Metric && (
-            <div className="space-y-2 border-t pt-2 mt-2">
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <Label className="text-xs text-muted-foreground">Min Value</Label>
-                  <Input
-                    type="number"
-                    step="any"
-                    value={minValue ?? ''}
-                    onChange={e => setMinValue(e.target.value ? Number(e.target.value) : undefined)}
-                    className="h-8 text-sm"
-                    placeholder="Optional"
-                  />
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-xs text-muted-foreground">Max Value</Label>
-                  <Input
-                    type="number"
-                    step="any"
-                    value={maxValue ?? ''}
-                    onChange={e => setMaxValue(e.target.value ? Number(e.target.value) : undefined)}
-                    className="h-8 text-sm"
-                    placeholder="Optional"
-                  />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <Label className="text-xs text-muted-foreground">Threshold Strategy</Label>
-                  <Select value={String(thresholdStrategy)} onValueChange={v => setThresholdStrategy(Number(v) as ThresholdStrategy)}>
-                    <SelectTrigger className="w-full h-8 text-sm" size="sm">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value={String(ThresholdStrategy.Immediate)}>Immediate</SelectItem>
-                      <SelectItem value={String(ThresholdStrategy.ConsecutiveCount)}>Consecutive Count</SelectItem>
-                      <SelectItem value={String(ThresholdStrategy.TimeDurationAverage)}>Time Window Average</SelectItem>
-                      <SelectItem value={String(ThresholdStrategy.SampleCountAverage)}>Sample Count Average</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-xs text-muted-foreground">Retention (days)</Label>
-                  <Input
-                    type="number"
-                    value={retentionDays}
-                    onChange={e => setRetentionDays(Number(e.target.value))}
-                    className="h-8 text-sm"
-                    min={1}
-                    max={365}
-                  />
-                </div>
-              </div>
-              {(thresholdStrategy === ThresholdStrategy.ConsecutiveCount ||
-                thresholdStrategy === ThresholdStrategy.SampleCountAverage) && (
-                <div className="space-y-1">
-                  <Label className="text-xs text-muted-foreground">Threshold Count</Label>
-                  <Input
-                    type="number"
-                    value={thresholdCount}
-                    onChange={e => setThresholdCount(Number(e.target.value))}
-                    className="h-8 text-sm"
-                    min={2}
-                  />
-                </div>
-              )}
-            </div>
+            <MetricFields
+              values={{
+                minValue,
+                maxValue,
+                thresholdStrategy,
+                thresholdCount,
+                retentionDays,
+              }}
+              onChange={(field, value) => {
+                const setters: Record<string, (v: any) => void> = {
+                  minValue: setMinValue,
+                  maxValue: setMaxValue,
+                  thresholdStrategy: setThresholdStrategy,
+                  thresholdCount: setThresholdCount,
+                  retentionDays: setRetentionDays,
+                };
+                setters[field]?.(value);
+              }}
+            />
           )}
           {monitor.type === MonitorType.HealthCheck && (
-            <div className="space-y-2 border-t pt-2 mt-2">
-              <div className="space-y-1">
-                <Label className="text-xs text-muted-foreground">URL</Label>
-                <Input
-                  type="url"
-                  value={healthCheckUrl}
-                  onChange={e => setHealthCheckUrl(e.target.value)}
-                  className="h-8 text-sm"
-                  placeholder="https://example.com/health"
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <Label className="text-xs text-muted-foreground">HTTP Method</Label>
-                  <Select value={httpMethod} onValueChange={v => setHttpMethod(v)}>
-                    <SelectTrigger className="w-full h-8 text-sm" size="sm">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="GET">GET</SelectItem>
-                      <SelectItem value="HEAD">HEAD</SelectItem>
-                      <SelectItem value="POST">POST</SelectItem>
-                      <SelectItem value="PUT">PUT</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-xs text-muted-foreground">Timeout (seconds)</Label>
-                  <Input
-                    type="number"
-                    value={timeoutSeconds}
-                    onChange={e => setTimeoutSeconds(Number(e.target.value))}
-                    className="h-8 text-sm"
-                    min={1}
-                    max={120}
-                  />
-                </div>
-              </div>
-              <div className="space-y-1">
-                <Label className="text-xs text-muted-foreground">Expected Status Codes</Label>
-                <Input
-                  type="text"
-                  value={expectedStatusCodes}
-                  onChange={e => setExpectedStatusCodes(e.target.value)}
-                  className="h-8 text-sm"
-                  placeholder="200,201,204"
-                />
-              </div>
-              <div className="space-y-1">
-                <Label className="text-xs text-muted-foreground">Body Match Regex (optional)</Label>
-                <Input
-                  type="text"
-                  value={bodyMatchRegex}
-                  onChange={e => setBodyMatchRegex(e.target.value)}
-                  className="h-8 text-sm"
-                  placeholder="ok|healthy"
-                />
-              </div>
-            </div>
+            <HealthCheckFields
+              values={{
+                healthCheckUrl,
+                httpMethod,
+                expectedStatusCodes,
+                timeoutSeconds,
+                bodyMatchRegex,
+              }}
+              onChange={(field, value) => {
+                const setters: Record<string, (v: any) => void> = {
+                  healthCheckUrl: setHealthCheckUrl,
+                  httpMethod: setHttpMethod,
+                  expectedStatusCodes: setExpectedStatusCodes,
+                  timeoutSeconds: setTimeoutSeconds,
+                  bodyMatchRegex: setBodyMatchRegex,
+                };
+                setters[field]?.(value ?? '');
+              }}
+            />
           )}
           <div className="flex gap-2">
             <Button
@@ -851,7 +642,7 @@ function MonitorRow({
           </div>
         </div>
       ) : (
-        <div className="text-xs text-gray-500">
+        <div className="text-xs text-muted-foreground">
           Interval: {monitor.intervalSeconds}s | Grace: {monitor.gracePeriodSeconds}s
           {monitor.type === MonitorType.Metric && (
             <span>

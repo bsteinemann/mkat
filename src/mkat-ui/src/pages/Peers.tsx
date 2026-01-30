@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
 import { toast } from 'sonner';
+import { getErrorMessage } from '../api/client';
 import { peersApi } from '../api/services';
 import { StateIndicator } from '../components/services/StateIndicator';
 import { Button } from '@/components/ui/button';
@@ -40,8 +41,8 @@ export function Peers() {
       queryClient.invalidateQueries({ queryKey: ['peers'] });
       toast.success('Peer unpaired');
     },
-    onError: () => {
-      toast.error('Failed to unpair peer');
+    onError: (error) => {
+      toast.error(getErrorMessage(error, 'Failed to unpair peer'));
     },
   });
 
@@ -61,7 +62,7 @@ export function Peers() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Peers</h1>
+        <h1 className="text-2xl font-bold text-foreground">Peers</h1>
         <Button onClick={() => setShowPairDialog(true)}>
           Pair Instance
         </Button>
@@ -84,13 +85,13 @@ export function Peers() {
                 <div className="flex items-center justify-between">
                   <div>
                     <div className="flex items-center gap-3">
-                      <h2 className="text-lg font-semibold text-gray-900">{peer.name}</h2>
+                      <h2 className="text-lg font-semibold text-foreground">{peer.name}</h2>
                       {peer.serviceState != null && (
                         <StateIndicator state={peer.serviceState} size="sm" />
                       )}
                     </div>
-                    <p className="text-sm text-gray-500 mt-1">{peer.url}</p>
-                    <p className="text-xs text-gray-400 mt-1">
+                    <p className="text-sm text-muted-foreground mt-1">{peer.url}</p>
+                    <p className="text-xs text-muted-foreground mt-1">
                       Paired {new Date(peer.pairedAt).toLocaleString()} | Heartbeat every {peer.heartbeatIntervalSeconds}s
                     </p>
                   </div>
@@ -98,7 +99,7 @@ export function Peers() {
                     <Link
                       to="/services/$serviceId"
                       params={{ serviceId: peer.serviceId }}
-                      className="px-3 py-1.5 text-sm bg-blue-100 text-blue-800 rounded hover:bg-blue-200"
+                      className="px-3 py-1.5 text-sm bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded hover:bg-blue-200 dark:hover:bg-blue-800"
                     >
                       View Service
                     </Link>
@@ -143,8 +144,8 @@ function PairDialog({ onClose }: { onClose: () => void }) {
     onSuccess: (data) => {
       setGeneratedToken(data.token);
     },
-    onError: () => {
-      toast.error('Failed to generate pairing token');
+    onError: (error) => {
+      toast.error(getErrorMessage(error, 'Failed to generate pairing token'));
     },
   });
 
@@ -155,13 +156,13 @@ function PairDialog({ onClose }: { onClose: () => void }) {
       toast.success('Pairing complete');
       onClose();
     },
-    onError: () => {
-      toast.error('Failed to complete pairing');
+    onError: (error) => {
+      toast.error(getErrorMessage(error, 'Failed to complete pairing'));
     },
   });
 
   return (
-    <Card className="border-blue-200 py-0">
+    <Card className="border-blue-200 dark:border-blue-800 py-0">
       <CardContent className="p-6">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-semibold">Pair with Another Instance</h2>
@@ -196,7 +197,7 @@ function PairDialog({ onClose }: { onClose: () => void }) {
             </div>
           ) : (
             <div className="space-y-3">
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-muted-foreground">
                 Share this token with the other instance. It expires in 10 minutes.
               </p>
               <div className="relative">

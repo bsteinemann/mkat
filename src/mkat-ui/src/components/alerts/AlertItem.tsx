@@ -24,10 +24,10 @@ const typeColors: Record<AlertType, string> = {
 };
 
 const severityBadge = {
-  [Severity.Low]: 'bg-green-100 text-green-700',
-  [Severity.Medium]: 'bg-yellow-100 text-yellow-700',
-  [Severity.High]: 'bg-orange-100 text-orange-700',
-  [Severity.Critical]: 'bg-red-100 text-red-700',
+  [Severity.Low]: 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300',
+  [Severity.Medium]: 'bg-yellow-100 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-300',
+  [Severity.High]: 'bg-orange-100 dark:bg-orange-900 text-orange-700 dark:text-orange-300',
+  [Severity.Critical]: 'bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300',
 };
 
 export function AlertItem({ alert, onAcknowledge }: Props) {
@@ -42,8 +42,8 @@ export function AlertItem({ alert, onAcknowledge }: Props) {
             {Severity[alert.severity]}
           </Badge>
         </div>
-        <p className="text-sm text-gray-700 mt-1">{alert.message}</p>
-        <p className="text-xs text-gray-500 mt-1">
+        <p className="text-sm text-foreground mt-1">{alert.message}</p>
+        <p className="text-xs text-muted-foreground mt-1">
           {formatDistanceToNow(new Date(alert.createdAt))} ago
           {alert.acknowledgedAt && ' - Acknowledged'}
         </p>

@@ -20,9 +20,9 @@ export function CopyableUrl({ label, url }: Props) {
 
   return (
     <div className="flex flex-col gap-1">
-      <Label className="text-gray-700">{label}</Label>
+      <Label className="text-foreground">{label}</Label>
       <div className="flex items-center gap-2">
-        <code className="flex-1 bg-gray-100 px-3 py-2 rounded text-sm font-mono truncate">
+        <code className="flex-1 bg-muted px-3 py-2 rounded text-sm font-mono truncate">
           {url}
         </code>
         <TooltipProvider>

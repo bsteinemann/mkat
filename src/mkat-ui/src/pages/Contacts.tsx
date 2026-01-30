@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import { getErrorMessage } from '../api/client';
 import { contactsApi } from '../api/services';
 import { ChannelType } from '../api/types';
 import type { Contact, ContactChannel } from '../api/types';
@@ -49,8 +50,8 @@ export function Contacts() {
       queryClient.invalidateQueries({ queryKey: ['contacts'] });
       toast.success('Contact deleted');
     },
-    onError: () => {
-      toast.error('Failed to delete contact');
+    onError: (error) => {
+      toast.error(getErrorMessage(error, 'Failed to delete contact'));
     },
   });
 
@@ -71,7 +72,7 @@ export function Contacts() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Contacts</h1>
+        <h1 className="text-2xl font-bold text-foreground">Contacts</h1>
         <Button onClick={() => setShowCreate(true)}>
           Add Contact
         </Button>
@@ -101,12 +102,12 @@ export function Contacts() {
                 <div className="flex items-center justify-between">
                   <div>
                     <div className="flex items-center gap-2">
-                      <h2 className="text-lg font-semibold text-gray-900">{contact.name}</h2>
+                      <h2 className="text-lg font-semibold text-foreground">{contact.name}</h2>
                       {contact.isDefault && (
-                        <Badge variant="secondary" className="bg-blue-100 text-blue-800">Default</Badge>
+                        <Badge variant="secondary" className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200">Default</Badge>
                       )}
                     </div>
-                    <p className="text-sm text-gray-500 mt-1">
+                    <p className="text-sm text-muted-foreground mt-1">
                       {contact.channels.length} channel{contact.channels.length !== 1 ? 's' : ''} |{' '}
                       {contact.serviceCount} service{contact.serviceCount !== 1 ? 's' : ''}
                     </p>
@@ -162,8 +163,8 @@ function ContactForm({ onClose, contact }: { onClose: () => void; contact?: Cont
       toast.success('Contact created');
       onClose();
     },
-    onError: () => {
-      toast.error('Failed to create contact');
+    onError: (error) => {
+      toast.error(getErrorMessage(error, 'Failed to create contact'));
     },
   });
 
@@ -174,13 +175,13 @@ function ContactForm({ onClose, contact }: { onClose: () => void; contact?: Cont
       toast.success('Contact updated');
       onClose();
     },
-    onError: () => {
-      toast.error('Failed to update contact');
+    onError: (error) => {
+      toast.error(getErrorMessage(error, 'Failed to update contact'));
     },
   });
 
   return (
-    <Card className="border-blue-200 py-0">
+    <Card className="border-blue-200 dark:border-blue-800 py-0">
       <CardContent className="p-6">
         <h3 className="text-lg font-semibold mb-3">{contact ? 'Edit Contact' : 'New Contact'}</h3>
         <div className="flex gap-3">
@@ -225,8 +226,8 @@ function ContactDetail({ contact, onClose }: { contact: Contact; onClose: () => 
       queryClient.invalidateQueries({ queryKey: ['contacts'] });
       setEditingName(false);
     },
-    onError: () => {
-      toast.error('Failed to update contact name');
+    onError: (error) => {
+      toast.error(getErrorMessage(error, 'Failed to update contact name'));
     },
   });
 
@@ -236,8 +237,8 @@ function ContactDetail({ contact, onClose }: { contact: Contact; onClose: () => 
       queryClient.invalidateQueries({ queryKey: ['contacts'] });
       toast.success('Channel removed');
     },
-    onError: () => {
-      toast.error('Failed to remove channel');
+    onError: (error) => {
+      toast.error(getErrorMessage(error, 'Failed to remove channel'));
     },
   });
 
@@ -245,8 +246,8 @@ function ContactDetail({ contact, onClose }: { contact: Contact; onClose: () => 
     mutationFn: (ch: ContactChannel) =>
       contactsApi.updateChannel(contact.id, ch.id, ch.configuration, !ch.isEnabled),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['contacts'] }),
-    onError: () => {
-      toast.error('Failed to update channel');
+    onError: (error) => {
+      toast.error(getErrorMessage(error, 'Failed to update channel'));
     },
   });
 
@@ -255,15 +256,15 @@ function ContactDetail({ contact, onClose }: { contact: Contact; onClose: () => 
     onSuccess: () => {
       toast.success('Test notification sent');
     },
-    onError: () => {
-      toast.error('Failed to send test notification');
+    onError: (error) => {
+      toast.error(getErrorMessage(error, 'Failed to send test notification'));
     },
   });
 
   const displayContact = freshContact ?? contact;
 
   return (
-    <Card className="border-blue-200 py-0">
+    <Card className="border-blue-200 dark:border-blue-800 py-0">
       <CardContent className="p-6">
       <div className="flex items-center justify-between mb-4">
         {editingName ? (
@@ -301,7 +302,7 @@ function ContactDetail({ contact, onClose }: { contact: Contact; onClose: () => 
 
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <h3 className="font-medium text-gray-700">Channels</h3>
+          <h3 className="font-medium text-foreground">Channels</h3>
           <Button
             variant="link"
             size="sm"
@@ -320,10 +321,10 @@ function ContactDetail({ contact, onClose }: { contact: Contact; onClose: () => 
         )}
 
         {displayContact.channels.length === 0 ? (
-          <p className="text-sm text-gray-500">No channels configured.</p>
+          <p className="text-sm text-muted-foreground">No channels configured.</p>
         ) : (
           displayContact.channels.map(ch => (
-            <div key={ch.id} className="flex items-center justify-between p-3 bg-gray-50 rounded">
+            <div key={ch.id} className="flex items-center justify-between p-3 bg-muted rounded">
               <div className="flex items-center gap-3">
                 <span className="text-sm font-medium">
                   {ch.type === ChannelType.Telegram ? 'Telegram' : 'Email'}
@@ -333,7 +334,7 @@ function ContactDetail({ contact, onClose }: { contact: Contact; onClose: () => 
                     checked={ch.isEnabled}
                     onCheckedChange={() => toggleChannelMutation.mutate(ch)}
                   />
-                  <span className={`text-xs ${ch.isEnabled ? 'text-green-600' : 'text-gray-400'}`}>
+                  <span className={`text-xs ${ch.isEnabled ? 'text-green-600 dark:text-green-400' : 'text-muted-foreground'}`}>
                     {ch.isEnabled ? 'Enabled' : 'Disabled'}
                   </span>
                 </div>
@@ -401,8 +402,8 @@ function AddChannelForm({ contactId, onClose }: { contactId: string; onClose: ()
       toast.success('Channel added');
       onClose();
     },
-    onError: () => {
-      toast.error('Failed to add channel');
+    onError: (error) => {
+      toast.error(getErrorMessage(error, 'Failed to add channel'));
     },
   });
 

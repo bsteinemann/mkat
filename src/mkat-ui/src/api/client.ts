@@ -5,8 +5,21 @@ function getApiBase(): string {
 }
 
 export class ApiError extends Error {
-  constructor(public status: number, public code: string, message: string) {
+  constructor(
+    public status: number,
+    public code: string,
+    message: string,
+    public details?: Record<string, string[]>,
+  ) {
     super(message);
+  }
+
+  get userMessage(): string {
+    if (this.details) {
+      const msgs = Object.values(this.details).flat();
+      if (msgs.length > 0) return msgs.join('. ');
+    }
+    return this.message;
   }
 }
 
@@ -38,11 +51,16 @@ export async function apiRequest<T>(
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({ error: 'Unknown error' }));
-    throw new ApiError(response.status, error.code || 'ERROR', error.error);
+    throw new ApiError(response.status, error.code || 'ERROR', error.error, error.details);
   }
 
   if (response.status === 204) return {} as T;
   return response.json();
+}
+
+export function getErrorMessage(error: unknown, fallback: string): string {
+  if (error instanceof ApiError) return error.userMessage;
+  return fallback;
 }
 
 export const api = {

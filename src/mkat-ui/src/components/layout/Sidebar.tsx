@@ -9,6 +9,7 @@ import {
 import {
   Sidebar as SidebarRoot,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupLabel,
   SidebarHeader,
@@ -17,6 +18,7 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from '@/components/ui/sidebar';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 const navItems = [
   { to: '/' as const, label: 'Dashboard', icon: LayoutDashboard },
@@ -58,6 +60,13 @@ export function Sidebar() {
           </SidebarMenu>
         </SidebarGroup>
       </SidebarContent>
+      <SidebarFooter>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <ThemeToggle />
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
       <SidebarRail />
     </SidebarRoot>
   );

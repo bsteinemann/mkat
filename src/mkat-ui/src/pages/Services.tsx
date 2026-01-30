@@ -45,7 +45,7 @@ export function Services() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Services</h1>
+        <h1 className="text-2xl font-bold text-foreground">Services</h1>
         <Link
           to="/services/new"
           className={buttonVariants()}
@@ -59,7 +59,7 @@ export function Services() {
           <Info className="h-4 w-4" />
           <AlertDescription>
             No services configured yet.{' '}
-            <Link to="/services/new" className="text-blue-600 hover:text-blue-800 underline">
+            <Link to="/services/new" className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 underline">
               Create your first service
             </Link>
           </AlertDescription>

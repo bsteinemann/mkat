@@ -31,7 +31,7 @@ export function Dashboard() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+      <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
 
       <div className="grid grid-cols-4 gap-4">
         <StatCard state={ServiceState.Up} count={counts.up} />
@@ -46,7 +46,7 @@ export function Dashboard() {
         </CardHeader>
         <CardContent>
           {alerts.length === 0 ? (
-            <p className="text-gray-500">No recent alerts</p>
+            <p className="text-muted-foreground">No recent alerts</p>
           ) : (
             <div className="space-y-3">
               {alerts.map(alert => (
@@ -58,9 +58,9 @@ export function Dashboard() {
       </Card>
 
       {counts.down > 0 && (
-        <Card className="bg-red-50 border-red-200 py-0">
+        <Card className="bg-red-50 dark:bg-red-950 border-red-200 dark:border-red-800 py-0">
           <CardHeader>
-            <CardTitle className="text-lg text-red-800">
+            <CardTitle className="text-lg text-red-800 dark:text-red-200">
               Services Down ({counts.down})
             </CardTitle>
           </CardHeader>
@@ -97,7 +97,7 @@ function StatCard({ state, count }: { state: ServiceState; count: number }) {
           <StateIndicator state={state} />
           <span className="text-3xl font-bold">{count}</span>
         </div>
-        <p className="text-sm text-gray-500 mt-2">{labels[state]} Services</p>
+        <p className="text-sm text-muted-foreground mt-2">{labels[state]} Services</p>
       </CardContent>
     </Card>
   );
