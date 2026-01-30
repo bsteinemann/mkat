@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
+import { useTheme } from 'next-themes';
 import { toast } from 'sonner';
 import {
   ReactFlow,
@@ -136,6 +137,7 @@ function toFlowElements(
 export function DependencyMap() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const { resolvedTheme } = useTheme();
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['dependency-graph'],
@@ -241,6 +243,7 @@ export function DependencyMap() {
           onEdgesDelete={onEdgesDelete}
           onNodeClick={onNodeClick}
           nodeTypes={nodeTypes}
+          colorMode={resolvedTheme === 'dark' ? 'dark' : 'light'}
           deleteKeyCode="Delete"
           fitView
           fitViewOptions={{ padding: 0.2 }}
