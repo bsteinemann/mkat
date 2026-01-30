@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Mkat.Application.Interfaces;
 using Mkat.Domain.Entities;
+using Mkat.Domain.Enums;
 using Monitor = Mkat.Domain.Entities.Monitor;
 
 namespace Mkat.Infrastructure.Data;
@@ -22,6 +23,8 @@ public class MkatDbContext : DbContext, IUnitOfWork
     public DbSet<ContactChannel> ContactChannels => Set<ContactChannel>();
     public DbSet<ServiceContact> ServiceContacts => Set<ServiceContact>();
     public DbSet<PushSubscription> PushSubscriptions => Set<PushSubscription>();
+    public DbSet<MonitorEvent> MonitorEvents => Set<MonitorEvent>();
+    public DbSet<MonitorRollup> MonitorRollups => Set<MonitorRollup>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -149,6 +152,39 @@ public class MkatDbContext : DbContext, IUnitOfWork
             entity.Property(e => e.P256dhKey).IsRequired().HasMaxLength(500);
             entity.Property(e => e.AuthKey).IsRequired().HasMaxLength(500);
             entity.HasIndex(e => e.Endpoint).IsUnique();
+        });
+
+        modelBuilder.Entity<MonitorEvent>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.EventType).HasConversion<string>().HasMaxLength(30);
+            entity.Property(e => e.Message).HasMaxLength(2000);
+            entity.HasIndex(e => new { e.MonitorId, e.CreatedAt });
+            entity.HasIndex(e => new { e.ServiceId, e.CreatedAt });
+            entity.HasOne(e => e.Monitor)
+                .WithMany()
+                .HasForeignKey(e => e.MonitorId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(e => e.Service)
+                .WithMany()
+                .HasForeignKey(e => e.ServiceId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<MonitorRollup>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Granularity).HasConversion<string>().HasMaxLength(20);
+            entity.HasIndex(e => new { e.MonitorId, e.Granularity, e.PeriodStart }).IsUnique();
+            entity.HasIndex(e => new { e.ServiceId, e.Granularity, e.PeriodStart });
+            entity.HasOne(e => e.Monitor)
+                .WithMany()
+                .HasForeignKey(e => e.MonitorId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(e => e.Service)
+                .WithMany()
+                .HasForeignKey(e => e.ServiceId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
     }
 }
