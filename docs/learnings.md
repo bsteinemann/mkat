@@ -147,3 +147,19 @@ Read this file FIRST before starting any new work -- it prevents repeating mista
 - `dotnet test` from wrong CWD (mkat-ui/) fails with "no project or solution" — always use absolute path or ensure CWD is repo root
 **Pattern:** When replacing an entity, add all needed query methods to the new repository interface BEFORE refactoring consumers. Missing methods discovered during consumer refactoring cause backtracking.
 **Anti-pattern:** Don't assume new repository interfaces cover all old patterns. Compare old interface methods against usage sites to identify gaps early.
+
+### 2026-01-30 - Service Dependencies (DAG, Suppression, React Flow)
+**Context:** Adding directed dependency graph between services with cycle prevention, transitive alert suppression, and interactive React Flow dependency map
+**Went well:**
+- BFS-based graph traversal for transitive resolution and cycle detection worked correctly first try
+- Subagent-driven development workflow (14 tasks) ran smoothly with spec + quality review after each task
+- `DeleteBehavior.Cascade` on dependent side + `DeleteBehavior.Restrict` on dependency side prevents cascade loops while cleaning up properly
+- React Flow + dagre auto-layout integration was straightforward; `nodeTypes` defined outside component prevents re-registration
+- ContactsSection pattern (checkbox + dirty state + Save/Cancel) was directly reusable for DependenciesSection
+**Tripped up:**
+- Suppression banner/text initially guarded on `isSuppressed && suppressionReason` — if `suppressionReason` is null, no indicator shows despite `isSuppressed` being true. Guard on `isSuppressed` only, show reason conditionally inside.
+- Spec reviewer caught missing search/filter and inline cycle error display in dependency selector — these were in the plan spec but the implementer skipped them. Spec review is valuable.
+- `useNodesState<Node>` generic type in @xyflow/react v12+ expects the data type, not Node itself — works but is technically incorrect typing
+- Self-connections (node to itself) possible via React Flow drag — add `source !== target` guard in `onConnect`
+**Pattern:** For DAG operations, BFS traversal (queue-based) is simpler and more readable than DFS for both cycle detection and transitive resolution. Check reachability by traversing from the target — if you can reach the source, adding the edge creates a cycle.
+**Anti-pattern:** Don't guard UI visibility on both a boolean flag AND its associated reason string. Guard on the boolean, render the reason conditionally inside the UI element.
