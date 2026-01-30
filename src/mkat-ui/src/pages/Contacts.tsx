@@ -4,6 +4,9 @@ import { contactsApi } from '../api/services';
 import { ChannelType } from '../api/types';
 import type { Contact, ContactChannel } from '../api/types';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export function Contacts() {
   const queryClient = useQueryClient();
@@ -118,12 +121,12 @@ function ContactForm({ onClose, contact }: { onClose: () => void; contact?: Cont
     <div className="bg-white rounded-lg shadow p-6 border border-blue-200">
       <h3 className="text-lg font-semibold mb-3">{contact ? 'Edit Contact' : 'New Contact'}</h3>
       <div className="flex gap-3">
-        <input
+        <Input
           type="text"
           value={name}
           onChange={e => setName(e.target.value)}
           placeholder="Contact name"
-          className="flex-1 rounded border-gray-300 shadow-sm px-3 py-2 border"
+          className="flex-1"
         />
         <Button
           onClick={() => contact ? updateMutation.mutate(name) : createMutation.mutate(name)}
@@ -181,11 +184,11 @@ function ContactDetail({ contact, onClose }: { contact: Contact; onClose: () => 
       <div className="flex items-center justify-between mb-4">
         {editingName ? (
           <div className="flex gap-2">
-            <input
+            <Input
               type="text"
               value={name}
               onChange={e => setName(e.target.value)}
-              className="rounded border-gray-300 shadow-sm px-3 py-1 border"
+              className="h-8"
             />
             <Button
               size="sm"
@@ -301,38 +304,39 @@ function AddChannelForm({ contactId, onClose }: { contactId: string; onClose: ()
 
   return (
     <div className="p-3 border rounded space-y-3">
-      <div>
-        <label className="block text-sm font-medium text-gray-700">Type</label>
-        <select
-          value={type}
-          onChange={e => setType(Number(e.target.value))}
-          className="mt-1 block w-full rounded border-gray-300 shadow-sm px-3 py-2 border"
-        >
-          <option value={ChannelType.Telegram}>Telegram</option>
-          <option value={ChannelType.Email}>Email</option>
-        </select>
+      <div className="space-y-2">
+        <Label>Type</Label>
+        <Select value={String(type)} onValueChange={v => setType(Number(v) as ChannelType)}>
+          <SelectTrigger className="w-full">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={String(ChannelType.Telegram)}>Telegram</SelectItem>
+            <SelectItem value={String(ChannelType.Email)}>Email</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       {type === ChannelType.Telegram && (
         <>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Bot Token</label>
-            <input
+          <div className="space-y-2">
+            <Label>Bot Token</Label>
+            <Input
               type="text"
               value={botToken}
               onChange={e => setBotToken(e.target.value)}
               placeholder="123456:ABC-DEF..."
-              className="mt-1 block w-full rounded border-gray-300 shadow-sm px-3 py-2 border text-sm"
+              className="text-sm"
             />
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Chat ID</label>
-            <input
+          <div className="space-y-2">
+            <Label>Chat ID</Label>
+            <Input
               type="text"
               value={chatId}
               onChange={e => setChatId(e.target.value)}
               placeholder="-100123456789"
-              className="mt-1 block w-full rounded border-gray-300 shadow-sm px-3 py-2 border text-sm"
+              className="text-sm"
             />
           </div>
         </>

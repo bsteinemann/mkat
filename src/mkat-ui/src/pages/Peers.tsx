@@ -4,6 +4,9 @@ import { Link } from '@tanstack/react-router';
 import { peersApi } from '../api/services';
 import { StateIndicator } from '../components/services/StateIndicator';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 
 export function Peers() {
   const queryClient = useQueryClient();
@@ -142,14 +145,13 @@ function PairDialog({ onClose }: { onClose: () => void }) {
 
       {mode === 'generate' && !generatedToken && (
         <div className="space-y-3">
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Instance Name</label>
-            <input
+          <div className="space-y-2">
+            <Label>Instance Name</Label>
+            <Input
               type="text"
               value={instanceName}
               onChange={e => setInstanceName(e.target.value)}
               placeholder="e.g. Home Server"
-              className="mt-1 block w-full rounded border-gray-300 shadow-sm px-3 py-2 border"
             />
           </div>
           <Button
@@ -170,10 +172,10 @@ function PairDialog({ onClose }: { onClose: () => void }) {
             Share this token with the other instance. It expires in 10 minutes.
           </p>
           <div className="relative">
-            <textarea
+            <Textarea
               readOnly
               value={generatedToken}
-              className="block w-full rounded border-gray-300 shadow-sm px-3 py-2 border text-xs font-mono"
+              className="text-xs font-mono"
               rows={3}
             />
             <Button
@@ -190,13 +192,13 @@ function PairDialog({ onClose }: { onClose: () => void }) {
 
       {mode === 'enter' && (
         <div className="space-y-3">
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Pairing Token</label>
-            <textarea
+          <div className="space-y-2">
+            <Label>Pairing Token</Label>
+            <Textarea
               value={pasteToken}
               onChange={e => setPasteToken(e.target.value)}
               placeholder="Paste the token from the other instance"
-              className="mt-1 block w-full rounded border-gray-300 shadow-sm px-3 py-2 border text-xs font-mono"
+              className="text-xs font-mono"
               rows={3}
             />
           </div>

@@ -6,6 +6,9 @@ import { ServiceForm } from '../components/services/ServiceForm';
 import { MonitorType, ThresholdStrategy } from '../api/types';
 import type { CreateServiceRequest, UpdateServiceRequest, CreateMonitorRequest, UpdateMonitorRequest, Monitor } from '../api/types';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export function ServiceEdit() {
   const { serviceId } = useParams({ strict: false }) as { serviceId: string };
@@ -206,37 +209,38 @@ function MonitorSection({
 
       {showAddForm && (
         <div className="border rounded p-4 mb-4 bg-gray-50 space-y-3">
-          <div>
-            <label className="block text-xs text-gray-600">Type</label>
-            <select
-              value={newType}
-              onChange={e => setNewType(Number(e.target.value) as MonitorType)}
-              className="mt-1 block w-full rounded border-gray-300 shadow-sm text-sm px-2 py-1 border"
-            >
-              <option value={MonitorType.Webhook}>Webhook</option>
-              <option value={MonitorType.Heartbeat}>Heartbeat</option>
-              <option value={MonitorType.HealthCheck}>Health Check</option>
-              <option value={MonitorType.Metric}>Metric</option>
-            </select>
+          <div className="space-y-1">
+            <Label className="text-xs text-muted-foreground">Type</Label>
+            <Select value={String(newType)} onValueChange={v => setNewType(Number(v) as MonitorType)}>
+              <SelectTrigger className="w-full h-8 text-sm" size="sm">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={String(MonitorType.Webhook)}>Webhook</SelectItem>
+                <SelectItem value={String(MonitorType.Heartbeat)}>Heartbeat</SelectItem>
+                <SelectItem value={String(MonitorType.HealthCheck)}>Health Check</SelectItem>
+                <SelectItem value={String(MonitorType.Metric)}>Metric</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs text-gray-600">Interval (seconds)</label>
-              <input
+            <div className="space-y-1">
+              <Label className="text-xs text-muted-foreground">Interval (seconds)</Label>
+              <Input
                 type="number"
                 value={newInterval}
                 onChange={e => setNewInterval(Number(e.target.value))}
-                className="mt-1 block w-full rounded border-gray-300 shadow-sm text-sm px-2 py-1 border"
+                className="h-8 text-sm"
                 min={30}
               />
             </div>
-            <div>
-              <label className="block text-xs text-gray-600">Grace period (seconds)</label>
-              <input
+            <div className="space-y-1">
+              <Label className="text-xs text-muted-foreground">Grace period (seconds)</Label>
+              <Input
                 type="number"
                 value={newGrace}
                 onChange={e => setNewGrace(Number(e.target.value))}
-                className="mt-1 block w-full rounded border-gray-300 shadow-sm text-sm px-2 py-1 border"
+                className="h-8 text-sm"
                 min={60}
               />
             </div>
@@ -244,50 +248,51 @@ function MonitorSection({
           {newType === MonitorType.Metric && (
             <div className="space-y-3 border-t pt-3">
               <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs text-gray-600">Min Value</label>
-                  <input
+                <div className="space-y-1">
+                  <Label className="text-xs text-muted-foreground">Min Value</Label>
+                  <Input
                     type="number"
                     step="any"
                     value={newMinValue ?? ''}
                     onChange={e => setNewMinValue(e.target.value ? Number(e.target.value) : undefined)}
-                    className="mt-1 block w-full rounded border-gray-300 shadow-sm text-sm px-2 py-1 border"
+                    className="h-8 text-sm"
                     placeholder="Optional"
                   />
                 </div>
-                <div>
-                  <label className="block text-xs text-gray-600">Max Value</label>
-                  <input
+                <div className="space-y-1">
+                  <Label className="text-xs text-muted-foreground">Max Value</Label>
+                  <Input
                     type="number"
                     step="any"
                     value={newMaxValue ?? ''}
                     onChange={e => setNewMaxValue(e.target.value ? Number(e.target.value) : undefined)}
-                    className="mt-1 block w-full rounded border-gray-300 shadow-sm text-sm px-2 py-1 border"
+                    className="h-8 text-sm"
                     placeholder="Optional"
                   />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs text-gray-600">Threshold Strategy</label>
-                  <select
-                    value={newThresholdStrategy}
-                    onChange={e => setNewThresholdStrategy(Number(e.target.value) as ThresholdStrategy)}
-                    className="mt-1 block w-full rounded border-gray-300 shadow-sm text-sm px-2 py-1 border"
-                  >
-                    <option value={ThresholdStrategy.Immediate}>Immediate</option>
-                    <option value={ThresholdStrategy.ConsecutiveCount}>Consecutive Count</option>
-                    <option value={ThresholdStrategy.TimeDurationAverage}>Time Window Average</option>
-                    <option value={ThresholdStrategy.SampleCountAverage}>Sample Count Average</option>
-                  </select>
+                <div className="space-y-1">
+                  <Label className="text-xs text-muted-foreground">Threshold Strategy</Label>
+                  <Select value={String(newThresholdStrategy)} onValueChange={v => setNewThresholdStrategy(Number(v) as ThresholdStrategy)}>
+                    <SelectTrigger className="w-full h-8 text-sm" size="sm">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={String(ThresholdStrategy.Immediate)}>Immediate</SelectItem>
+                      <SelectItem value={String(ThresholdStrategy.ConsecutiveCount)}>Consecutive Count</SelectItem>
+                      <SelectItem value={String(ThresholdStrategy.TimeDurationAverage)}>Time Window Average</SelectItem>
+                      <SelectItem value={String(ThresholdStrategy.SampleCountAverage)}>Sample Count Average</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
-                <div>
-                  <label className="block text-xs text-gray-600">Retention (days)</label>
-                  <input
+                <div className="space-y-1">
+                  <Label className="text-xs text-muted-foreground">Retention (days)</Label>
+                  <Input
                     type="number"
                     value={newRetentionDays}
                     onChange={e => setNewRetentionDays(Number(e.target.value))}
-                    className="mt-1 block w-full rounded border-gray-300 shadow-sm text-sm px-2 py-1 border"
+                    className="h-8 text-sm"
                     min={1}
                     max={365}
                   />
@@ -295,13 +300,13 @@ function MonitorSection({
               </div>
               {(newThresholdStrategy === ThresholdStrategy.ConsecutiveCount ||
                 newThresholdStrategy === ThresholdStrategy.SampleCountAverage) && (
-                <div>
-                  <label className="block text-xs text-gray-600">Threshold Count</label>
-                  <input
+                <div className="space-y-1">
+                  <Label className="text-xs text-muted-foreground">Threshold Count</Label>
+                  <Input
                     type="number"
                     value={newThresholdCount}
                     onChange={e => setNewThresholdCount(Number(e.target.value))}
-                    className="mt-1 block w-full rounded border-gray-300 shadow-sm text-sm px-2 py-1 border"
+                    className="h-8 text-sm"
                     min={2}
                   />
                 </div>
@@ -310,60 +315,61 @@ function MonitorSection({
           )}
           {newType === MonitorType.HealthCheck && (
             <div className="space-y-3 border-t pt-3">
-              <div>
-                <label className="block text-xs text-gray-600">URL</label>
-                <input
+              <div className="space-y-1">
+                <Label className="text-xs text-muted-foreground">URL</Label>
+                <Input
                   type="url"
                   value={newHealthCheckUrl}
                   onChange={e => setNewHealthCheckUrl(e.target.value)}
-                  className="mt-1 block w-full rounded border-gray-300 shadow-sm text-sm px-2 py-1 border"
+                  className="h-8 text-sm"
                   placeholder="https://example.com/health"
                   required
                 />
               </div>
               <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs text-gray-600">HTTP Method</label>
-                  <select
-                    value={newHttpMethod}
-                    onChange={e => setNewHttpMethod(e.target.value)}
-                    className="mt-1 block w-full rounded border-gray-300 shadow-sm text-sm px-2 py-1 border"
-                  >
-                    <option value="GET">GET</option>
-                    <option value="HEAD">HEAD</option>
-                    <option value="POST">POST</option>
-                    <option value="PUT">PUT</option>
-                  </select>
+                <div className="space-y-1">
+                  <Label className="text-xs text-muted-foreground">HTTP Method</Label>
+                  <Select value={newHttpMethod} onValueChange={v => setNewHttpMethod(v)}>
+                    <SelectTrigger className="w-full h-8 text-sm" size="sm">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="GET">GET</SelectItem>
+                      <SelectItem value="HEAD">HEAD</SelectItem>
+                      <SelectItem value="POST">POST</SelectItem>
+                      <SelectItem value="PUT">PUT</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
-                <div>
-                  <label className="block text-xs text-gray-600">Timeout (seconds)</label>
-                  <input
+                <div className="space-y-1">
+                  <Label className="text-xs text-muted-foreground">Timeout (seconds)</Label>
+                  <Input
                     type="number"
                     value={newTimeoutSeconds}
                     onChange={e => setNewTimeoutSeconds(Number(e.target.value))}
-                    className="mt-1 block w-full rounded border-gray-300 shadow-sm text-sm px-2 py-1 border"
+                    className="h-8 text-sm"
                     min={1}
                     max={120}
                   />
                 </div>
               </div>
-              <div>
-                <label className="block text-xs text-gray-600">Expected Status Codes</label>
-                <input
+              <div className="space-y-1">
+                <Label className="text-xs text-muted-foreground">Expected Status Codes</Label>
+                <Input
                   type="text"
                   value={newExpectedStatusCodes}
                   onChange={e => setNewExpectedStatusCodes(e.target.value)}
-                  className="mt-1 block w-full rounded border-gray-300 shadow-sm text-sm px-2 py-1 border"
+                  className="h-8 text-sm"
                   placeholder="200,201,204"
                 />
               </div>
-              <div>
-                <label className="block text-xs text-gray-600">Body Match Regex (optional)</label>
-                <input
+              <div className="space-y-1">
+                <Label className="text-xs text-muted-foreground">Body Match Regex (optional)</Label>
+                <Input
                   type="text"
                   value={newBodyMatchRegex}
                   onChange={e => setNewBodyMatchRegex(e.target.value)}
-                  className="mt-1 block w-full rounded border-gray-300 shadow-sm text-sm px-2 py-1 border"
+                  className="h-8 text-sm"
                   placeholder="ok|healthy"
                 />
               </div>
@@ -610,23 +616,23 @@ function MonitorRow({
       {editing ? (
         <div className="space-y-2">
           <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs text-gray-600">Interval (seconds)</label>
-              <input
+            <div className="space-y-1">
+              <Label className="text-xs text-muted-foreground">Interval (seconds)</Label>
+              <Input
                 type="number"
                 value={interval}
                 onChange={e => setInterval(Number(e.target.value))}
-                className="mt-1 block w-full rounded border-gray-300 shadow-sm text-sm px-2 py-1 border"
+                className="h-8 text-sm"
                 min={30}
               />
             </div>
-            <div>
-              <label className="block text-xs text-gray-600">Grace period (seconds)</label>
-              <input
+            <div className="space-y-1">
+              <Label className="text-xs text-muted-foreground">Grace period (seconds)</Label>
+              <Input
                 type="number"
                 value={grace}
                 onChange={e => setGrace(Number(e.target.value))}
-                className="mt-1 block w-full rounded border-gray-300 shadow-sm text-sm px-2 py-1 border"
+                className="h-8 text-sm"
                 min={60}
               />
             </div>
@@ -634,50 +640,51 @@ function MonitorRow({
           {monitor.type === MonitorType.Metric && (
             <div className="space-y-2 border-t pt-2 mt-2">
               <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs text-gray-600">Min Value</label>
-                  <input
+                <div className="space-y-1">
+                  <Label className="text-xs text-muted-foreground">Min Value</Label>
+                  <Input
                     type="number"
                     step="any"
                     value={minValue ?? ''}
                     onChange={e => setMinValue(e.target.value ? Number(e.target.value) : undefined)}
-                    className="mt-1 block w-full rounded border-gray-300 shadow-sm text-sm px-2 py-1 border"
+                    className="h-8 text-sm"
                     placeholder="Optional"
                   />
                 </div>
-                <div>
-                  <label className="block text-xs text-gray-600">Max Value</label>
-                  <input
+                <div className="space-y-1">
+                  <Label className="text-xs text-muted-foreground">Max Value</Label>
+                  <Input
                     type="number"
                     step="any"
                     value={maxValue ?? ''}
                     onChange={e => setMaxValue(e.target.value ? Number(e.target.value) : undefined)}
-                    className="mt-1 block w-full rounded border-gray-300 shadow-sm text-sm px-2 py-1 border"
+                    className="h-8 text-sm"
                     placeholder="Optional"
                   />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs text-gray-600">Threshold Strategy</label>
-                  <select
-                    value={thresholdStrategy}
-                    onChange={e => setThresholdStrategy(Number(e.target.value) as ThresholdStrategy)}
-                    className="mt-1 block w-full rounded border-gray-300 shadow-sm text-sm px-2 py-1 border"
-                  >
-                    <option value={ThresholdStrategy.Immediate}>Immediate</option>
-                    <option value={ThresholdStrategy.ConsecutiveCount}>Consecutive Count</option>
-                    <option value={ThresholdStrategy.TimeDurationAverage}>Time Window Average</option>
-                    <option value={ThresholdStrategy.SampleCountAverage}>Sample Count Average</option>
-                  </select>
+                <div className="space-y-1">
+                  <Label className="text-xs text-muted-foreground">Threshold Strategy</Label>
+                  <Select value={String(thresholdStrategy)} onValueChange={v => setThresholdStrategy(Number(v) as ThresholdStrategy)}>
+                    <SelectTrigger className="w-full h-8 text-sm" size="sm">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={String(ThresholdStrategy.Immediate)}>Immediate</SelectItem>
+                      <SelectItem value={String(ThresholdStrategy.ConsecutiveCount)}>Consecutive Count</SelectItem>
+                      <SelectItem value={String(ThresholdStrategy.TimeDurationAverage)}>Time Window Average</SelectItem>
+                      <SelectItem value={String(ThresholdStrategy.SampleCountAverage)}>Sample Count Average</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
-                <div>
-                  <label className="block text-xs text-gray-600">Retention (days)</label>
-                  <input
+                <div className="space-y-1">
+                  <Label className="text-xs text-muted-foreground">Retention (days)</Label>
+                  <Input
                     type="number"
                     value={retentionDays}
                     onChange={e => setRetentionDays(Number(e.target.value))}
-                    className="mt-1 block w-full rounded border-gray-300 shadow-sm text-sm px-2 py-1 border"
+                    className="h-8 text-sm"
                     min={1}
                     max={365}
                   />
@@ -685,13 +692,13 @@ function MonitorRow({
               </div>
               {(thresholdStrategy === ThresholdStrategy.ConsecutiveCount ||
                 thresholdStrategy === ThresholdStrategy.SampleCountAverage) && (
-                <div>
-                  <label className="block text-xs text-gray-600">Threshold Count</label>
-                  <input
+                <div className="space-y-1">
+                  <Label className="text-xs text-muted-foreground">Threshold Count</Label>
+                  <Input
                     type="number"
                     value={thresholdCount}
                     onChange={e => setThresholdCount(Number(e.target.value))}
-                    className="mt-1 block w-full rounded border-gray-300 shadow-sm text-sm px-2 py-1 border"
+                    className="h-8 text-sm"
                     min={2}
                   />
                 </div>
@@ -700,59 +707,60 @@ function MonitorRow({
           )}
           {monitor.type === MonitorType.HealthCheck && (
             <div className="space-y-2 border-t pt-2 mt-2">
-              <div>
-                <label className="block text-xs text-gray-600">URL</label>
-                <input
+              <div className="space-y-1">
+                <Label className="text-xs text-muted-foreground">URL</Label>
+                <Input
                   type="url"
                   value={healthCheckUrl}
                   onChange={e => setHealthCheckUrl(e.target.value)}
-                  className="mt-1 block w-full rounded border-gray-300 shadow-sm text-sm px-2 py-1 border"
+                  className="h-8 text-sm"
                   placeholder="https://example.com/health"
                 />
               </div>
               <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs text-gray-600">HTTP Method</label>
-                  <select
-                    value={httpMethod}
-                    onChange={e => setHttpMethod(e.target.value)}
-                    className="mt-1 block w-full rounded border-gray-300 shadow-sm text-sm px-2 py-1 border"
-                  >
-                    <option value="GET">GET</option>
-                    <option value="HEAD">HEAD</option>
-                    <option value="POST">POST</option>
-                    <option value="PUT">PUT</option>
-                  </select>
+                <div className="space-y-1">
+                  <Label className="text-xs text-muted-foreground">HTTP Method</Label>
+                  <Select value={httpMethod} onValueChange={v => setHttpMethod(v)}>
+                    <SelectTrigger className="w-full h-8 text-sm" size="sm">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="GET">GET</SelectItem>
+                      <SelectItem value="HEAD">HEAD</SelectItem>
+                      <SelectItem value="POST">POST</SelectItem>
+                      <SelectItem value="PUT">PUT</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
-                <div>
-                  <label className="block text-xs text-gray-600">Timeout (seconds)</label>
-                  <input
+                <div className="space-y-1">
+                  <Label className="text-xs text-muted-foreground">Timeout (seconds)</Label>
+                  <Input
                     type="number"
                     value={timeoutSeconds}
                     onChange={e => setTimeoutSeconds(Number(e.target.value))}
-                    className="mt-1 block w-full rounded border-gray-300 shadow-sm text-sm px-2 py-1 border"
+                    className="h-8 text-sm"
                     min={1}
                     max={120}
                   />
                 </div>
               </div>
-              <div>
-                <label className="block text-xs text-gray-600">Expected Status Codes</label>
-                <input
+              <div className="space-y-1">
+                <Label className="text-xs text-muted-foreground">Expected Status Codes</Label>
+                <Input
                   type="text"
                   value={expectedStatusCodes}
                   onChange={e => setExpectedStatusCodes(e.target.value)}
-                  className="mt-1 block w-full rounded border-gray-300 shadow-sm text-sm px-2 py-1 border"
+                  className="h-8 text-sm"
                   placeholder="200,201,204"
                 />
               </div>
-              <div>
-                <label className="block text-xs text-gray-600">Body Match Regex (optional)</label>
-                <input
+              <div className="space-y-1">
+                <Label className="text-xs text-muted-foreground">Body Match Regex (optional)</Label>
+                <Input
                   type="text"
                   value={bodyMatchRegex}
                   onChange={e => setBodyMatchRegex(e.target.value)}
-                  className="mt-1 block w-full rounded border-gray-300 shadow-sm text-sm px-2 py-1 border"
+                  className="h-8 text-sm"
                   placeholder="ok|healthy"
                 />
               </div>

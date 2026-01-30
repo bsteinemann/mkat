@@ -3,6 +3,10 @@ import { MonitorType, Severity, ThresholdStrategy } from '../../api/types';
 import type { CreateServiceRequest, CreateMonitorRequest } from '../../api/types';
 import { MonitorDescription } from '../monitors/MonitorDescription';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface Props {
   initialData?: {
@@ -69,45 +73,44 @@ export function ServiceForm({ initialData, onSubmit, isLoading, submitLabel = 'C
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <div>
-        <label className="block text-sm font-medium text-gray-700">Name</label>
-        <input
+      <div className="space-y-2">
+        <Label>Name</Label>
+        <Input
           type="text"
           value={name}
           onChange={e => setName(e.target.value)}
-          className="mt-1 block w-full rounded border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2 border"
           required
         />
       </div>
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700">Description</label>
-        <textarea
+      <div className="space-y-2">
+        <Label>Description</Label>
+        <Textarea
           value={description}
           onChange={e => setDescription(e.target.value)}
-          className="mt-1 block w-full rounded border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2 border"
           rows={3}
         />
       </div>
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700">Severity</label>
-        <select
-          value={severity}
-          onChange={e => setSeverity(Number(e.target.value) as Severity)}
-          className="mt-1 block w-full rounded border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2 border"
-        >
-          <option value={Severity.Low}>Low</option>
-          <option value={Severity.Medium}>Medium</option>
-          <option value={Severity.High}>High</option>
-          <option value={Severity.Critical}>Critical</option>
-        </select>
+      <div className="space-y-2">
+        <Label>Severity</Label>
+        <Select value={String(severity)} onValueChange={v => setSeverity(Number(v) as Severity)}>
+          <SelectTrigger className="w-full">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={String(Severity.Low)}>Low</SelectItem>
+            <SelectItem value={String(Severity.Medium)}>Medium</SelectItem>
+            <SelectItem value={String(Severity.High)}>High</SelectItem>
+            <SelectItem value={String(Severity.Critical)}>Critical</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       {showMonitors && (
         <div>
           <div className="flex items-center justify-between mb-3">
-            <label className="block text-sm font-medium text-gray-700">Monitors</label>
+            <Label>Monitors</Label>
             <Button
               type="button"
               variant="link"
@@ -123,16 +126,20 @@ export function ServiceForm({ initialData, onSubmit, isLoading, submitLabel = 'C
             {monitors.map((monitor, index) => (
               <div key={index} className="border rounded p-4 space-y-3">
                 <div className="flex items-center justify-between">
-                  <select
-                    value={monitor.type}
-                    onChange={e => updateMonitor(index, 'type', Number(e.target.value))}
-                    className="rounded border-gray-300 shadow-sm text-sm px-2 py-1 border"
+                  <Select
+                    value={String(monitor.type)}
+                    onValueChange={v => updateMonitor(index, 'type', Number(v))}
                   >
-                    <option value={MonitorType.Webhook}>Webhook</option>
-                    <option value={MonitorType.Heartbeat}>Heartbeat</option>
-                    <option value={MonitorType.HealthCheck}>Health Check</option>
-                    <option value={MonitorType.Metric}>Metric</option>
-                  </select>
+                    <SelectTrigger size="sm">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={String(MonitorType.Webhook)}>Webhook</SelectItem>
+                      <SelectItem value={String(MonitorType.Heartbeat)}>Heartbeat</SelectItem>
+                      <SelectItem value={String(MonitorType.HealthCheck)}>Health Check</SelectItem>
+                      <SelectItem value={String(MonitorType.Metric)}>Metric</SelectItem>
+                    </SelectContent>
+                  </Select>
                   {monitors.length > 1 && (
                     <Button
                       type="button"
@@ -149,23 +156,23 @@ export function ServiceForm({ initialData, onSubmit, isLoading, submitLabel = 'C
                 <MonitorDescription type={monitor.type} variant="compact" />
 
                 <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-xs text-gray-600">Interval (seconds)</label>
-                    <input
+                  <div className="space-y-1">
+                    <Label className="text-xs text-muted-foreground">Interval (seconds)</Label>
+                    <Input
                       type="number"
                       value={monitor.intervalSeconds}
                       onChange={e => updateMonitor(index, 'intervalSeconds', Number(e.target.value))}
-                      className="mt-1 block w-full rounded border-gray-300 shadow-sm text-sm px-2 py-1 border"
+                      className="h-8 text-sm"
                       min={10}
                     />
                   </div>
-                  <div>
-                    <label className="block text-xs text-gray-600">Grace period (seconds)</label>
-                    <input
+                  <div className="space-y-1">
+                    <Label className="text-xs text-muted-foreground">Grace period (seconds)</Label>
+                    <Input
                       type="number"
                       value={monitor.gracePeriodSeconds ?? 30}
                       onChange={e => updateMonitor(index, 'gracePeriodSeconds', Number(e.target.value))}
-                      className="mt-1 block w-full rounded border-gray-300 shadow-sm text-sm px-2 py-1 border"
+                      className="h-8 text-sm"
                       min={0}
                     />
                   </div>
@@ -174,50 +181,54 @@ export function ServiceForm({ initialData, onSubmit, isLoading, submitLabel = 'C
                 {monitor.type === MonitorType.Metric && (
                   <div className="space-y-3 border-t pt-3 mt-3">
                     <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <label className="block text-xs text-gray-600">Min Value</label>
-                        <input
+                      <div className="space-y-1">
+                        <Label className="text-xs text-muted-foreground">Min Value</Label>
+                        <Input
                           type="number"
                           step="any"
                           value={monitor.minValue ?? ''}
                           onChange={e => updateMonitor(index, 'minValue', e.target.value ? Number(e.target.value) : undefined)}
-                          className="mt-1 block w-full rounded border-gray-300 shadow-sm text-sm px-2 py-1 border"
+                          className="h-8 text-sm"
                           placeholder="Optional"
                         />
                       </div>
-                      <div>
-                        <label className="block text-xs text-gray-600">Max Value</label>
-                        <input
+                      <div className="space-y-1">
+                        <Label className="text-xs text-muted-foreground">Max Value</Label>
+                        <Input
                           type="number"
                           step="any"
                           value={monitor.maxValue ?? ''}
                           onChange={e => updateMonitor(index, 'maxValue', e.target.value ? Number(e.target.value) : undefined)}
-                          className="mt-1 block w-full rounded border-gray-300 shadow-sm text-sm px-2 py-1 border"
+                          className="h-8 text-sm"
                           placeholder="Optional"
                         />
                       </div>
                     </div>
                     <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <label className="block text-xs text-gray-600">Threshold Strategy</label>
-                        <select
-                          value={monitor.thresholdStrategy ?? ThresholdStrategy.Immediate}
-                          onChange={e => updateMonitor(index, 'thresholdStrategy', Number(e.target.value))}
-                          className="mt-1 block w-full rounded border-gray-300 shadow-sm text-sm px-2 py-1 border"
+                      <div className="space-y-1">
+                        <Label className="text-xs text-muted-foreground">Threshold Strategy</Label>
+                        <Select
+                          value={String(monitor.thresholdStrategy ?? ThresholdStrategy.Immediate)}
+                          onValueChange={v => updateMonitor(index, 'thresholdStrategy', Number(v))}
                         >
-                          <option value={ThresholdStrategy.Immediate}>Immediate</option>
-                          <option value={ThresholdStrategy.ConsecutiveCount}>Consecutive Count</option>
-                          <option value={ThresholdStrategy.TimeDurationAverage}>Time Window Average</option>
-                          <option value={ThresholdStrategy.SampleCountAverage}>Sample Count Average</option>
-                        </select>
+                          <SelectTrigger className="w-full h-8 text-sm" size="sm">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value={String(ThresholdStrategy.Immediate)}>Immediate</SelectItem>
+                            <SelectItem value={String(ThresholdStrategy.ConsecutiveCount)}>Consecutive Count</SelectItem>
+                            <SelectItem value={String(ThresholdStrategy.TimeDurationAverage)}>Time Window Average</SelectItem>
+                            <SelectItem value={String(ThresholdStrategy.SampleCountAverage)}>Sample Count Average</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </div>
-                      <div>
-                        <label className="block text-xs text-gray-600">Retention (days)</label>
-                        <input
+                      <div className="space-y-1">
+                        <Label className="text-xs text-muted-foreground">Retention (days)</Label>
+                        <Input
                           type="number"
                           value={monitor.retentionDays ?? 7}
                           onChange={e => updateMonitor(index, 'retentionDays', Number(e.target.value))}
-                          className="mt-1 block w-full rounded border-gray-300 shadow-sm text-sm px-2 py-1 border"
+                          className="h-8 text-sm"
                           min={1}
                           max={365}
                         />
@@ -225,13 +236,13 @@ export function ServiceForm({ initialData, onSubmit, isLoading, submitLabel = 'C
                     </div>
                     {(monitor.thresholdStrategy === ThresholdStrategy.ConsecutiveCount ||
                       monitor.thresholdStrategy === ThresholdStrategy.SampleCountAverage) && (
-                      <div>
-                        <label className="block text-xs text-gray-600">Threshold Count</label>
-                        <input
+                      <div className="space-y-1">
+                        <Label className="text-xs text-muted-foreground">Threshold Count</Label>
+                        <Input
                           type="number"
                           value={monitor.thresholdCount ?? 3}
                           onChange={e => updateMonitor(index, 'thresholdCount', Number(e.target.value))}
-                          className="mt-1 block w-full rounded border-gray-300 shadow-sm text-sm px-2 py-1 border"
+                          className="h-8 text-sm"
                           min={2}
                         />
                       </div>
@@ -241,60 +252,64 @@ export function ServiceForm({ initialData, onSubmit, isLoading, submitLabel = 'C
 
                 {monitor.type === MonitorType.HealthCheck && (
                   <div className="space-y-3 border-t pt-3 mt-3">
-                    <div>
-                      <label className="block text-xs text-gray-600">URL</label>
-                      <input
+                    <div className="space-y-1">
+                      <Label className="text-xs text-muted-foreground">URL</Label>
+                      <Input
                         type="url"
                         value={monitor.healthCheckUrl ?? ''}
                         onChange={e => updateMonitor(index, 'healthCheckUrl', e.target.value || undefined)}
-                        className="mt-1 block w-full rounded border-gray-300 shadow-sm text-sm px-2 py-1 border"
+                        className="h-8 text-sm"
                         placeholder="https://example.com/health"
                         required
                       />
                     </div>
                     <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <label className="block text-xs text-gray-600">HTTP Method</label>
-                        <select
+                      <div className="space-y-1">
+                        <Label className="text-xs text-muted-foreground">HTTP Method</Label>
+                        <Select
                           value={monitor.httpMethod ?? 'GET'}
-                          onChange={e => updateMonitor(index, 'httpMethod', e.target.value)}
-                          className="mt-1 block w-full rounded border-gray-300 shadow-sm text-sm px-2 py-1 border"
+                          onValueChange={v => updateMonitor(index, 'httpMethod', v)}
                         >
-                          <option value="GET">GET</option>
-                          <option value="HEAD">HEAD</option>
-                          <option value="POST">POST</option>
-                          <option value="PUT">PUT</option>
-                        </select>
+                          <SelectTrigger className="w-full h-8 text-sm" size="sm">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="GET">GET</SelectItem>
+                            <SelectItem value="HEAD">HEAD</SelectItem>
+                            <SelectItem value="POST">POST</SelectItem>
+                            <SelectItem value="PUT">PUT</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </div>
-                      <div>
-                        <label className="block text-xs text-gray-600">Timeout (seconds)</label>
-                        <input
+                      <div className="space-y-1">
+                        <Label className="text-xs text-muted-foreground">Timeout (seconds)</Label>
+                        <Input
                           type="number"
                           value={monitor.timeoutSeconds ?? 10}
                           onChange={e => updateMonitor(index, 'timeoutSeconds', Number(e.target.value))}
-                          className="mt-1 block w-full rounded border-gray-300 shadow-sm text-sm px-2 py-1 border"
+                          className="h-8 text-sm"
                           min={1}
                           max={120}
                         />
                       </div>
                     </div>
-                    <div>
-                      <label className="block text-xs text-gray-600">Expected Status Codes</label>
-                      <input
+                    <div className="space-y-1">
+                      <Label className="text-xs text-muted-foreground">Expected Status Codes</Label>
+                      <Input
                         type="text"
                         value={monitor.expectedStatusCodes ?? '200'}
                         onChange={e => updateMonitor(index, 'expectedStatusCodes', e.target.value)}
-                        className="mt-1 block w-full rounded border-gray-300 shadow-sm text-sm px-2 py-1 border"
+                        className="h-8 text-sm"
                         placeholder="200,201,204"
                       />
                     </div>
-                    <div>
-                      <label className="block text-xs text-gray-600">Body Match Regex (optional)</label>
-                      <input
+                    <div className="space-y-1">
+                      <Label className="text-xs text-muted-foreground">Body Match Regex (optional)</Label>
+                      <Input
                         type="text"
                         value={monitor.bodyMatchRegex ?? ''}
                         onChange={e => updateMonitor(index, 'bodyMatchRegex', e.target.value || undefined)}
-                        className="mt-1 block w-full rounded border-gray-300 shadow-sm text-sm px-2 py-1 border"
+                        className="h-8 text-sm"
                         placeholder="ok|healthy"
                       />
                     </div>

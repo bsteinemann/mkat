@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { getBasePath } from '../config';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 export function Login() {
   const navigate = useNavigate();
@@ -43,28 +45,22 @@ export function Login() {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Username
-            </label>
-            <input
+          <div className="space-y-2">
+            <Label>Username</Label>
+            <Input
               type="text"
               value={username}
               onChange={e => setUsername(e.target.value)}
-              className="mt-1 block w-full rounded border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2 border"
               required
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Password
-            </label>
-            <input
+          <div className="space-y-2">
+            <Label>Password</Label>
+            <Input
               type="password"
               value={password}
               onChange={e => setPassword(e.target.value)}
-              className="mt-1 block w-full rounded border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2 border"
               required
             />
           </div>
