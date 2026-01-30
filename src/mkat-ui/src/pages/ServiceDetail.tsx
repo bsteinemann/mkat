@@ -6,6 +6,7 @@ import { MonitorType, ThresholdStrategy } from '../api/types';
 import { StateIndicator } from '../components/services/StateIndicator';
 import { CopyableUrl } from '../components/common/CopyableUrl';
 import { AlertItem } from '../components/alerts/AlertItem';
+import { MonitorDescription } from '../components/monitors/MonitorDescription';
 
 export function ServiceDetail() {
   const { serviceId } = useParams({ strict: false }) as { serviceId: string };
@@ -108,6 +109,8 @@ export function ServiceDetail() {
                   ({monitor.intervalSeconds}s interval)
                 </span>
               </div>
+
+              <MonitorDescription type={monitor.type} variant="full" />
 
               {monitor.type === MonitorType.Webhook && (
                 <div className="space-y-3">

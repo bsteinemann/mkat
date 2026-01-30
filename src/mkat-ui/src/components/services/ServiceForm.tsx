@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { MonitorType, Severity, ThresholdStrategy } from '../../api/types';
 import type { CreateServiceRequest, CreateMonitorRequest } from '../../api/types';
+import { MonitorDescription } from '../monitors/MonitorDescription';
 
 interface Props {
   initialData?: {
@@ -131,6 +132,8 @@ export function ServiceForm({ initialData, onSubmit, isLoading, submitLabel = 'C
                     </button>
                   )}
                 </div>
+
+                <MonitorDescription type={monitor.type} variant="compact" />
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
