@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { ClipboardIcon, CheckIcon } from '@heroicons/react/24/outline';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface Props {
   label: string;
@@ -24,18 +25,22 @@ export function CopyableUrl({ label, url }: Props) {
         <code className="flex-1 bg-gray-100 px-3 py-2 rounded text-sm font-mono truncate">
           {url}
         </code>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={handleCopy}
-          title={copied ? 'Copied!' : 'Copy to clipboard'}
-        >
-          {copied ? (
-            <CheckIcon className="h-5 w-5 text-green-500" />
-          ) : (
-            <ClipboardIcon className="h-5 w-5" />
-          )}
-        </Button>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="ghost" size="icon" onClick={handleCopy}>
+                {copied ? (
+                  <CheckIcon className="h-5 w-5 text-green-500" />
+                ) : (
+                  <ClipboardIcon className="h-5 w-5" />
+                )}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{copied ? 'Copied!' : 'Copy to clipboard'}</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </div>
     </div>
   );
