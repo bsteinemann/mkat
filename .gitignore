@@ -56,6 +56,9 @@ docker-compose.override.yml
 TestResults/
 coverage/
 
+## Frontend build output
+src/Mkat.Api/wwwroot/assets/
+
 ## VitePress docs
 docs-site/node_modules/
 docs-site/.vitepress/dist/
