@@ -11,6 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Info } from 'lucide-react';
 import {
   AlertDialog,
@@ -133,7 +134,6 @@ export function Peers() {
 
 function PairDialog({ onClose }: { onClose: () => void }) {
   const queryClient = useQueryClient();
-  const [mode, setMode] = useState<'choose' | 'generate' | 'enter'>('choose');
   const [instanceName, setInstanceName] = useState('');
   const [generatedToken, setGeneratedToken] = useState('');
   const [pasteToken, setPasteToken] = useState('');
@@ -170,77 +170,55 @@ function PairDialog({ onClose }: { onClose: () => void }) {
         </Button>
       </div>
 
-      {mode === 'choose' && (
-        <div className="space-y-3">
-          <Button
-            variant="outline"
-            className="block w-full text-left p-4 h-auto"
-            onClick={() => setMode('generate')}
-          >
-            <div>
-              <div className="font-medium">Generate a pairing token</div>
-              <div className="text-sm text-gray-500">Share the token with the other instance</div>
+      <Tabs defaultValue="generate" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="generate">Generate Token</TabsTrigger>
+          <TabsTrigger value="enter">Enter Token</TabsTrigger>
+        </TabsList>
+        <TabsContent value="generate" className="space-y-3">
+          {!generatedToken ? (
+            <div className="space-y-3">
+              <div className="space-y-2">
+                <Label>Instance Name</Label>
+                <Input
+                  type="text"
+                  value={instanceName}
+                  onChange={e => setInstanceName(e.target.value)}
+                  placeholder="e.g. Home Server"
+                />
+              </div>
+              <Button
+                onClick={() => initiateMutation.mutate(instanceName)}
+                disabled={!instanceName || initiateMutation.isPending}
+              >
+                {initiateMutation.isPending ? 'Generating...' : 'Generate Token'}
+              </Button>
             </div>
-          </Button>
-          <Button
-            variant="outline"
-            className="block w-full text-left p-4 h-auto"
-            onClick={() => setMode('enter')}
-          >
-            <div>
-              <div className="font-medium">Enter a pairing token</div>
-              <div className="text-sm text-gray-500">Paste a token from another instance</div>
+          ) : (
+            <div className="space-y-3">
+              <p className="text-sm text-gray-600">
+                Share this token with the other instance. It expires in 10 minutes.
+              </p>
+              <div className="relative">
+                <Textarea
+                  readOnly
+                  value={generatedToken}
+                  className="text-xs font-mono"
+                  rows={3}
+                />
+                <Button
+                  variant="secondary"
+                  size="xs"
+                  className="absolute top-2 right-2"
+                  onClick={() => navigator.clipboard.writeText(generatedToken)}
+                >
+                  Copy
+                </Button>
+              </div>
             </div>
-          </Button>
-        </div>
-      )}
-
-      {mode === 'generate' && !generatedToken && (
-        <div className="space-y-3">
-          <div className="space-y-2">
-            <Label>Instance Name</Label>
-            <Input
-              type="text"
-              value={instanceName}
-              onChange={e => setInstanceName(e.target.value)}
-              placeholder="e.g. Home Server"
-            />
-          </div>
-          <Button
-            onClick={() => initiateMutation.mutate(instanceName)}
-            disabled={!instanceName || initiateMutation.isPending}
-          >
-            {initiateMutation.isPending ? 'Generating...' : 'Generate Token'}
-          </Button>
-        </div>
-      )}
-
-      {mode === 'generate' && generatedToken && (
-        <div className="space-y-3">
-          <p className="text-sm text-gray-600">
-            Share this token with the other instance. It expires in 10 minutes.
-          </p>
-          <div className="relative">
-            <Textarea
-              readOnly
-              value={generatedToken}
-              className="text-xs font-mono"
-              rows={3}
-            />
-            <Button
-              variant="secondary"
-              size="xs"
-              className="absolute top-2 right-2"
-              onClick={() => navigator.clipboard.writeText(generatedToken)}
-            >
-              Copy
-            </Button>
-          </div>
-        </div>
-      )}
-
-      {mode === 'enter' && (
-        <div className="space-y-3">
+          )}
+        </TabsContent>
+        <TabsContent value="enter" className="space-y-3">
           <div className="space-y-2">
             <Label>Pairing Token</Label>
             <Textarea
@@ -257,8 +235,8 @@ function PairDialog({ onClose }: { onClose: () => void }) {
           >
             {completeMutation.isPending ? 'Pairing...' : 'Complete Pairing'}
           </Button>
-        </div>
-      )}
+        </TabsContent>
+      </Tabs>
       </CardContent>
     </Card>
   );
