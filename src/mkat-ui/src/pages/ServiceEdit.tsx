@@ -21,6 +21,7 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   AlertDialog,
@@ -476,6 +477,8 @@ function DependenciesSection({ serviceId }: { serviceId: string }) {
   });
 
   const [localSelected, setLocalSelected] = useState<Set<string> | null>(null);
+  const [search, setSearch] = useState('');
+  const [error, setError] = useState<string | null>(null);
 
   const serverSet = new Set(currentDeps?.map((d) => d.id) ?? []);
   const selected = localSelected ?? serverSet;
@@ -500,10 +503,13 @@ function DependenciesSection({ serviceId }: { serviceId: string }) {
       queryClient.invalidateQueries({ queryKey: ['services', serviceId, 'dependencies'] });
       queryClient.invalidateQueries({ queryKey: ['services', serviceId] });
       setLocalSelected(null);
+      setError(null);
       toast.success('Dependencies updated');
     },
-    onError: (error) => {
-      toast.error(getErrorMessage(error, 'Failed to update dependencies'));
+    onError: (err) => {
+      const message = getErrorMessage(err, 'Failed to update dependencies');
+      setError(message);
+      toast.error(message);
     },
   });
 
@@ -516,6 +522,7 @@ function DependenciesSection({ serviceId }: { serviceId: string }) {
       next.add(id);
     }
     setLocalSelected(next);
+    setError(null);
   };
 
   if (loadingServices || loadingDeps) {
@@ -549,15 +556,30 @@ function DependenciesSection({ serviceId }: { serviceId: string }) {
         {availableServices.length === 0 ? (
           <p className="text-sm text-muted-foreground">No other services available.</p>
         ) : (
-          <div className="space-y-2">
-            {availableServices.map((svc) => (
-              <Label key={svc.id} className="flex items-center gap-2 cursor-pointer">
-                <Checkbox checked={selected.has(svc.id)} onCheckedChange={() => toggle(svc.id)} />
-                <span className="text-sm text-foreground">{svc.name}</span>
-              </Label>
-            ))}
-          </div>
+          <>
+            <Input
+              placeholder="Filter services..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="mb-3"
+            />
+            <div className="space-y-2">
+              {availableServices
+                .filter((svc) => svc.name.toLowerCase().includes(search.toLowerCase()))
+                .map((svc) => (
+                  <Label key={svc.id} className="flex items-center gap-2 cursor-pointer">
+                    <Checkbox
+                      checked={selected.has(svc.id)}
+                      onCheckedChange={() => toggle(svc.id)}
+                    />
+                    <span className="text-sm text-foreground">{svc.name}</span>
+                  </Label>
+                ))}
+            </div>
+          </>
         )}
+
+        {error && <p className="mt-3 text-sm text-destructive">{error}</p>}
 
         {dirty && (
           <div className="mt-4 flex items-center gap-2">
