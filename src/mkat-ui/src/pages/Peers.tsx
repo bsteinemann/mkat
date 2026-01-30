@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Card, CardContent } from '@/components/ui/card';
 
 export function Peers() {
   const queryClient = useQueryClient();
@@ -38,48 +39,52 @@ export function Peers() {
       )}
 
       {peers?.length === 0 ? (
-        <div className="bg-white rounded-lg shadow p-6 text-center text-gray-500">
-          No paired instances. Click "Pair Instance" to connect with another mkat instance.
-        </div>
+        <Card className="py-0">
+          <CardContent className="p-6 text-center text-gray-500">
+            No paired instances. Click "Pair Instance" to connect with another mkat instance.
+          </CardContent>
+        </Card>
       ) : (
         <div className="space-y-4">
           {peers?.map(peer => (
-            <div key={peer.id} className="bg-white rounded-lg shadow p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="flex items-center gap-3">
-                    <h2 className="text-lg font-semibold text-gray-900">{peer.name}</h2>
-                    {peer.serviceState != null && (
-                      <StateIndicator state={peer.serviceState} size="sm" />
-                    )}
+            <Card key={peer.id} className="py-0">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="flex items-center gap-3">
+                      <h2 className="text-lg font-semibold text-gray-900">{peer.name}</h2>
+                      {peer.serviceState != null && (
+                        <StateIndicator state={peer.serviceState} size="sm" />
+                      )}
+                    </div>
+                    <p className="text-sm text-gray-500 mt-1">{peer.url}</p>
+                    <p className="text-xs text-gray-400 mt-1">
+                      Paired {new Date(peer.pairedAt).toLocaleString()} | Heartbeat every {peer.heartbeatIntervalSeconds}s
+                    </p>
                   </div>
-                  <p className="text-sm text-gray-500 mt-1">{peer.url}</p>
-                  <p className="text-xs text-gray-400 mt-1">
-                    Paired {new Date(peer.pairedAt).toLocaleString()} | Heartbeat every {peer.heartbeatIntervalSeconds}s
-                  </p>
+                  <div className="flex gap-2">
+                    <Link
+                      to="/services/$serviceId"
+                      params={{ serviceId: peer.serviceId }}
+                      className="px-3 py-1.5 text-sm bg-blue-100 text-blue-800 rounded hover:bg-blue-200"
+                    >
+                      View Service
+                    </Link>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => {
+                        if (confirm(`Unpair from ${peer.name}?`)) {
+                          unpairMutation.mutate(peer.id);
+                        }
+                      }}
+                    >
+                      Unpair
+                    </Button>
+                  </div>
                 </div>
-                <div className="flex gap-2">
-                  <Link
-                    to="/services/$serviceId"
-                    params={{ serviceId: peer.serviceId }}
-                    className="px-3 py-1.5 text-sm bg-blue-100 text-blue-800 rounded hover:bg-blue-200"
-                  >
-                    View Service
-                  </Link>
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    onClick={() => {
-                      if (confirm(`Unpair from ${peer.name}?`)) {
-                        unpairMutation.mutate(peer.id);
-                      }
-                    }}
-                  >
-                    Unpair
-                  </Button>
-                </div>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
           ))}
         </div>
       )}
@@ -110,7 +115,8 @@ function PairDialog({ onClose }: { onClose: () => void }) {
   });
 
   return (
-    <div className="bg-white rounded-lg shadow p-6 border border-blue-200">
+    <Card className="border-blue-200 py-0">
+      <CardContent className="p-6">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-semibold">Pair with Another Instance</h2>
         <Button variant="ghost" size="sm" onClick={onClose}>
@@ -213,6 +219,7 @@ function PairDialog({ onClose }: { onClose: () => void }) {
           )}
         </div>
       )}
-    </div>
+      </CardContent>
+    </Card>
   );
 }

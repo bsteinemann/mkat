@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export function ServiceEdit() {
   const { serviceId } = useParams({ strict: false }) as { serviceId: string };
@@ -70,24 +71,26 @@ export function ServiceEdit() {
   return (
     <div className="max-w-2xl">
       <h1 className="text-2xl font-bold text-gray-900 mb-6">Edit Service</h1>
-      <div className="bg-white rounded-lg shadow p-6">
-        <ServiceForm
-          initialData={{
-            name: service.name,
-            description: service.description ?? undefined,
-            severity: service.severity,
-          }}
-          onSubmit={handleSubmit}
-          isLoading={updateMutation.isPending}
-          submitLabel="Update Service"
-          showMonitors={false}
-        />
-        {updateMutation.isError && (
-          <p className="text-red-600 text-sm mt-4">
-            {(updateMutation.error as Error).message}
-          </p>
-        )}
-      </div>
+      <Card className="py-0">
+        <CardContent className="p-6">
+          <ServiceForm
+            initialData={{
+              name: service.name,
+              description: service.description ?? undefined,
+              severity: service.severity,
+            }}
+            onSubmit={handleSubmit}
+            isLoading={updateMutation.isPending}
+            submitLabel="Update Service"
+            showMonitors={false}
+          />
+          {updateMutation.isError && (
+            <p className="text-red-600 text-sm mt-4">
+              {(updateMutation.error as Error).message}
+            </p>
+          )}
+        </CardContent>
+      </Card>
 
       <MonitorSection
         monitors={service.monitors}
@@ -101,22 +104,26 @@ export function ServiceEdit() {
 
       <ContactsSection serviceId={serviceId} />
 
-      <div className="mt-6 bg-white rounded-lg shadow p-6 border border-red-200">
-        <h2 className="text-lg font-semibold text-red-800 mb-2">Danger Zone</h2>
-        <p className="text-sm text-gray-600 mb-4">
-          Deleting a service removes all monitors and alert history.
-        </p>
-        <Button
-          variant="destructive"
-          onClick={() => {
-            if (confirm('Are you sure you want to delete this service?')) {
-              deleteMutation.mutate();
-            }
-          }}
-        >
-          Delete Service
-        </Button>
-      </div>
+      <Card className="mt-6 border-red-200 py-0">
+        <CardHeader>
+          <CardTitle className="text-lg text-red-800">Danger Zone</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-gray-600 mb-4">
+            Deleting a service removes all monitors and alert history.
+          </p>
+          <Button
+            variant="destructive"
+            onClick={() => {
+              if (confirm('Are you sure you want to delete this service?')) {
+                deleteMutation.mutate();
+              }
+            }}
+          >
+            Delete Service
+          </Button>
+        </CardContent>
+      </Card>
     </div>
   );
 }
@@ -193,7 +200,8 @@ function MonitorSection({
   };
 
   return (
-    <div className="mt-6 bg-white rounded-lg shadow p-6">
+    <Card className="mt-6 py-0">
+      <CardContent className="p-6">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-semibold text-gray-900">Monitors</h2>
         <Button
@@ -400,7 +408,8 @@ function MonitorSection({
           />
         ))}
       </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -445,15 +454,20 @@ function ContactsSection({ serviceId }: { serviceId: string }) {
 
   if (loadingContacts || loadingAssigned) {
     return (
-      <div className="mt-6 bg-white rounded-lg shadow p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Contacts</h2>
-        <p className="text-sm text-gray-500">Loading...</p>
-      </div>
+      <Card className="mt-6 py-0">
+        <CardHeader>
+          <CardTitle className="text-lg">Contacts</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-gray-500">Loading...</p>
+        </CardContent>
+      </Card>
     );
   }
 
   return (
-    <div className="mt-6 bg-white rounded-lg shadow p-6">
+    <Card className="mt-6 py-0">
+      <CardContent className="p-6">
       <h2 className="text-lg font-semibold text-gray-900 mb-2">Contacts</h2>
       <p className="text-xs text-gray-500 mb-4">
         Select which contacts receive alerts for this service. If none are assigned, the default contact is used.
@@ -507,7 +521,8 @@ function ContactsSection({ serviceId }: { serviceId: string }) {
           {(saveMutation.error as Error).message}
         </p>
       )}
-    </div>
+      </CardContent>
+    </Card>
   );
 }
 

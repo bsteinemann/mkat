@@ -4,6 +4,7 @@ import { alertsApi } from '../api/alerts';
 import { ServiceState } from '../api/types';
 import { StateIndicator } from '../components/services/StateIndicator';
 import { AlertItem } from '../components/alerts/AlertItem';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export function Dashboard() {
   const { data: servicesData } = useQuery({
@@ -39,35 +40,43 @@ export function Dashboard() {
         <StatCard state={ServiceState.Unknown} count={counts.unknown} />
       </div>
 
-      <div className="bg-white rounded-lg shadow p-6">
-        <h2 className="text-lg font-semibold mb-4">Recent Alerts</h2>
-        {alerts.length === 0 ? (
-          <p className="text-gray-500">No recent alerts</p>
-        ) : (
-          <div className="space-y-3">
-            {alerts.map(alert => (
-              <AlertItem key={alert.id} alert={alert} />
-            ))}
-          </div>
-        )}
-      </div>
+      <Card className="py-0">
+        <CardHeader>
+          <CardTitle className="text-lg">Recent Alerts</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {alerts.length === 0 ? (
+            <p className="text-gray-500">No recent alerts</p>
+          ) : (
+            <div className="space-y-3">
+              {alerts.map(alert => (
+                <AlertItem key={alert.id} alert={alert} />
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {counts.down > 0 && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-6">
-          <h2 className="text-lg font-semibold text-red-800 mb-4">
-            Services Down ({counts.down})
-          </h2>
-          <div className="space-y-2">
-            {services
-              .filter(s => s.state === ServiceState.Down)
-              .map(s => (
-                <div key={s.id} className="flex items-center justify-between">
-                  <span className="font-medium">{s.name}</span>
-                  <StateIndicator state={s.state} size="sm" />
-                </div>
-              ))}
-          </div>
-        </div>
+        <Card className="bg-red-50 border-red-200 py-0">
+          <CardHeader>
+            <CardTitle className="text-lg text-red-800">
+              Services Down ({counts.down})
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              {services
+                .filter(s => s.state === ServiceState.Down)
+                .map(s => (
+                  <div key={s.id} className="flex items-center justify-between">
+                    <span className="font-medium">{s.name}</span>
+                    <StateIndicator state={s.state} size="sm" />
+                  </div>
+                ))}
+            </div>
+          </CardContent>
+        </Card>
       )}
     </div>
   );
@@ -82,12 +91,14 @@ function StatCard({ state, count }: { state: ServiceState; count: number }) {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow p-4">
-      <div className="flex items-center justify-between">
-        <StateIndicator state={state} />
-        <span className="text-3xl font-bold">{count}</span>
-      </div>
-      <p className="text-sm text-gray-500 mt-2">{labels[state]} Services</p>
-    </div>
+    <Card className="py-0">
+      <CardContent className="p-4">
+        <div className="flex items-center justify-between">
+          <StateIndicator state={state} />
+          <span className="text-3xl font-bold">{count}</span>
+        </div>
+        <p className="text-sm text-gray-500 mt-2">{labels[state]} Services</p>
+      </CardContent>
+    </Card>
   );
 }

@@ -8,6 +8,7 @@ import { CopyableUrl } from '../components/common/CopyableUrl';
 import { AlertItem } from '../components/alerts/AlertItem';
 import { MonitorDescription } from '../components/monitors/MonitorDescription';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export function ServiceDetail() {
   const { serviceId } = useParams({ strict: false }) as { serviceId: string };
@@ -96,8 +97,11 @@ export function ServiceDetail() {
         </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow p-6">
-        <h2 className="text-lg font-semibold mb-4">Monitors</h2>
+      <Card className="py-0">
+        <CardHeader>
+          <CardTitle className="text-lg">Monitors</CardTitle>
+        </CardHeader>
+        <CardContent>
         <div className="space-y-6">
           {service.monitors.map(monitor => (
             <div key={monitor.id} className="border-b pb-4 last:border-0">
@@ -195,24 +199,29 @@ export function ServiceDetail() {
             </div>
           ))}
         </div>
-      </div>
+        </CardContent>
+      </Card>
 
-      <div className="bg-white rounded-lg shadow p-6">
-        <h2 className="text-lg font-semibold mb-4">Recent Alerts</h2>
-        {alertsData?.items.length === 0 ? (
-          <p className="text-gray-500">No alerts for this service</p>
-        ) : (
-          <div className="space-y-3">
-            {alertsData?.items.map(alert => (
-              <AlertItem
-                key={alert.id}
-                alert={alert}
-                onAcknowledge={() => ackMutation.mutate(alert.id)}
-              />
-            ))}
-          </div>
-        )}
-      </div>
+      <Card className="py-0">
+        <CardHeader>
+          <CardTitle className="text-lg">Recent Alerts</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {alertsData?.items.length === 0 ? (
+            <p className="text-gray-500">No alerts for this service</p>
+          ) : (
+            <div className="space-y-3">
+              {alertsData?.items.map(alert => (
+                <AlertItem
+                  key={alert.id}
+                  alert={alert}
+                  onAcknowledge={() => ackMutation.mutate(alert.id)}
+                />
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

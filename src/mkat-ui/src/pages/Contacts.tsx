@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Card, CardContent } from '@/components/ui/card';
 
 export function Contacts() {
   const queryClient = useQueryClient();
@@ -46,50 +47,54 @@ export function Contacts() {
       )}
 
       {contacts?.length === 0 ? (
-        <div className="bg-white rounded-lg shadow p-6 text-center text-gray-500">
-          No contacts configured. Add a contact to set up notification routing.
-        </div>
+        <Card className="py-0">
+          <CardContent className="p-6 text-center text-gray-500">
+            No contacts configured. Add a contact to set up notification routing.
+          </CardContent>
+        </Card>
       ) : (
         <div className="space-y-3">
           {contacts?.map(contact => (
-            <div key={contact.id} className="bg-white rounded-lg shadow p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h2 className="text-lg font-semibold text-gray-900">{contact.name}</h2>
-                    {contact.isDefault && (
-                      <span className="px-2 py-0.5 text-xs bg-blue-100 text-blue-800 rounded">Default</span>
+            <Card key={contact.id} className="py-0">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h2 className="text-lg font-semibold text-gray-900">{contact.name}</h2>
+                      {contact.isDefault && (
+                        <span className="px-2 py-0.5 text-xs bg-blue-100 text-blue-800 rounded">Default</span>
+                      )}
+                    </div>
+                    <p className="text-sm text-gray-500 mt-1">
+                      {contact.channels.length} channel{contact.channels.length !== 1 ? 's' : ''} |{' '}
+                      {contact.serviceCount} service{contact.serviceCount !== 1 ? 's' : ''}
+                    </p>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => setEditingContact(contact)}
+                    >
+                      Manage
+                    </Button>
+                    {!contact.isDefault && (
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => {
+                          if (confirm(`Delete contact "${contact.name}"?`)) {
+                            deleteMutation.mutate(contact.id);
+                          }
+                        }}
+                      >
+                        Delete
+                      </Button>
                     )}
                   </div>
-                  <p className="text-sm text-gray-500 mt-1">
-                    {contact.channels.length} channel{contact.channels.length !== 1 ? 's' : ''} |{' '}
-                    {contact.serviceCount} service{contact.serviceCount !== 1 ? 's' : ''}
-                  </p>
                 </div>
-                <div className="flex gap-2">
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => setEditingContact(contact)}
-                  >
-                    Manage
-                  </Button>
-                  {!contact.isDefault && (
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => {
-                        if (confirm(`Delete contact "${contact.name}"?`)) {
-                          deleteMutation.mutate(contact.id);
-                        }
-                      }}
-                    >
-                      Delete
-                    </Button>
-                  )}
-                </div>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
           ))}
         </div>
       )}
@@ -118,27 +123,29 @@ function ContactForm({ onClose, contact }: { onClose: () => void; contact?: Cont
   });
 
   return (
-    <div className="bg-white rounded-lg shadow p-6 border border-blue-200">
-      <h3 className="text-lg font-semibold mb-3">{contact ? 'Edit Contact' : 'New Contact'}</h3>
-      <div className="flex gap-3">
-        <Input
-          type="text"
-          value={name}
-          onChange={e => setName(e.target.value)}
-          placeholder="Contact name"
-          className="flex-1"
-        />
-        <Button
-          onClick={() => contact ? updateMutation.mutate(name) : createMutation.mutate(name)}
-          disabled={!name.trim()}
-        >
-          {contact ? 'Save' : 'Create'}
-        </Button>
-        <Button variant="ghost" onClick={onClose}>
-          Cancel
-        </Button>
-      </div>
-    </div>
+    <Card className="border-blue-200 py-0">
+      <CardContent className="p-6">
+        <h3 className="text-lg font-semibold mb-3">{contact ? 'Edit Contact' : 'New Contact'}</h3>
+        <div className="flex gap-3">
+          <Input
+            type="text"
+            value={name}
+            onChange={e => setName(e.target.value)}
+            placeholder="Contact name"
+            className="flex-1"
+          />
+          <Button
+            onClick={() => contact ? updateMutation.mutate(name) : createMutation.mutate(name)}
+            disabled={!name.trim()}
+          >
+            {contact ? 'Save' : 'Create'}
+          </Button>
+          <Button variant="ghost" onClick={onClose}>
+            Cancel
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -180,7 +187,8 @@ function ContactDetail({ contact, onClose }: { contact: Contact; onClose: () => 
   const displayContact = freshContact ?? contact;
 
   return (
-    <div className="bg-white rounded-lg shadow p-6 border border-blue-200">
+    <Card className="border-blue-200 py-0">
+      <CardContent className="p-6">
       <div className="flex items-center justify-between mb-4">
         {editingName ? (
           <div className="flex gap-2">
@@ -279,7 +287,8 @@ function ContactDetail({ contact, onClose }: { contact: Contact; onClose: () => 
           ))
         )}
       </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }
 
