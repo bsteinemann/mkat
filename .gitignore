@@ -55,3 +55,8 @@ docker-compose.override.yml
 ## Test results
 TestResults/
 coverage/
+
+## VitePress docs
+docs-site/node_modules/
+docs-site/.vitepress/dist/
+docs-site/.vitepress/cache/
