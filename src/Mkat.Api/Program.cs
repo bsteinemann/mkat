@@ -73,6 +73,7 @@ try
     builder.Services.AddHostedService<AlertDispatchWorker>();
     builder.Services.AddHostedService<TelegramBotService>();
     builder.Services.AddHostedService<MetricRetentionWorker>();
+    builder.Services.AddHostedService<HealthCheckWorker>();
     builder.Services.AddHttpClient();
     builder.Services.AddHostedService<PeerHeartbeatWorker>();
 
