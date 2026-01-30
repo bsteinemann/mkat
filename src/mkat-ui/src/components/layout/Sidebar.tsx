@@ -1,5 +1,5 @@
 import { Link, useRouterState } from '@tanstack/react-router';
-import { LayoutDashboard, Server, Bell, Link2, Users } from 'lucide-react';
+import { LayoutDashboard, Server, Bell, Link2, Users, GitBranch } from 'lucide-react';
 import {
   Sidebar as SidebarRoot,
   SidebarContent,
@@ -17,6 +17,7 @@ import { ThemeToggle } from '@/components/ThemeToggle';
 const navItems = [
   { to: '/' as const, label: 'Dashboard', icon: LayoutDashboard },
   { to: '/services' as const, label: 'Services', icon: Server },
+  { to: '/dependencies' as const, label: 'Dependencies', icon: GitBranch },
   { to: '/alerts' as const, label: 'Alerts', icon: Bell },
   { to: '/peers' as const, label: 'Peers', icon: Link2 },
   { to: '/contacts' as const, label: 'Contacts', icon: Users },
