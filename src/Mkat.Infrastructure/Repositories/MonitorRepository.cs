@@ -53,6 +53,15 @@ public class MonitorRepository : IMonitorRepository
             .ToListAsync(ct);
     }
 
+    public async Task<IReadOnlyList<Monitor>> GetHealthCheckMonitorsDueAsync(DateTime now, CancellationToken ct = default)
+    {
+        return await _context.Monitors
+            .Include(m => m.Service)
+            .Where(m => m.Type == MonitorType.HealthCheck)
+            .Where(m => m.LastCheckIn == null || m.LastCheckIn.Value.AddSeconds(m.IntervalSeconds) <= now)
+            .ToListAsync(ct);
+    }
+
     public async Task AddAsync(Monitor monitor, CancellationToken ct = default)
     {
         monitor.CreatedAt = DateTime.UtcNow;
