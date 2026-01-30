@@ -3,7 +3,7 @@ import { useNavigate, useParams } from '@tanstack/react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { getErrorMessage } from '../api/client';
-import { servicesApi, contactsApi } from '../api/services';
+import { servicesApi, contactsApi, dependenciesApi } from '../api/services';
 import { ServiceForm } from '../components/services/ServiceForm';
 import { MonitorTypeSelector } from '../components/monitors/MonitorTypeSelector';
 import { IntervalGraceFields } from '../components/monitors/IntervalGraceFields';
@@ -146,6 +146,8 @@ export function ServiceEdit() {
       />
 
       <ContactsSection serviceId={serviceId} />
+
+      <DependenciesSection serviceId={serviceId} />
 
       <Card className="mt-6 border-red-200 dark:border-red-800 py-0">
         <CardHeader>
@@ -449,6 +451,122 @@ function ContactsSection({ serviceId }: { serviceId: string }) {
               disabled={saveMutation.isPending}
             >
               {saveMutation.isPending ? 'Saving...' : 'Save Contacts'}
+            </Button>
+            <Button variant="secondary" size="sm" onClick={() => setLocalSelected(null)}>
+              Cancel
+            </Button>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+function DependenciesSection({ serviceId }: { serviceId: string }) {
+  const queryClient = useQueryClient();
+
+  const { data: allServicesPage, isLoading: loadingServices } = useQuery({
+    queryKey: ['services'],
+    queryFn: () => servicesApi.list(1, 100),
+  });
+
+  const { data: currentDeps, isLoading: loadingDeps } = useQuery({
+    queryKey: ['services', serviceId, 'dependencies'],
+    queryFn: () => dependenciesApi.list(serviceId),
+  });
+
+  const [localSelected, setLocalSelected] = useState<Set<string> | null>(null);
+
+  const serverSet = new Set(currentDeps?.map((d) => d.id) ?? []);
+  const selected = localSelected ?? serverSet;
+  const dirty = localSelected !== null;
+
+  const saveMutation = useMutation({
+    mutationFn: async (newIds: string[]) => {
+      const newSet = new Set(newIds);
+      const oldSet = serverSet;
+
+      const toAdd = newIds.filter((id) => !oldSet.has(id));
+      const toRemove = [...oldSet].filter((id) => !newSet.has(id));
+
+      for (const id of toAdd) {
+        await dependenciesApi.add(serviceId, id);
+      }
+      for (const id of toRemove) {
+        await dependenciesApi.remove(serviceId, id);
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['services', serviceId, 'dependencies'] });
+      queryClient.invalidateQueries({ queryKey: ['services', serviceId] });
+      setLocalSelected(null);
+      toast.success('Dependencies updated');
+    },
+    onError: (error) => {
+      toast.error(getErrorMessage(error, 'Failed to update dependencies'));
+    },
+  });
+
+  const toggle = (id: string) => {
+    const current = localSelected ?? serverSet;
+    const next = new Set(current);
+    if (next.has(id)) {
+      next.delete(id);
+    } else {
+      next.add(id);
+    }
+    setLocalSelected(next);
+  };
+
+  if (loadingServices || loadingDeps) {
+    return (
+      <Card className="mt-6 py-0">
+        <CardHeader>
+          <CardTitle className="text-lg">Dependencies</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            <Skeleton className="h-5 w-full rounded" />
+            <Skeleton className="h-5 w-full rounded" />
+            <Skeleton className="h-5 w-full rounded" />
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const availableServices = (allServicesPage?.items ?? []).filter((s) => s.id !== serviceId);
+
+  return (
+    <Card className="mt-6 py-0">
+      <CardContent className="p-6">
+        <h2 className="text-lg font-semibold text-foreground mb-2">Dependencies</h2>
+        <p className="text-xs text-muted-foreground mb-4">
+          Select services that this service depends on. Alerts may be suppressed when a dependency
+          is down.
+        </p>
+
+        {availableServices.length === 0 ? (
+          <p className="text-sm text-muted-foreground">No other services available.</p>
+        ) : (
+          <div className="space-y-2">
+            {availableServices.map((svc) => (
+              <Label key={svc.id} className="flex items-center gap-2 cursor-pointer">
+                <Checkbox checked={selected.has(svc.id)} onCheckedChange={() => toggle(svc.id)} />
+                <span className="text-sm text-foreground">{svc.name}</span>
+              </Label>
+            ))}
+          </div>
+        )}
+
+        {dirty && (
+          <div className="mt-4 flex items-center gap-2">
+            <Button
+              size="sm"
+              onClick={() => saveMutation.mutate(Array.from(selected))}
+              disabled={saveMutation.isPending}
+            >
+              {saveMutation.isPending ? 'Saving...' : 'Save Dependencies'}
             </Button>
             <Button variant="secondary" size="sm" onClick={() => setLocalSelected(null)}>
               Cancel
