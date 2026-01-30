@@ -76,6 +76,7 @@ try
     builder.Services.AddHostedService<TelegramBotService>();
     builder.Services.AddHostedService<MetricRetentionWorker>();
     builder.Services.AddHostedService<HealthCheckWorker>();
+    builder.Services.AddHostedService<RollupAggregationWorker>();
     builder.Services.AddHttpClient();
     builder.Services.AddHostedService<PeerHeartbeatWorker>();
 

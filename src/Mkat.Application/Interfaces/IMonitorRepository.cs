@@ -11,6 +11,7 @@ public interface IMonitorRepository
     Task<IReadOnlyList<Monitor>> GetHeartbeatMonitorsDueAsync(DateTime threshold, CancellationToken ct = default);
     Task<IReadOnlyList<Monitor>> GetAllMetricMonitorsAsync(CancellationToken ct = default);
     Task<IReadOnlyList<Monitor>> GetHealthCheckMonitorsDueAsync(DateTime now, CancellationToken ct = default);
+    Task<IReadOnlyList<Monitor>> GetAllAsync(CancellationToken ct = default);
     Task AddAsync(Monitor monitor, CancellationToken ct = default);
     Task UpdateAsync(Monitor monitor, CancellationToken ct = default);
     Task DeleteAsync(Monitor monitor, CancellationToken ct = default);
