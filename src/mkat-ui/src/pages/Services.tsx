@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { servicesApi } from '../api/services';
 import { ServiceCard } from '../components/services/ServiceCard';
 import { Pagination } from '../components/common/Pagination';
+import { buttonVariants } from '@/components/ui/button';
 
 export function Services() {
   const [page, setPage] = useState(1);
@@ -32,7 +33,7 @@ export function Services() {
         <h1 className="text-2xl font-bold text-gray-900">Services</h1>
         <Link
           to="/services/new"
-          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          className={buttonVariants()}
         >
           Add Service
         </Link>
