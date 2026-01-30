@@ -19,4 +19,6 @@ public class Service
     public ICollection<Alert> Alerts { get; set; } = new List<Alert>();
     public ICollection<MuteWindow> MuteWindows { get; set; } = new List<MuteWindow>();
     public ICollection<ServiceContact> ServiceContacts { get; set; } = new List<ServiceContact>();
+    public ICollection<ServiceDependency> DependsOn { get; set; } = new List<ServiceDependency>();
+    public ICollection<ServiceDependency> DependedOnBy { get; set; } = new List<ServiceDependency>();
 }
