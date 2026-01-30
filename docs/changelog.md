@@ -6,6 +6,23 @@ All notable changes to mkat, ordered newest-first.
 
 ## [Unreleased]
 
+### 2026-01-30 - Historical Data & Analytics
+
+- Added unified `MonitorEvent` entity replacing `MetricReading` for all monitor types
+- Added `MonitorRollup` entity for pre-aggregated statistics (hourly, daily, weekly, monthly)
+- Added `RollupCalculator` computing min, max, mean, median, P80, P90, P95, standard deviation, uptime %
+- Added `RollupAggregationWorker` (hourly background job)
+- Added `EventRetentionWorker` with tiered retention (events: 7d, hourly: 30d, daily: 1y, weekly: 2y, monthly: forever)
+- Added API endpoints: `GET /monitors/{id}/events`, `GET /monitors/{id}/rollups`, `GET /services/{id}/uptime`, `GET /services/{id}/events`
+- All monitor types (webhook, heartbeat, health check, metric) now log `MonitorEvent` records
+- Health check events include response time in `Value` field
+- Added Recharts-based history charts per monitor type on ServiceDetail page
+- Added time range selector (1h–1y) with automatic data source selection (events vs rollups)
+- Added uptime badge (color-coded: green >=99%, yellow >=95%, red <95%)
+- Added rollup stats table (min, max, mean, median, P80, P90, P95, stdev)
+- Removed deprecated `MetricReading` entity, `MetricReadingRepository`, `MetricHistoryController`, `MetricRetentionWorker`
+- `MetricEvaluator` now uses `IMonitorEventRepository` for threshold strategies
+
 ### 2026-01-22 - M5: Frontend
 
 - Scaffolded React 19 + TypeScript project with Vite 7

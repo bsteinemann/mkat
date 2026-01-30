@@ -74,6 +74,8 @@ This document defines the technical architecture for mkat. It serves as the sing
 | **Alert** | A record of a state change event (failure, recovery) |
 | **NotificationChannel** | A configured notification target (Telegram, etc.) |
 | **MuteWindow** | A time-bounded suppression of alerts |
+| **MonitorEvent** | A unified event record for all monitor activity (replaces MetricReading) |
+| **MonitorRollup** | Pre-aggregated statistics for a monitor over a time period |
 
 ### 4.2 Value Objects
 
@@ -87,9 +89,11 @@ This document defines the technical architecture for mkat. It serves as the sing
 
 ```csharp
 enum ServiceState { Unknown, Up, Down, Paused }
-enum MonitorType { Webhook, Heartbeat, HealthCheck }
+enum MonitorType { Webhook, Heartbeat, HealthCheck, Metric }
 enum AlertType { Failure, Recovery, MissedHeartbeat }
 enum Severity { Low, Medium, High, Critical }
+enum EventType { WebhookReceived, HeartbeatReceived, HealthCheckPerformed, MetricIngested, StateChanged }
+enum Granularity { Hourly, Daily, Weekly, Monthly }
 ```
 
 ### 4.4 State Machine
@@ -141,7 +145,7 @@ Services follow a defined state machine:
 **Purpose:** Business rules and invariants
 
 **Contents:**
-- Entities (Service, Monitor, Alert, NotificationChannel)
+- Entities (Service, Monitor, Alert, NotificationChannel, MonitorEvent, MonitorRollup)
 - Value Objects (ServiceId, Interval, GracePeriod, Severity)
 - Domain Enums (ServiceState, MonitorType, AlertType)
 - Domain Events (ServiceFailed, ServiceRecovered)

@@ -131,3 +131,19 @@ Read this file FIRST before starting any new work -- it prevents repeating mista
 **Pattern:** Use layered `Directory.Build.props` (root for global, tests/ for test-specific) and layered `.editorconfig` (root for global, subdirectory for overrides) to manage analyzer strictness
 **Anti-pattern:** Don't suppress too many rules globally in the root props — keep suppressions scoped to where they're needed (tests, migrations, UI components)
 **Action:** Added Monitor ambiguity gotcha, analyzer culture rules, test placement rule, middleware ordering, and lint/format commands to CLAUDE.md. Updated workflow.md Phase 4 to reflect TreatWarningsAsErrors and frontend lint/format checks.
+
+### 2026-01-30 - Historical Data & Analytics (MonitorEvent/MonitorRollup)
+**Context:** Adding unified event logging, rollup aggregation, and Recharts-based charts for all monitor types. Replacing MetricReading with MonitorEvent.
+**Went well:**
+- TDD gate followed properly: wrote tests first (RED), then implementation (GREEN) for all 11 phases
+- Clean Architecture separation made the MetricReading→MonitorEvent migration straightforward — only needed to update the interface dependency in MetricEvaluator and the DI registration
+- Recharts integration was smooth; LineChart, BarChart, ScatterChart all worked without issues
+- `GetByMonitorIdInWindowAsync` on IMonitorEventRepository needed both start and end DateTime (unlike old IMetricReadingRepository which only took start) — better API design
+- Rollup computation (RollupCalculator) with proper population standard deviation and linear interpolation percentiles worked correctly first try
+**Tripped up:**
+- `IMonitorEventRepository` initially lacked `GetLastNByMonitorIdAsync` needed by MetricEvaluator's ConsecutiveCount and SampleCountAverage strategies — had to add it during Phase 10 cleanup
+- MonitorEvent's `Value` is `double?` (nullable) unlike MetricReading's `double` — average strategies need `.Where(e => e.Value.HasValue)` filter before calling `.Average()`
+- Removing `using Mkat.Domain.Enums;` when refactoring MetricEvaluator caused `ThresholdStrategy` to become unresolved — the enum was used implicitly in the switch expression
+- `dotnet test` from wrong CWD (mkat-ui/) fails with "no project or solution" — always use absolute path or ensure CWD is repo root
+**Pattern:** When replacing an entity, add all needed query methods to the new repository interface BEFORE refactoring consumers. Missing methods discovered during consumer refactoring cause backtracking.
+**Anti-pattern:** Don't assume new repository interfaces cover all old patterns. Compare old interface methods against usage sites to identify gaps early.
