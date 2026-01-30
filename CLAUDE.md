@@ -84,6 +84,8 @@ If you are a sub-agent: your prompt MUST include the contents of `docs/learnings
 - Structured logging with Serilog (semantic templates, not string interpolation)
 - `DateTime.UtcNow` for all timestamps
 - Use `Guid` for entity IDs
+- `Monitor` conflicts with `System.Threading.Monitor` under ImplicitUsings — always add `using Monitor = Mkat.Domain.Entities.Monitor;` in files that import the domain entity
+- Use `StringComparison.Ordinal` with `StartsWith`/`EndsWith` and `CultureInfo.InvariantCulture` with `Parse`/`ToString` — the build enforces this via analyzers
 
 ### React / TypeScript
 
@@ -102,6 +104,16 @@ If you are a sub-agent: your prompt MUST include the contents of `docs/learnings
 - Error messages should be actionable
 - One concern per file
 
+## ASP.NET Middleware Order
+
+The SPA + API middleware must be registered in this order:
+
+```
+UseDefaultFiles → UseStaticFiles → UsePathBase → auth middleware → MapControllers → MapFallback
+```
+
+Static files must come before auth or they get blocked. `MapFallback` must be last.
+
 ## Commands
 
 ```bash
@@ -115,6 +127,11 @@ docker compose -f docker-compose.dev.yml up
 dotnet test
 dotnet test tests/Mkat.Domain.Tests
 cd src/mkat-ui && npm test
+
+# Lint & Format (frontend)
+cd src/mkat-ui && npm run lint
+cd src/mkat-ui && npm run format:check
+cd src/mkat-ui && npm run format          # auto-fix
 
 # Database Migrations
 dotnet ef migrations add <Name> -p src/Mkat.Infrastructure -s src/Mkat.Api
@@ -155,6 +172,7 @@ This is a gate, not a suggestion. If you find yourself writing implementation co
 - Arrange/Act/Assert pattern
 - Test one behavior per test method
 - Cover edge cases: nulls, empty inputs, invalid state transitions
+- Tests that reference Infrastructure types belong in `Api.Tests` (transitive access via Api project), not `Application.Tests`
 
 ### TDD Workflow Per Feature
 

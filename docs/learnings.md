@@ -130,3 +130,4 @@ Read this file FIRST before starting any new work -- it prevents repeating mista
 - EF Core auto-generated migrations trigger CA1861 (constant arrays) — suppress via migration-specific `.editorconfig`
 **Pattern:** Use layered `Directory.Build.props` (root for global, tests/ for test-specific) and layered `.editorconfig` (root for global, subdirectory for overrides) to manage analyzer strictness
 **Anti-pattern:** Don't suppress too many rules globally in the root props — keep suppressions scoped to where they're needed (tests, migrations, UI components)
+**Action:** Added Monitor ambiguity gotcha, analyzer culture rules, test placement rule, middleware ordering, and lint/format commands to CLAUDE.md. Updated workflow.md Phase 4 to reflect TreatWarningsAsErrors and frontend lint/format checks.
