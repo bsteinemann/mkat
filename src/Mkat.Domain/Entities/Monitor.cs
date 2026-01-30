@@ -26,5 +26,12 @@ public class Monitor
     public double? LastMetricValue { get; set; }
     public DateTime? LastMetricAt { get; set; }
 
+    // Health check monitor fields
+    public string? HealthCheckUrl { get; set; }
+    public string? HttpMethod { get; set; }
+    public string? ExpectedStatusCodes { get; set; }
+    public int? TimeoutSeconds { get; set; }
+    public string? BodyMatchRegex { get; set; }
+
     public Service Service { get; set; } = null!;
 }

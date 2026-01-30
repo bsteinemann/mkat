@@ -45,6 +45,10 @@ public class MkatDbContext : DbContext, IUnitOfWork
             entity.Property(e => e.Type).HasConversion<string>().HasMaxLength(20);
             entity.Property(e => e.ConfigJson).HasMaxLength(4000);
             entity.Property(e => e.ThresholdStrategy).HasConversion<string>().HasMaxLength(30);
+            entity.Property(e => e.HealthCheckUrl).HasMaxLength(2000);
+            entity.Property(e => e.HttpMethod).HasMaxLength(10);
+            entity.Property(e => e.ExpectedStatusCodes).HasMaxLength(200);
+            entity.Property(e => e.BodyMatchRegex).HasMaxLength(1000);
             entity.HasIndex(e => e.Token).IsUnique();
             entity.HasOne(e => e.Service)
                 .WithMany(s => s.Monitors)
