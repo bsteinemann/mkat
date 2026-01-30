@@ -61,7 +61,7 @@ public class ServicesControllerTests : IDisposable
         Environment.SetEnvironmentVariable("MKAT_PASSWORD", null);
     }
 
-    private CreateServiceRequest ValidCreateRequest() => new()
+    private static CreateServiceRequest ValidCreateRequest() => new()
     {
         Name = "Test Service",
         Description = "A test service",

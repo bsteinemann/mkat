@@ -27,7 +27,7 @@ public class MaintenanceResumeWorkerTests
         _worker = new MaintenanceResumeWorker(serviceProvider, loggerMock.Object);
     }
 
-    private IServiceProvider BuildServiceProvider()
+    private ServiceProvider BuildServiceProvider()
     {
         var services = new ServiceCollection();
         services.AddSingleton(_serviceRepoMock.Object);

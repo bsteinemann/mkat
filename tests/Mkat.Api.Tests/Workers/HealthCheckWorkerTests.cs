@@ -36,7 +36,7 @@ public class HealthCheckWorkerTests
         _worker = new HealthCheckWorker(serviceProvider, loggerMock.Object);
     }
 
-    private IServiceProvider BuildServiceProvider()
+    private ServiceProvider BuildServiceProvider()
     {
         var services = new ServiceCollection();
         services.AddSingleton(_monitorRepoMock.Object);
@@ -62,7 +62,7 @@ public class HealthCheckWorkerTests
         _httpFactoryMock.Setup(f => f.CreateClient(It.IsAny<string>())).Returns(httpClient);
     }
 
-    private (Monitor monitor, Service service) CreateTestMonitorAndService(ServiceState state = ServiceState.Unknown)
+    private static (Monitor monitor, Service service) CreateTestMonitorAndService(ServiceState state = ServiceState.Unknown)
     {
         var serviceId = Guid.NewGuid();
         var service = new Service { Id = serviceId, Name = "Test", State = state };

@@ -30,7 +30,7 @@ public class HeartbeatMonitorWorkerTests
         _worker = new HeartbeatMonitorWorker(serviceProvider, loggerMock.Object);
     }
 
-    private IServiceProvider BuildServiceProvider()
+    private ServiceProvider BuildServiceProvider()
     {
         var services = new ServiceCollection();
         services.AddSingleton(_monitorRepoMock.Object);
