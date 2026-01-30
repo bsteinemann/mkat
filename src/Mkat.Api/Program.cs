@@ -38,6 +38,7 @@ try
     builder.Services.AddScoped<IPushSubscriptionRepository, PushSubscriptionRepository>();
     builder.Services.AddScoped<IMonitorEventRepository, MonitorEventRepository>();
     builder.Services.AddScoped<IMonitorRollupRepository, MonitorRollupRepository>();
+    builder.Services.AddScoped<IServiceDependencyRepository, ServiceDependencyRepository>();
     builder.Services.AddScoped<IRollupCalculator, RollupCalculator>();
     builder.Services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<MkatDbContext>());
     builder.Services.AddScoped<IStateService, StateService>();
