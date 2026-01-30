@@ -58,6 +58,7 @@ coverage/
 
 ## Frontend build output
 src/Mkat.Api/wwwroot/assets/
+src/Mkat.Api/wwwroot/index.html
 
 ## VitePress docs
 docs-site/node_modules/
