@@ -7,6 +7,9 @@ import { StateIndicator } from '../components/services/StateIndicator';
 import { CopyableUrl } from '../components/common/CopyableUrl';
 import { AlertItem } from '../components/alerts/AlertItem';
 import { MonitorDescription } from '../components/monitors/MonitorDescription';
+import { MonitorHistory } from '../components/history/MonitorHistory';
+import { UptimeBadge } from '../components/history/UptimeBadge';
+import { serviceUptimeApi } from '../api/services';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -18,6 +21,11 @@ export function ServiceDetail() {
   const { data: service, isLoading } = useQuery({
     queryKey: ['services', serviceId],
     queryFn: () => servicesApi.get(serviceId),
+  });
+
+  const { data: uptime } = useQuery({
+    queryKey: ['uptime', serviceId],
+    queryFn: () => serviceUptimeApi.get(serviceId),
   });
 
   const { data: alertsData } = useQuery({
@@ -88,6 +96,7 @@ export function ServiceDetail() {
         </div>
         <div className="flex items-center gap-4">
           <StateIndicator state={service.state} size="lg" />
+          <UptimeBadge percent={uptime?.uptimePercent} />
           <div className="flex gap-2">
             {service.state !== 3 ? (
               <Button
@@ -219,6 +228,8 @@ export function ServiceDetail() {
                     Last check-in: {new Date(monitor.lastCheckIn).toLocaleString()}
                   </p>
                 )}
+
+                <MonitorHistory monitor={monitor} />
               </div>
             ))}
           </div>
