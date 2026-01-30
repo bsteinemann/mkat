@@ -12,6 +12,10 @@ public record ServiceResponse
     public DateTime? PausedUntil { get; init; }
     public DateTime CreatedAt { get; init; }
     public DateTime UpdatedAt { get; init; }
+    public bool IsSuppressed { get; init; }
+    public string? SuppressionReason { get; init; }
+    public List<DependencyResponse> DependsOn { get; init; } = new();
+    public List<DependencyResponse> DependedOnBy { get; init; } = new();
     public List<MonitorResponse> Monitors { get; init; } = new();
 }
 
