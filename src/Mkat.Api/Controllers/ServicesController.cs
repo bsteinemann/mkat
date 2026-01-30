@@ -426,6 +426,27 @@ public class ServicesController : ControllerBase
         };
 
         await _depRepo.AddAsync(dependency, ct);
+
+        // If the new dependency is DOWN, suppress the dependent and its transitive dependents
+        if (dependencyService.State == ServiceState.Down)
+        {
+            dependentService.IsSuppressed = true;
+            dependentService.SuppressionReason = $"Dependency down: {dependencyService.Name}";
+            await _serviceRepo.UpdateAsync(dependentService, ct);
+
+            var transitiveDependentIds = await _depRepo.GetTransitiveDependentIdsAsync(id, ct);
+            foreach (var transDepId in transitiveDependentIds)
+            {
+                var transDep = await _serviceRepo.GetByIdAsync(transDepId, ct);
+                if (transDep != null)
+                {
+                    transDep.IsSuppressed = true;
+                    transDep.SuppressionReason = $"Dependency down: {dependencyService.Name}";
+                    await _serviceRepo.UpdateAsync(transDep, ct);
+                }
+            }
+        }
+
         await _unitOfWork.SaveChangesAsync(ct);
 
         _logger.LogInformation("Added dependency: service {DependentId} depends on {DependencyId}",
@@ -454,6 +475,31 @@ public class ServicesController : ControllerBase
         }
 
         await _depRepo.DeleteAsync(existing, ct);
+
+        // Re-evaluate suppression for the dependent after removing the edge
+        var dependent = await _serviceRepo.GetByIdAsync(id, ct);
+        if (dependent is { IsSuppressed: true })
+        {
+            var remainingDepIds = await _depRepo.GetTransitiveDependencyIdsAsync(id, ct);
+            var anyStillDown = false;
+            foreach (var depId in remainingDepIds)
+            {
+                var dep = await _serviceRepo.GetByIdAsync(depId, ct);
+                if (dep is { State: ServiceState.Down })
+                {
+                    anyStillDown = true;
+                    break;
+                }
+            }
+
+            if (!anyStillDown)
+            {
+                dependent.IsSuppressed = false;
+                dependent.SuppressionReason = null;
+                await _serviceRepo.UpdateAsync(dependent, ct);
+            }
+        }
+
         await _unitOfWork.SaveChangesAsync(ct);
 
         _logger.LogInformation("Removed dependency: service {DependentId} no longer depends on {DependencyId}",
