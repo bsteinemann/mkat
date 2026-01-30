@@ -9,6 +9,17 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
 export function Contacts() {
   const queryClient = useQueryClient();
@@ -80,17 +91,25 @@ export function Contacts() {
                       Manage
                     </Button>
                     {!contact.isDefault && (
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => {
-                          if (confirm(`Delete contact "${contact.name}"?`)) {
-                            deleteMutation.mutate(contact.id);
-                          }
-                        }}
-                      >
-                        Delete
-                      </Button>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="destructive" size="sm">Delete</Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Delete contact "{contact.name}"?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              This will remove the contact and all its channels.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction onClick={() => deleteMutation.mutate(contact.id)}>
+                              Delete
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     )}
                   </div>
                 </div>
@@ -272,17 +291,25 @@ function ContactDetail({ contact, onClose }: { contact: Contact; onClose: () => 
                 >
                   {ch.isEnabled ? 'Disable' : 'Enable'}
                 </Button>
-                <Button
-                  variant="destructive"
-                  size="xs"
-                  onClick={() => {
-                    if (confirm('Remove this channel?')) {
-                      deleteChannelMutation.mutate(ch.id);
-                    }
-                  }}
-                >
-                  Remove
-                </Button>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="destructive" size="xs">Remove</Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Remove this channel?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This will stop notifications via this channel.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction onClick={() => deleteChannelMutation.mutate(ch.id)}>
+                        Remove
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </div>
             </div>
           ))

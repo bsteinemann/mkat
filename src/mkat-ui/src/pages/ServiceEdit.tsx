@@ -10,6 +10,17 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
 export function ServiceEdit() {
   const { serviceId } = useParams({ strict: false }) as { serviceId: string };
@@ -112,16 +123,25 @@ export function ServiceEdit() {
           <p className="text-sm text-gray-600 mb-4">
             Deleting a service removes all monitors and alert history.
           </p>
-          <Button
-            variant="destructive"
-            onClick={() => {
-              if (confirm('Are you sure you want to delete this service?')) {
-                deleteMutation.mutate();
-              }
-            }}
-          >
-            Delete Service
-          </Button>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive">Delete Service</Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete service "{service.name}"?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This will permanently delete the service and all its monitors and alerts.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={() => deleteMutation.mutate()}>
+                  Delete
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </CardContent>
       </Card>
     </div>
@@ -613,18 +633,33 @@ function MonitorRow({
               Edit
             </Button>
           )}
-          <Button
-            type="button"
-            variant="ghost"
-            size="xs"
-            className="p-0 h-auto text-red-600 hover:text-red-800 hover:bg-transparent"
-            onClick={() => {
-              if (confirm('Remove this monitor?')) onDelete();
-            }}
-            disabled={!canDelete}
-          >
-            Remove
-          </Button>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button
+                type="button"
+                variant="ghost"
+                size="xs"
+                className="p-0 h-auto text-red-600 hover:text-red-800 hover:bg-transparent"
+                disabled={!canDelete}
+              >
+                Remove
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Remove this monitor?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This will permanently remove the monitor from this service.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={() => onDelete()}>
+                  Remove
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </div>
 
