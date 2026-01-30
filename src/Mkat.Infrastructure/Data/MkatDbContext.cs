@@ -24,6 +24,7 @@ public class MkatDbContext : DbContext, IUnitOfWork
     public DbSet<PushSubscription> PushSubscriptions => Set<PushSubscription>();
     public DbSet<MonitorEvent> MonitorEvents => Set<MonitorEvent>();
     public DbSet<MonitorRollup> MonitorRollups => Set<MonitorRollup>();
+    public DbSet<ServiceDependency> ServiceDependencies => Set<ServiceDependency>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -37,6 +38,7 @@ public class MkatDbContext : DbContext, IUnitOfWork
             entity.Property(e => e.State).HasConversion<string>().HasMaxLength(20);
             entity.Property(e => e.PreviousState).HasConversion<string>().HasMaxLength(20);
             entity.Property(e => e.Severity).HasConversion<string>().HasMaxLength(20);
+            entity.Property(e => e.SuppressionReason).HasMaxLength(500);
             entity.HasIndex(e => e.Name).IsUnique();
         });
 
@@ -174,6 +176,20 @@ public class MkatDbContext : DbContext, IUnitOfWork
                 .WithMany()
                 .HasForeignKey(e => e.ServiceId)
                 .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<ServiceDependency>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => new { e.DependentServiceId, e.DependencyServiceId }).IsUnique();
+            entity.HasOne(e => e.DependentService)
+                .WithMany(s => s.DependsOn)
+                .HasForeignKey(e => e.DependentServiceId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(e => e.DependencyService)
+                .WithMany(s => s.DependedOnBy)
+                .HasForeignKey(e => e.DependencyServiceId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
     }
 }
