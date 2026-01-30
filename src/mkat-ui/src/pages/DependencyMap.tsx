@@ -13,6 +13,7 @@ import {
   Position,
   type Node,
   type Edge,
+  MarkerType,
   type Connection,
   type NodeMouseHandler,
 } from '@xyflow/react';
@@ -128,6 +129,7 @@ function toFlowElements(
     source: e.dependentId,
     target: e.dependencyId,
     animated: true,
+    markerEnd: { type: MarkerType.ArrowClosed },
   }));
 
   const layoutedNodes = getLayoutedElements(nodes, edges);
