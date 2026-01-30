@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 
 export function Contacts() {
   const queryClient = useQueryClient();
@@ -62,7 +63,7 @@ export function Contacts() {
                     <div className="flex items-center gap-2">
                       <h2 className="text-lg font-semibold text-gray-900">{contact.name}</h2>
                       {contact.isDefault && (
-                        <span className="px-2 py-0.5 text-xs bg-blue-100 text-blue-800 rounded">Default</span>
+                        <Badge variant="secondary" className="bg-blue-100 text-blue-800">Default</Badge>
                       )}
                     </div>
                     <p className="text-sm text-gray-500 mt-1">
@@ -252,9 +253,9 @@ function ContactDetail({ contact, onClose }: { contact: Contact; onClose: () => 
                 <span className="text-sm font-medium">
                   {ch.type === ChannelType.Telegram ? 'Telegram' : 'Email'}
                 </span>
-                <span className={`ml-2 text-xs ${ch.isEnabled ? 'text-green-600' : 'text-gray-400'}`}>
+                <Badge variant="outline" className={`ml-2 ${ch.isEnabled ? 'text-green-600' : 'text-gray-400'}`}>
                   {ch.isEnabled ? 'Enabled' : 'Disabled'}
-                </span>
+                </Badge>
               </div>
               <div className="flex gap-2">
                 <Button

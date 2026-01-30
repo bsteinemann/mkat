@@ -1,6 +1,7 @@
 import type { Alert } from '../../api/types';
 import { AlertType, Severity } from '../../api/types';
 import { formatDistanceToNow } from 'date-fns';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 
 interface Props {
@@ -34,12 +35,12 @@ export function AlertItem({ alert, onAcknowledge }: Props) {
     <div className="flex items-start justify-between p-3 border rounded">
       <div className="flex-1">
         <div className="flex items-center gap-2">
-          <span className={`text-sm font-medium ${typeColors[alert.type]}`}>
+          <Badge variant="outline" className={typeColors[alert.type]}>
             {typeLabels[alert.type]}
-          </span>
-          <span className={`text-xs px-2 py-0.5 rounded ${severityBadge[alert.severity]}`}>
+          </Badge>
+          <Badge className={severityBadge[alert.severity]}>
             {Severity[alert.severity]}
-          </span>
+          </Badge>
         </div>
         <p className="text-sm text-gray-700 mt-1">{alert.message}</p>
         <p className="text-xs text-gray-500 mt-1">
