@@ -50,8 +50,6 @@ public class EventRetentionWorker : BackgroundService
         using var scope = _serviceProvider.CreateScope();
         var eventRepo = scope.ServiceProvider.GetRequiredService<IMonitorEventRepository>();
         var rollupRepo = scope.ServiceProvider.GetRequiredService<IMonitorRollupRepository>();
-        var monitorRepo = scope.ServiceProvider.GetRequiredService<IMonitorRepository>();
-        var readingRepo = scope.ServiceProvider.GetRequiredService<IMetricReadingRepository>();
         var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
         var now = DateTime.UtcNow;
@@ -69,14 +67,6 @@ public class EventRetentionWorker : BackgroundService
         await rollupRepo.DeleteOlderThanAsync(Granularity.Weekly, now.AddYears(-2), ct);
 
         // Monthly rollups: keep forever (no purge)
-
-        // Legacy: clean up MetricReadings (same as old MetricRetentionWorker)
-        var metricMonitors = await monitorRepo.GetAllMetricMonitorsAsync(ct);
-        foreach (var monitor in metricMonitors)
-        {
-            var threshold = now.AddDays(-monitor.RetentionDays);
-            await readingRepo.DeleteOlderThanAsync(monitor.Id, threshold, ct);
-        }
 
         await unitOfWork.SaveChangesAsync(ct);
         _logger.LogInformation("Event retention cleanup completed");

@@ -33,7 +33,6 @@ try
     builder.Services.AddScoped<IMonitorRepository, MonitorRepository>();
     builder.Services.AddScoped<IAlertRepository, AlertRepository>();
     builder.Services.AddScoped<IMuteWindowRepository, MuteWindowRepository>();
-    builder.Services.AddScoped<IMetricReadingRepository, MetricReadingRepository>();
     builder.Services.AddScoped<IPeerRepository, PeerRepository>();
     builder.Services.AddScoped<IContactRepository, ContactRepository>();
     builder.Services.AddScoped<IPushSubscriptionRepository, PushSubscriptionRepository>();

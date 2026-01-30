@@ -66,6 +66,15 @@ public class MonitorEventRepository : IMonitorEventRepository
             .ToListAsync(ct);
     }
 
+    public async Task<IReadOnlyList<MonitorEvent>> GetLastNByMonitorIdAsync(Guid monitorId, int count, CancellationToken ct = default)
+    {
+        return await _context.MonitorEvents
+            .Where(e => e.MonitorId == monitorId)
+            .OrderByDescending(e => e.CreatedAt)
+            .Take(count)
+            .ToListAsync(ct);
+    }
+
     public async Task DeleteOlderThanAsync(DateTime threshold, CancellationToken ct = default)
     {
         var oldEvents = await _context.MonitorEvents

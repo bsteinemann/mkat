@@ -17,7 +17,6 @@ public class MkatDbContext : DbContext, IUnitOfWork
     public DbSet<Alert> Alerts => Set<Alert>();
     public DbSet<NotificationChannel> NotificationChannels => Set<NotificationChannel>();
     public DbSet<MuteWindow> MuteWindows => Set<MuteWindow>();
-    public DbSet<MetricReading> MetricReadings => Set<MetricReading>();
     public DbSet<Peer> Peers => Set<Peer>();
     public DbSet<Contact> Contacts => Set<Contact>();
     public DbSet<ContactChannel> ContactChannels => Set<ContactChannel>();
@@ -56,16 +55,6 @@ public class MkatDbContext : DbContext, IUnitOfWork
             entity.HasOne(e => e.Service)
                 .WithMany(s => s.Monitors)
                 .HasForeignKey(e => e.ServiceId)
-                .OnDelete(DeleteBehavior.Cascade);
-        });
-
-        modelBuilder.Entity<MetricReading>(entity =>
-        {
-            entity.HasKey(e => e.Id);
-            entity.HasIndex(e => new { e.MonitorId, e.RecordedAt });
-            entity.HasOne(e => e.Monitor)
-                .WithMany()
-                .HasForeignKey(e => e.MonitorId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
 

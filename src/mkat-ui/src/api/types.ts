@@ -140,25 +140,6 @@ export interface UpdateMonitorRequest {
   bodyMatchRegex?: string;
 }
 
-export interface MetricReading {
-  id: string;
-  value: number;
-  recordedAt: string;
-  outOfRange: boolean;
-}
-
-export interface MetricHistoryResponse {
-  monitorId: string;
-  readings: MetricReading[];
-}
-
-export interface MetricLatestResponse {
-  value: number;
-  recordedAt: string;
-  outOfRange: boolean;
-  monitorId: string;
-}
-
 export enum EventType {
   WebhookReceived = 'WebhookReceived',
   HeartbeatReceived = 'HeartbeatReceived',

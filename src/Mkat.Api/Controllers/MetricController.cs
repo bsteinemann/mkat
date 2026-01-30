@@ -11,7 +11,6 @@ namespace Mkat.Api.Controllers;
 public class MetricController : ControllerBase
 {
     private readonly IMonitorRepository _monitorRepo;
-    private readonly IMetricReadingRepository _readingRepo;
     private readonly IMonitorEventRepository _eventRepo;
     private readonly IMetricEvaluator _evaluator;
     private readonly IStateService _stateService;
@@ -20,7 +19,6 @@ public class MetricController : ControllerBase
 
     public MetricController(
         IMonitorRepository monitorRepo,
-        IMetricReadingRepository readingRepo,
         IMonitorEventRepository eventRepo,
         IMetricEvaluator evaluator,
         IStateService stateService,
@@ -28,7 +26,6 @@ public class MetricController : ControllerBase
         ILogger<MetricController> logger)
     {
         _monitorRepo = monitorRepo;
-        _readingRepo = readingRepo;
         _eventRepo = eventRepo;
         _evaluator = evaluator;
         _stateService = stateService;
@@ -63,17 +60,7 @@ public class MetricController : ControllerBase
 
         var val = metricValue.Value;
         var isOutOfRange = MetricEvaluator.IsOutOfRange(val, monitor);
-
-        // Store the reading (legacy, will be removed in Phase 10)
-        var reading = new MetricReading
-        {
-            Id = Guid.NewGuid(),
-            MonitorId = monitor.Id,
-            Value = val,
-            RecordedAt = DateTime.UtcNow,
-            IsOutOfRange = isOutOfRange
-        };
-        await _readingRepo.AddAsync(reading, ct);
+        var now = DateTime.UtcNow;
 
         // Store as MonitorEvent
         var monitorEvent = new MonitorEvent
@@ -85,13 +72,13 @@ public class MetricController : ControllerBase
             Success = !isOutOfRange,
             Value = val,
             IsOutOfRange = isOutOfRange,
-            CreatedAt = reading.RecordedAt
+            CreatedAt = now
         };
         await _eventRepo.AddAsync(monitorEvent, ct);
 
         // Update monitor's last metric info
         monitor.LastMetricValue = val;
-        monitor.LastMetricAt = reading.RecordedAt;
+        monitor.LastMetricAt = now;
         await _monitorRepo.UpdateAsync(monitor, ct);
         await _unitOfWork.SaveChangesAsync(ct);
 

@@ -10,13 +10,13 @@ namespace Mkat.Application.Tests.Services;
 
 public class MetricEvaluatorTests
 {
-    private readonly Mock<IMetricReadingRepository> _readingRepo;
+    private readonly Mock<IMonitorEventRepository> _eventRepo;
     private readonly MetricEvaluator _evaluator;
 
     public MetricEvaluatorTests()
     {
-        _readingRepo = new Mock<IMetricReadingRepository>();
-        _evaluator = new MetricEvaluator(_readingRepo.Object);
+        _eventRepo = new Mock<IMonitorEventRepository>();
+        _evaluator = new MetricEvaluator(_eventRepo.Object);
     }
 
     private static Monitor CreateMonitor(
@@ -127,14 +127,14 @@ public class MetricEvaluatorTests
             maxValue: 90.0,
             thresholdCount: 3);
 
-        var readings = new List<MetricReading>
+        var events = new List<MonitorEvent>
         {
-            new() { Value = 95.0, IsOutOfRange = true, RecordedAt = DateTime.UtcNow.AddSeconds(-2) },
-            new() { Value = 92.0, IsOutOfRange = true, RecordedAt = DateTime.UtcNow.AddSeconds(-1) }
+            new() { Value = 95.0, IsOutOfRange = true, CreatedAt = DateTime.UtcNow.AddSeconds(-2) },
+            new() { Value = 92.0, IsOutOfRange = true, CreatedAt = DateTime.UtcNow.AddSeconds(-1) }
         };
 
-        _readingRepo.Setup(r => r.GetLastNByMonitorIdAsync(monitor.Id, 2, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(readings);
+        _eventRepo.Setup(r => r.GetLastNByMonitorIdAsync(monitor.Id, 2, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(events);
 
         // Current value (95) is out of range, plus 2 previous out-of-range = 3 consecutive
         var result = await _evaluator.EvaluateAsync(monitor, 95.0);
@@ -149,14 +149,14 @@ public class MetricEvaluatorTests
             maxValue: 90.0,
             thresholdCount: 3);
 
-        var readings = new List<MetricReading>
+        var events = new List<MonitorEvent>
         {
-            new() { Value = 95.0, IsOutOfRange = true, RecordedAt = DateTime.UtcNow.AddSeconds(-2) },
-            new() { Value = 80.0, IsOutOfRange = false, RecordedAt = DateTime.UtcNow.AddSeconds(-1) }
+            new() { Value = 95.0, IsOutOfRange = true, CreatedAt = DateTime.UtcNow.AddSeconds(-2) },
+            new() { Value = 80.0, IsOutOfRange = false, CreatedAt = DateTime.UtcNow.AddSeconds(-1) }
         };
 
-        _readingRepo.Setup(r => r.GetLastNByMonitorIdAsync(monitor.Id, 2, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(readings);
+        _eventRepo.Setup(r => r.GetLastNByMonitorIdAsync(monitor.Id, 2, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(events);
 
         var result = await _evaluator.EvaluateAsync(monitor, 95.0);
         Assert.False(result);
@@ -184,15 +184,15 @@ public class MetricEvaluatorTests
             maxValue: 90.0,
             windowSeconds: 60);
 
-        var readings = new List<MetricReading>
+        var events = new List<MonitorEvent>
         {
-            new() { Value = 95.0, RecordedAt = DateTime.UtcNow.AddSeconds(-30) },
-            new() { Value = 92.0, RecordedAt = DateTime.UtcNow.AddSeconds(-20) }
+            new() { Value = 95.0, CreatedAt = DateTime.UtcNow.AddSeconds(-30) },
+            new() { Value = 92.0, CreatedAt = DateTime.UtcNow.AddSeconds(-20) }
         };
 
-        _readingRepo.Setup(r => r.GetByMonitorIdInWindowAsync(
-                monitor.Id, It.IsAny<DateTime>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(readings);
+        _eventRepo.Setup(r => r.GetByMonitorIdInWindowAsync(
+                monitor.Id, It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(events);
 
         // Average of (95, 92, 91) = 92.67 > 90
         var result = await _evaluator.EvaluateAsync(monitor, 91.0);
@@ -207,15 +207,15 @@ public class MetricEvaluatorTests
             maxValue: 90.0,
             windowSeconds: 60);
 
-        var readings = new List<MetricReading>
+        var events = new List<MonitorEvent>
         {
-            new() { Value = 80.0, RecordedAt = DateTime.UtcNow.AddSeconds(-30) },
-            new() { Value = 85.0, RecordedAt = DateTime.UtcNow.AddSeconds(-20) }
+            new() { Value = 80.0, CreatedAt = DateTime.UtcNow.AddSeconds(-30) },
+            new() { Value = 85.0, CreatedAt = DateTime.UtcNow.AddSeconds(-20) }
         };
 
-        _readingRepo.Setup(r => r.GetByMonitorIdInWindowAsync(
-                monitor.Id, It.IsAny<DateTime>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(readings);
+        _eventRepo.Setup(r => r.GetByMonitorIdInWindowAsync(
+                monitor.Id, It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(events);
 
         // Average of (80, 85, 88) = 84.33 < 90
         var result = await _evaluator.EvaluateAsync(monitor, 88.0);
@@ -230,9 +230,9 @@ public class MetricEvaluatorTests
             maxValue: 90.0,
             windowSeconds: 60);
 
-        _readingRepo.Setup(r => r.GetByMonitorIdInWindowAsync(
-                monitor.Id, It.IsAny<DateTime>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new List<MetricReading>());
+        _eventRepo.Setup(r => r.GetByMonitorIdInWindowAsync(
+                monitor.Id, It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<MonitorEvent>());
 
         // Only current value 95 > 90
         var result = await _evaluator.EvaluateAsync(monitor, 95.0);
@@ -249,14 +249,14 @@ public class MetricEvaluatorTests
             maxValue: 90.0,
             windowSampleCount: 3);
 
-        var readings = new List<MetricReading>
+        var events = new List<MonitorEvent>
         {
-            new() { Value = 95.0, RecordedAt = DateTime.UtcNow.AddSeconds(-2) },
-            new() { Value = 92.0, RecordedAt = DateTime.UtcNow.AddSeconds(-1) }
+            new() { Value = 95.0, CreatedAt = DateTime.UtcNow.AddSeconds(-2) },
+            new() { Value = 92.0, CreatedAt = DateTime.UtcNow.AddSeconds(-1) }
         };
 
-        _readingRepo.Setup(r => r.GetLastNByMonitorIdAsync(monitor.Id, 2, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(readings);
+        _eventRepo.Setup(r => r.GetLastNByMonitorIdAsync(monitor.Id, 2, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(events);
 
         // Average of (95, 92, 91) = 92.67 > 90
         var result = await _evaluator.EvaluateAsync(monitor, 91.0);
@@ -271,14 +271,14 @@ public class MetricEvaluatorTests
             maxValue: 90.0,
             windowSampleCount: 3);
 
-        var readings = new List<MetricReading>
+        var events = new List<MonitorEvent>
         {
-            new() { Value = 80.0, RecordedAt = DateTime.UtcNow.AddSeconds(-2) },
-            new() { Value = 85.0, RecordedAt = DateTime.UtcNow.AddSeconds(-1) }
+            new() { Value = 80.0, CreatedAt = DateTime.UtcNow.AddSeconds(-2) },
+            new() { Value = 85.0, CreatedAt = DateTime.UtcNow.AddSeconds(-1) }
         };
 
-        _readingRepo.Setup(r => r.GetLastNByMonitorIdAsync(monitor.Id, 2, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(readings);
+        _eventRepo.Setup(r => r.GetLastNByMonitorIdAsync(monitor.Id, 2, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(events);
 
         // Average of (80, 85, 70) = 78.33 < 90
         var result = await _evaluator.EvaluateAsync(monitor, 70.0);
@@ -295,15 +295,15 @@ public class MetricEvaluatorTests
             minValue: 50.0,
             windowSeconds: 60);
 
-        var readings = new List<MetricReading>
+        var events = new List<MonitorEvent>
         {
-            new() { Value = 30.0, RecordedAt = DateTime.UtcNow.AddSeconds(-30) },
-            new() { Value = 40.0, RecordedAt = DateTime.UtcNow.AddSeconds(-20) }
+            new() { Value = 30.0, CreatedAt = DateTime.UtcNow.AddSeconds(-30) },
+            new() { Value = 40.0, CreatedAt = DateTime.UtcNow.AddSeconds(-20) }
         };
 
-        _readingRepo.Setup(r => r.GetByMonitorIdInWindowAsync(
-                monitor.Id, It.IsAny<DateTime>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(readings);
+        _eventRepo.Setup(r => r.GetByMonitorIdInWindowAsync(
+                monitor.Id, It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(events);
 
         // Average of (30, 40, 35) = 35 < 50
         var result = await _evaluator.EvaluateAsync(monitor, 35.0);

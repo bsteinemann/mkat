@@ -7,8 +7,6 @@ import type {
   CreateMonitorRequest,
   UpdateServiceRequest,
   UpdateMonitorRequest,
-  MetricHistoryResponse,
-  MetricLatestResponse,
   MonitorEvent,
   MonitorRollup,
   ServiceUptime,
@@ -148,16 +146,4 @@ export const serviceUptimeApi = {
   },
 };
 
-export const metricsApi = {
-  getHistory: (monitorId: string, params?: { from?: string; to?: string; limit?: number }) => {
-    const query = new URLSearchParams();
-    if (params?.from) query.set('from', params.from);
-    if (params?.to) query.set('to', params.to);
-    if (params?.limit) query.set('limit', params.limit.toString());
-    const qs = query.toString();
-    return api.get<MetricHistoryResponse>(`/monitors/${monitorId}/metrics${qs ? `?${qs}` : ''}`);
-  },
 
-  getLatest: (monitorId: string) =>
-    api.get<MetricLatestResponse>(`/monitors/${monitorId}/metrics/latest`),
-};

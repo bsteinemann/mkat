@@ -12,11 +12,11 @@ public interface IMetricEvaluator
 
 public class MetricEvaluator : IMetricEvaluator
 {
-    private readonly IMetricReadingRepository _readingRepo;
+    private readonly IMonitorEventRepository _eventRepo;
 
-    public MetricEvaluator(IMetricReadingRepository readingRepo)
+    public MetricEvaluator(IMonitorEventRepository eventRepo)
     {
-        _readingRepo = readingRepo;
+        _eventRepo = eventRepo;
     }
 
     public static bool IsOutOfRange(double value, Monitor monitor)
@@ -54,13 +54,13 @@ public class MetricEvaluator : IMetricEvaluator
         if (count <= 1)
             return true;
 
-        // Need count-1 previous readings that are also out of range
-        var previousReadings = await _readingRepo.GetLastNByMonitorIdAsync(monitor.Id, count - 1, ct);
+        // Need count-1 previous events that are also out of range
+        var previousEvents = await _eventRepo.GetLastNByMonitorIdAsync(monitor.Id, count - 1, ct);
 
-        if (previousReadings.Count < count - 1)
+        if (previousEvents.Count < count - 1)
             return false;
 
-        return previousReadings.All(r => r.IsOutOfRange);
+        return previousEvents.All(e => e.IsOutOfRange);
     }
 
     private async Task<bool> EvaluateTimeDurationAverageAsync(Monitor monitor, double currentValue, CancellationToken ct)
@@ -68,9 +68,9 @@ public class MetricEvaluator : IMetricEvaluator
         var windowSeconds = monitor.WindowSeconds ?? 60;
         var windowStart = DateTime.UtcNow.AddSeconds(-windowSeconds);
 
-        var readings = await _readingRepo.GetByMonitorIdInWindowAsync(monitor.Id, windowStart, ct);
+        var events = await _eventRepo.GetByMonitorIdInWindowAsync(monitor.Id, windowStart, DateTime.UtcNow, ct);
 
-        var allValues = readings.Select(r => r.Value).Append(currentValue).ToList();
+        var allValues = events.Where(e => e.Value.HasValue).Select(e => e.Value!.Value).Append(currentValue).ToList();
         var average = allValues.Average();
 
         return IsOutOfRange(average, monitor);
@@ -80,10 +80,10 @@ public class MetricEvaluator : IMetricEvaluator
     {
         var sampleCount = monitor.WindowSampleCount ?? 1;
 
-        // Get sampleCount-1 previous readings (current value is the Nth sample)
-        var previousReadings = await _readingRepo.GetLastNByMonitorIdAsync(monitor.Id, sampleCount - 1, ct);
+        // Get sampleCount-1 previous events (current value is the Nth sample)
+        var previousEvents = await _eventRepo.GetLastNByMonitorIdAsync(monitor.Id, sampleCount - 1, ct);
 
-        var allValues = previousReadings.Select(r => r.Value).Append(currentValue).ToList();
+        var allValues = previousEvents.Where(e => e.Value.HasValue).Select(e => e.Value!.Value).Append(currentValue).ToList();
         var average = allValues.Average();
 
         return IsOutOfRange(average, monitor);

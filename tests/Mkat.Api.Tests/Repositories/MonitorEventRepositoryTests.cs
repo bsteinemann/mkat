@@ -154,6 +154,34 @@ public class MonitorEventRepositoryTests : IDisposable
         Assert.Single(remaining);
     }
 
+    [Fact]
+    public async Task GetLastNByMonitorIdAsync_ReturnsLastNEvents()
+    {
+        var now = DateTime.UtcNow;
+        // Seed 5 metric events with values
+        for (int i = 0; i < 5; i++)
+        {
+            _context.MonitorEvents.Add(new MonitorEvent
+            {
+                Id = Guid.NewGuid(),
+                MonitorId = _monitorId,
+                ServiceId = _serviceId,
+                EventType = EventType.MetricIngested,
+                Success = true,
+                Value = 10.0 + i,
+                CreatedAt = now.AddMinutes(-5 + i)
+            });
+        }
+        await _context.SaveChangesAsync();
+
+        var results = await _repository.GetLastNByMonitorIdAsync(_monitorId, 3);
+
+        Assert.Equal(3, results.Count);
+        // Should be ordered by CreatedAt descending (most recent first)
+        Assert.True(results[0].CreatedAt >= results[1].CreatedAt);
+        Assert.True(results[1].CreatedAt >= results[2].CreatedAt);
+    }
+
     private async Task SeedEvents(DateTime now)
     {
         var events = new[]
