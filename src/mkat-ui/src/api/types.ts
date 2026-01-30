@@ -159,6 +159,63 @@ export interface MetricLatestResponse {
   monitorId: string;
 }
 
+export enum EventType {
+  WebhookReceived = 'WebhookReceived',
+  HeartbeatReceived = 'HeartbeatReceived',
+  HealthCheckPerformed = 'HealthCheckPerformed',
+  MetricIngested = 'MetricIngested',
+  StateChanged = 'StateChanged',
+}
+
+export enum Granularity {
+  Hourly = 'Hourly',
+  Daily = 'Daily',
+  Weekly = 'Weekly',
+  Monthly = 'Monthly',
+}
+
+export interface MonitorEvent {
+  id: string;
+  monitorId: string;
+  serviceId: string;
+  eventType: EventType;
+  success: boolean;
+  value: number | null;
+  isOutOfRange: boolean;
+  message: string | null;
+  createdAt: string;
+}
+
+export interface MonitorRollup {
+  id: string;
+  monitorId: string;
+  serviceId: string;
+  granularity: Granularity;
+  periodStart: string;
+  count: number;
+  successCount: number;
+  failureCount: number;
+  min: number | null;
+  max: number | null;
+  mean: number | null;
+  median: number | null;
+  p80: number | null;
+  p90: number | null;
+  p95: number | null;
+  stdDev: number | null;
+  uptimePercent: number | null;
+}
+
+export interface ServiceUptime {
+  serviceId: string;
+  uptimePercent: number;
+  totalEvents: number;
+  successEvents: number;
+  failureEvents: number;
+  from: string;
+  to: string;
+}
+
 export interface Peer {
   id: string;
   name: string;

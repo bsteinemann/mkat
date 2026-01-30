@@ -9,6 +9,9 @@ import type {
   UpdateMonitorRequest,
   MetricHistoryResponse,
   MetricLatestResponse,
+  MonitorEvent,
+  MonitorRollup,
+  ServiceUptime,
   Peer,
   PeerInitiateResponse,
   PeerResponse,
@@ -91,6 +94,58 @@ export const contactsApi = {
 
   setServiceContacts: (serviceId: string, contactIds: string[]) =>
     api.put<{ assigned: number }>(`/services/${serviceId}/contacts`, { contactIds }),
+};
+
+export const monitorEventsApi = {
+  getByMonitor: (
+    monitorId: string,
+    params?: { from?: string; to?: string; eventType?: string; limit?: number },
+  ) => {
+    const query = new URLSearchParams();
+    if (params?.from) query.set('from', params.from);
+    if (params?.to) query.set('to', params.to);
+    if (params?.eventType) query.set('eventType', params.eventType);
+    if (params?.limit) query.set('limit', params.limit.toString());
+    const qs = query.toString();
+    return api.get<MonitorEvent[]>(`/monitors/${monitorId}/events${qs ? `?${qs}` : ''}`);
+  },
+
+  getByService: (
+    serviceId: string,
+    params?: { from?: string; to?: string; eventType?: string; limit?: number },
+  ) => {
+    const query = new URLSearchParams();
+    if (params?.from) query.set('from', params.from);
+    if (params?.to) query.set('to', params.to);
+    if (params?.eventType) query.set('eventType', params.eventType);
+    if (params?.limit) query.set('limit', params.limit.toString());
+    const qs = query.toString();
+    return api.get<MonitorEvent[]>(`/services/${serviceId}/events${qs ? `?${qs}` : ''}`);
+  },
+};
+
+export const monitorRollupsApi = {
+  getByMonitor: (
+    monitorId: string,
+    params?: { granularity?: string; from?: string; to?: string },
+  ) => {
+    const query = new URLSearchParams();
+    if (params?.granularity) query.set('granularity', params.granularity);
+    if (params?.from) query.set('from', params.from);
+    if (params?.to) query.set('to', params.to);
+    const qs = query.toString();
+    return api.get<MonitorRollup[]>(`/monitors/${monitorId}/rollups${qs ? `?${qs}` : ''}`);
+  },
+};
+
+export const serviceUptimeApi = {
+  get: (serviceId: string, params?: { from?: string; to?: string }) => {
+    const query = new URLSearchParams();
+    if (params?.from) query.set('from', params.from);
+    if (params?.to) query.set('to', params.to);
+    const qs = query.toString();
+    return api.get<ServiceUptime>(`/services/${serviceId}/uptime${qs ? `?${qs}` : ''}`);
+  },
 };
 
 export const metricsApi = {
