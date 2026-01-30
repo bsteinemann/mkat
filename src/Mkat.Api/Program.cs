@@ -22,8 +22,7 @@ try
 
     builder.Host.UseSerilog((context, services, configuration) => configuration
         .ReadFrom.Configuration(context.Configuration)
-        .ReadFrom.Services(services)
-        .WriteTo.Console());
+        .ReadFrom.Services(services));
 
     var databasePath = builder.Configuration["MKAT_DATABASE_PATH"] ?? "mkat.db";
 
