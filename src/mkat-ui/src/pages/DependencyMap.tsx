@@ -16,25 +16,78 @@ import {
   type NodeMouseHandler,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import Dagre from '@dagrejs/dagre';
 import { dependenciesApi } from '../api/services';
 import { getErrorMessage } from '../api/client';
 import type { DependencyGraphNode, DependencyGraphEdge } from '../api/types';
 import { Skeleton } from '@/components/ui/skeleton';
 
+const NODE_WIDTH = 180;
+const NODE_HEIGHT = 60;
+const NODE_SEP = 80;
+const RANK_SEP = 100;
+
 function getLayoutedElements(nodes: Node[], edges: Edge[]): Node[] {
-  const g = new Dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}));
-  g.setGraph({ rankdir: 'TB', nodesep: 80, ranksep: 100 });
+  // Build adjacency: target → sources (which nodes point to it)
+  const incomingMap = new Map<string, string[]>();
+  const outgoingMap = new Map<string, string[]>();
+  for (const node of nodes) {
+    incomingMap.set(node.id, []);
+    outgoingMap.set(node.id, []);
+  }
+  for (const edge of edges) {
+    incomingMap.get(edge.target)?.push(edge.source);
+    outgoingMap.get(edge.source)?.push(edge.target);
+  }
 
-  nodes.forEach((node) => g.setNode(node.id, { width: 180, height: 60 }));
-  edges.forEach((edge) => g.setEdge(edge.source, edge.target));
+  // Topological sort via Kahn's algorithm to assign ranks (layers)
+  const inDegree = new Map<string, number>();
+  for (const node of nodes) {
+    inDegree.set(node.id, incomingMap.get(node.id)?.length ?? 0);
+  }
+  const queue: string[] = [];
+  for (const [id, deg] of inDegree) {
+    if (deg === 0) queue.push(id);
+  }
+  const rank = new Map<string, number>();
+  while (queue.length > 0) {
+    const id = queue.shift()!;
+    const r = Math.max(0, ...(incomingMap.get(id) ?? []).map((src) => (rank.get(src) ?? 0) + 1));
+    rank.set(id, r);
+    for (const target of outgoingMap.get(id) ?? []) {
+      const newDeg = (inDegree.get(target) ?? 1) - 1;
+      inDegree.set(target, newDeg);
+      if (newDeg === 0) queue.push(target);
+    }
+  }
+  // Assign rank 0 to any unranked nodes (isolated or in cycles)
+  for (const node of nodes) {
+    if (!rank.has(node.id)) rank.set(node.id, 0);
+  }
 
-  Dagre.layout(g);
+  // Group nodes by rank
+  const layers = new Map<number, string[]>();
+  for (const [id, r] of rank) {
+    if (!layers.has(r)) layers.set(r, []);
+    layers.get(r)!.push(id);
+  }
 
-  return nodes.map((node) => {
-    const pos = g.node(node.id);
-    return { ...node, position: { x: pos.x - 90, y: pos.y - 30 } };
-  });
+  // Assign positions
+  const posMap = new Map<string, { x: number; y: number }>();
+  for (const [r, ids] of layers) {
+    const totalWidth = ids.length * NODE_WIDTH + (ids.length - 1) * NODE_SEP;
+    const startX = -totalWidth / 2;
+    ids.forEach((id, i) => {
+      posMap.set(id, {
+        x: startX + i * (NODE_WIDTH + NODE_SEP),
+        y: r * (NODE_HEIGHT + RANK_SEP),
+      });
+    });
+  }
+
+  return nodes.map((node) => ({
+    ...node,
+    position: posMap.get(node.id) ?? { x: 0, y: 0 },
+  }));
 }
 
 const stateColors: Record<string, string> = {
