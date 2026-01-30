@@ -13,7 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Switch } from '@/components/ui/switch';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Info } from 'lucide-react';
+import { Info, MoreHorizontal } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,6 +25,13 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 export function Contacts() {
   const queryClient = useQueryClient();
@@ -204,6 +211,7 @@ function ContactDetail({ contact, onClose }: { contact: Contact; onClose: () => 
   const [showAddChannel, setShowAddChannel] = useState(false);
   const [editingName, setEditingName] = useState(false);
   const [name, setName] = useState(contact.name);
+  const [channelToRemove, setChannelToRemove] = useState<string | null>(null);
 
   const { data: freshContact } = useQuery({
     queryKey: ['contacts', contact.id],
@@ -330,37 +338,45 @@ function ContactDetail({ contact, onClose }: { contact: Contact; onClose: () => 
                   </span>
                 </div>
               </div>
-              <div className="flex gap-2">
-                <Button
-                  variant="secondary"
-                  size="xs"
-                  onClick={() => testChannelMutation.mutate(ch.id)}
-                >
-                  Test
-                </Button>
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button variant="destructive" size="xs">Remove</Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Remove this channel?</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        This will stop notifications via this channel.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction onClick={() => deleteChannelMutation.mutate(ch.id)}>
-                        Remove
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-              </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-8 w-8">
+                    <MoreHorizontal className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => testChannelMutation.mutate(ch.id)}>
+                    Send Test
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    className="text-red-600 focus:text-red-600"
+                    onClick={() => setChannelToRemove(ch.id)}
+                  >
+                    Remove
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           ))
         )}
+
+        <AlertDialog open={!!channelToRemove} onOpenChange={() => setChannelToRemove(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Remove this channel?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This will stop notifications via this channel.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={() => { if (channelToRemove) deleteChannelMutation.mutate(channelToRemove); }}>
+                Remove
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
       </CardContent>
     </Card>
