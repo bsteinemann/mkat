@@ -71,6 +71,10 @@ export interface Service {
   createdAt: string;
   updatedAt: string;
   monitors: Monitor[];
+  isSuppressed: boolean;
+  suppressionReason: string | null;
+  dependsOn: DependencyResponse[];
+  dependedOnBy: DependencyResponse[];
 }
 
 export interface Alert {
@@ -240,6 +244,29 @@ export interface ContactChannel {
   configuration: string;
   isEnabled: boolean;
   createdAt: string;
+}
+
+export interface DependencyResponse {
+  id: string;
+  name: string;
+}
+
+export interface DependencyGraphResponse {
+  nodes: DependencyGraphNode[];
+  edges: DependencyGraphEdge[];
+}
+
+export interface DependencyGraphNode {
+  id: string;
+  name: string;
+  state: string;
+  isSuppressed: boolean;
+  suppressionReason: string | null;
+}
+
+export interface DependencyGraphEdge {
+  dependentId: string;
+  dependencyId: string;
 }
 
 export interface Contact {

@@ -15,6 +15,8 @@ import type {
   PeerResponse,
   Contact,
   ContactChannel,
+  DependencyResponse,
+  DependencyGraphResponse,
 } from './types';
 
 export const servicesApi = {
@@ -136,6 +138,21 @@ export const monitorRollupsApi = {
   },
 };
 
+export const dependenciesApi = {
+  list: (serviceId: string) => api.get<DependencyResponse[]>(`/services/${serviceId}/dependencies`),
+
+  listDependents: (serviceId: string) =>
+    api.get<DependencyResponse[]>(`/services/${serviceId}/dependents`),
+
+  add: (serviceId: string, dependencyServiceId: string) =>
+    api.post<DependencyResponse>(`/services/${serviceId}/dependencies`, { dependencyServiceId }),
+
+  remove: (serviceId: string, dependencyServiceId: string) =>
+    api.delete<void>(`/services/${serviceId}/dependencies/${dependencyServiceId}`),
+
+  graph: () => api.get<DependencyGraphResponse>('/services/graph'),
+};
+
 export const serviceUptimeApi = {
   get: (serviceId: string, params?: { from?: string; to?: string }) => {
     const query = new URLSearchParams();
@@ -145,5 +162,3 @@ export const serviceUptimeApi = {
     return api.get<ServiceUptime>(`/services/${serviceId}/uptime${qs ? `?${qs}` : ''}`);
   },
 };
-
-
