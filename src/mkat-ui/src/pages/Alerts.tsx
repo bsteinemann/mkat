@@ -4,6 +4,8 @@ import { alertsApi } from '../api/alerts';
 import { AlertItem } from '../components/alerts/AlertItem';
 import { Pagination } from '../components/common/Pagination';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Info } from 'lucide-react';
 
 export function Alerts() {
   const [page, setPage] = useState(1);
@@ -36,9 +38,10 @@ export function Alerts() {
       <h1 className="text-2xl font-bold text-gray-900">Alerts</h1>
 
       {data?.items.length === 0 ? (
-        <div className="text-center py-12 text-gray-500">
-          <p>No alerts yet.</p>
-        </div>
+        <Alert>
+          <Info className="h-4 w-4" />
+          <AlertDescription>No alerts yet.</AlertDescription>
+        </Alert>
       ) : (
         <div className="space-y-3">
           {data?.items.map(alert => (

@@ -10,6 +10,8 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Info } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -69,11 +71,10 @@ export function Peers() {
       )}
 
       {peers?.length === 0 ? (
-        <Card className="py-0">
-          <CardContent className="p-6 text-center text-gray-500">
-            No paired instances. Click "Pair Instance" to connect with another mkat instance.
-          </CardContent>
-        </Card>
+        <Alert>
+          <Info className="h-4 w-4" />
+          <AlertDescription>No paired instances. Click "Pair Instance" to connect with another mkat instance.</AlertDescription>
+        </Alert>
       ) : (
         <div className="space-y-4">
           {peers?.map(peer => (

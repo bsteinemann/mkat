@@ -12,6 +12,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Switch } from '@/components/ui/switch';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Info } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -80,11 +82,10 @@ export function Contacts() {
       )}
 
       {contacts?.length === 0 ? (
-        <Card className="py-0">
-          <CardContent className="p-6 text-center text-gray-500">
-            No contacts configured. Add a contact to set up notification routing.
-          </CardContent>
-        </Card>
+        <Alert>
+          <Info className="h-4 w-4" />
+          <AlertDescription>No contacts configured. Add a contact to set up notification routing.</AlertDescription>
+        </Alert>
       ) : (
         <div className="space-y-3">
           {contacts?.map(contact => (

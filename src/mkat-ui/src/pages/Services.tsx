@@ -6,6 +6,8 @@ import { ServiceCard } from '../components/services/ServiceCard';
 import { Pagination } from '../components/common/Pagination';
 import { buttonVariants } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Info } from 'lucide-react';
 
 export function Services() {
   const [page, setPage] = useState(1);
@@ -53,12 +55,15 @@ export function Services() {
       </div>
 
       {data?.items.length === 0 ? (
-        <div className="text-center py-12 text-gray-500">
-          <p>No services configured yet.</p>
-          <Link to="/services/new" className="text-blue-600 hover:text-blue-800 mt-2 inline-block">
-            Create your first service
-          </Link>
-        </div>
+        <Alert>
+          <Info className="h-4 w-4" />
+          <AlertDescription>
+            No services configured yet.{' '}
+            <Link to="/services/new" className="text-blue-600 hover:text-blue-800 underline">
+              Create your first service
+            </Link>
+          </AlertDescription>
+        </Alert>
       ) : (
         <div className="space-y-4">
           {data?.items.map(service => (
