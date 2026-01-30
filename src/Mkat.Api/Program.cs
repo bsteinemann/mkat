@@ -87,6 +87,14 @@ try
 
     var app = builder.Build();
 
+    // Validate required configuration before starting
+    var mkatPassword = Environment.GetEnvironmentVariable("MKAT_PASSWORD");
+    if (string.IsNullOrEmpty(mkatPassword))
+    {
+        Log.Fatal("MKAT_PASSWORD environment variable is not set. Set this variable to enable authentication before starting the application");
+        return;
+    }
+
     // Forwarded headers must be first to ensure correct scheme/host in Request
     app.UseForwardedHeaders();
 
