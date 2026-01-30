@@ -1,3 +1,63 @@
+# [1.5.0](https://github.com/bsteinemann/mkat/compare/v1.4.3...v1.5.0) (2026-01-30)
+
+
+### Bug Fixes
+
+* add arrowhead markers to dependency graph edges ([f33f4fe](https://github.com/bsteinemann/mkat/commit/f33f4fe7b6abb4672213685a569fa826038f5938))
+* add dark mode support to React Flow dependency map ([721224a](https://github.com/bsteinemann/mkat/commit/721224aec5dcba5af9175a2444da50dab91af034))
+* add search filter and inline cycle error to dependency selector ([2e6c90a](https://github.com/bsteinemann/mkat/commit/2e6c90ac30ec3377c199c44b6cf550b505bce58d))
+* evaluate suppression when dependencies are added or removed ([40b636d](https://github.com/bsteinemann/mkat/commit/40b636d2ef4c456416fca1e33aa7913cb5111727))
+* fail hard on startup when MKAT_PASSWORD is not set ([3cece3f](https://github.com/bsteinemann/mkat/commit/3cece3f458a88be866bd8da47d231ebf16c34c18))
+* guard against undefined dependsOn/dependedOnBy in ServiceDetail ([3d3af8d](https://github.com/bsteinemann/mkat/commit/3d3af8dfba9cf58b918407b922a7b1f5994e077a))
+* improve dependency graph readability with edge labels and legend ([e081b0c](https://github.com/bsteinemann/mkat/commit/e081b0cc29865b28c6c3184b8f8b04f61d6b9a92))
+* migrate remaining buttons in Header and Services to shadcn/ui ([1c76812](https://github.com/bsteinemann/mkat/commit/1c76812ae56842b0417c53a130bff3b8222dd5d5))
+* move time range utils to separate file to fix eslint react-refresh rule ([a35edbf](https://github.com/bsteinemann/mkat/commit/a35edbfcb3a7b043236305c4850e8b60e65e22a3))
+* prevent self-dependency connections in dependency map ([b3a01d9](https://github.com/bsteinemann/mkat/commit/b3a01d95e945a90f1d9ad639311d8f4eeea99ab4))
+* replace dagre with built-in DAG layout to fix CJS runtime error ([3c0511f](https://github.com/bsteinemann/mkat/commit/3c0511fd2c4a07fbfff11c45735b42ccb6ca5b73))
+* resolve CA1822 and CA1859 in test projects instead of suppressing ([fc30ede](https://github.com/bsteinemann/mkat/commit/fc30ededce23226ea90ff0a2953ef38237549e7a))
+* resolve Recharts Tooltip formatter type errors in chart components ([add5659](https://github.com/bsteinemann/mkat/commit/add565952625d02ae71b9a267838a211afe71177))
+* show suppression indicator even when suppressionReason is null ([88042f0](https://github.com/bsteinemann/mkat/commit/88042f020dfe2d0df7af91041fdd3e880c4ae893))
+* skip SPA fallback assertion when frontend build artifacts are missing ([b7f1271](https://github.com/bsteinemann/mkat/commit/b7f12717c21bf82547d05f31d0c127873fb6aa94))
+
+
+### Features
+
+* add alert suppression and recovery re-evaluation to StateService ([5a7ce90](https://github.com/bsteinemann/mkat/commit/5a7ce9010d34693ef4880dd8bff4d74dcaffb823))
+* add API endpoints for events, rollups, and uptime ([548f919](https://github.com/bsteinemann/mkat/commit/548f919670254f78c598ab59e3f60b5444f82497))
+* add dependency CRUD endpoints and graph API ([bcfb3c3](https://github.com/bsteinemann/mkat/commit/bcfb3c37fa5efe3b1cd8fd7d6d4f33fdb7142604))
+* add dependency DTOs and extend ServiceResponse with suppression fields ([0510a63](https://github.com/bsteinemann/mkat/commit/0510a6350f29a34ecf802372329b2dd733463b3c))
+* add dependency selector to service edit page ([829b694](https://github.com/bsteinemann/mkat/commit/829b694713498995df5aa6ebef899874fcf8a639))
+* add dependency types and API client methods ([5431d40](https://github.com/bsteinemann/mkat/commit/5431d409365bb0d117d7ffc81c9cfa48989e4fd1))
+* add EF Core configuration and migration for ServiceDependency ([757dbaf](https://github.com/bsteinemann/mkat/commit/757dbaf3ae95c4826aed92446235233fdb98241e))
+* add FailedHealthCheck alert type ([5531129](https://github.com/bsteinemann/mkat/commit/55311296d483a3a8f7b88fe42392a6641c019a43))
+* add GetHealthCheckMonitorsDueAsync repository method ([7688362](https://github.com/bsteinemann/mkat/commit/7688362e25c5742ae64b914281b93039e2fa7e47))
+* add health check configuration to frontend forms and detail page ([0ebbf98](https://github.com/bsteinemann/mkat/commit/0ebbf9898c828f48d609a6ee4b7328acceb17548))
+* add health check fields to DTOs and controller mapping ([c2df5a6](https://github.com/bsteinemann/mkat/commit/c2df5a645609ac6746e1c2fd0f3331d7b2590be9))
+* add health check fields to Monitor entity ([75ce5ab](https://github.com/bsteinemann/mkat/commit/75ce5abfd2cd26a0aa2f950c2f495aab737bd93f))
+* add health check validation rules, remove HealthCheck type block ([41fab25](https://github.com/bsteinemann/mkat/commit/41fab251bfb07fc2adfe6c993b529fb82e4dd8ca))
+* add history chart components for all monitor types ([b9e6db7](https://github.com/bsteinemann/mkat/commit/b9e6db7e631b79c555861cb62b6b8a450ce64496))
+* add interactive Dependency Map page with React Flow ([8016231](https://github.com/bsteinemann/mkat/commit/80162313c53d5062e7c55e4a0f4ca0568d4d4c60))
+* add IServiceDependencyRepository interface ([c260b6d](https://github.com/bsteinemann/mkat/commit/c260b6d331461f0b0152edfe2776ff6421504529))
+* add IsSuppressed and SuppressionReason fields to Service ([2578234](https://github.com/bsteinemann/mkat/commit/2578234b81ebb90b896aba7ddea4ed12b7bdedf7))
+* add MetricReading to MonitorEvent migration ([f72e9a6](https://github.com/bsteinemann/mkat/commit/f72e9a61b3c2e118ab7aa1d32fa2bf5398e10d84))
+* add monitor event/rollup interfaces and rollup calculator ([4a34cee](https://github.com/bsteinemann/mkat/commit/4a34cee5376d46c13f5959a9f4f55ddcd8d5916d))
+* add monitor type descriptions to service detail and create form ([6161438](https://github.com/bsteinemann/mkat/commit/6161438586c62be1d678c410f38412ad0738228e))
+* add MonitorEvent and MonitorRollup domain entities ([65b8b2f](https://github.com/bsteinemann/mkat/commit/65b8b2ff1e92fed1b3e8483a9368d8b67fb3719a))
+* add MonitorEvent/MonitorRollup repositories and EF migration ([b83ab60](https://github.com/bsteinemann/mkat/commit/b83ab602e7a12af14c8f750d2bd6749e6f9d118c))
+* add RollupAggregationWorker ([c1ab728](https://github.com/bsteinemann/mkat/commit/c1ab728b41c9813f7f3f7df3bbc650a43dc9a926))
+* add ServiceDependency entity and dependency collections on Service ([013147b](https://github.com/bsteinemann/mkat/commit/013147bdc237db1e59b607fdafe1218a8e473316))
+* add ServiceDependencyRepository with cycle detection and transitive traversal ([754b517](https://github.com/bsteinemann/mkat/commit/754b517bfc263f1e0d1ea7a8719d862f61b25a0a))
+* add suppression indicators and dependency sections to service UI ([bbf4a56](https://github.com/bsteinemann/mkat/commit/bbf4a569ff7c7da63b7b3104fdb6343cb9ef12fe))
+* implement HealthCheckWorker background service ([7c0b194](https://github.com/bsteinemann/mkat/commit/7c0b1945ed714336ca410f1007523e703beb292e))
+* install Recharts and add history TypeScript types ([10119bc](https://github.com/bsteinemann/mkat/commit/10119bcd0a4c0d10ae35f4fa918dc6054929e587))
+* integrate history charts into ServiceDetail page ([0e78a1a](https://github.com/bsteinemann/mkat/commit/0e78a1ab44e12972732be5dbc9b4e3db45cadfdd))
+* log MonitorEvents from all workers and controllers ([e4cdd2c](https://github.com/bsteinemann/mkat/commit/e4cdd2cc9994aac8336f0f312c79dfdc98f23ba7))
+
+
+### Performance Improvements
+
+* add route-based code splitting with React.lazy ([6213dbb](https://github.com/bsteinemann/mkat/commit/6213dbb6ec8b972765e7d493b4cbcc9f8563bcc6))
+
 ## [1.4.3](https://github.com/bsteinemann/mkat/compare/v1.4.2...v1.4.3) (2026-01-25)
 
 
