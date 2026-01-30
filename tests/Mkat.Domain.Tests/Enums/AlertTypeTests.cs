@@ -24,9 +24,15 @@ public class AlertTypeTests
     }
 
     [Fact]
-    public void AlertType_HasExactlyThreeValues()
+    public void FailedHealthCheck_HasValue_Three()
+    {
+        Assert.Equal(3, (int)AlertType.FailedHealthCheck);
+    }
+
+    [Fact]
+    public void AlertType_HasExactlyFourValues()
     {
         var values = Enum.GetValues<AlertType>();
-        Assert.Equal(3, values.Length);
+        Assert.Equal(4, values.Length);
     }
 }

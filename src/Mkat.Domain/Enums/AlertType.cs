@@ -4,5 +4,6 @@ public enum AlertType
 {
     Failure = 0,
     Recovery = 1,
-    MissedHeartbeat = 2
+    MissedHeartbeat = 2,
+    FailedHealthCheck = 3
 }
